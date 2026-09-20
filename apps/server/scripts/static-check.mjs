@@ -28,6 +28,8 @@ for (const contract of [
   "access-control-allow-origin",
   "payload_too_large",
   "invalid_json",
+  "invalid_prompt_template",
+  "promptTemplate",
   "server.stop(true)",
 ]) {
   assert.ok(source.includes(contract), `missing contract ${contract}`);

@@ -38,12 +38,18 @@ async function handleSystemOne(
     }
 
     const model = resolveModel(parsed.model, env);
+    if (parsed.promptTemplate !== undefined && typeof parsed.promptTemplate !== "string") {
+      throw new HttpError(400, "invalid_prompt_template", "promptTemplate must be a string.");
+    }
     const client = clientFactory({ apiKey, model });
     const input = {
       state: parsed.state,
       questions: parsed.questions,
       model,
       ...(typeof parsed.debug === "boolean" ? { debug: parsed.debug } : {}),
+      ...(typeof parsed.promptTemplate === "string"
+        ? { promptTemplate: parsed.promptTemplate }
+        : {}),
     } as Parameters<JevSeekClient["systemOne"]>[0];
     const result = await client.systemOne(input);
 

@@ -71,6 +71,32 @@ describe("JevSeekClient", () => {
     expect(result.usage).toEqual({ input_tokens: 36, output_tokens: 3 });
   });
 
+  it("applies client and request prompt templates", async () => {
+    const prompts: string[] = [];
+    const transport = makeTransport(async (request) => {
+      prompts.push(request.prompt);
+      return completion("1", { "0": -2, "1": -0.1 });
+    });
+    const client = createJevSeek({
+      transport,
+      promptTemplate: "client {{questionType}} {{state}} {{question}} {{codes}}",
+    });
+    const question = {
+      type: "noul" as const,
+      instructions: "Is it urgent?",
+    };
+
+    await client.systemOne({ state: "first", questions: { q: question } });
+    await client.systemOne({
+      state: "second",
+      questions: { q: question },
+      promptTemplate: ({ codeList, state }) => `request ${state} ${codeList}`,
+    });
+
+    expect(prompts[0]).toContain("client noul");
+    expect(prompts[0]).toContain('"first"');
+    expect(prompts[1]).toBe('request "second" 0, 1');
+  });
   it("limits concurrent question requests", async () => {
     let active = 0;
     let maximum = 0;

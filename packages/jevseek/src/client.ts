@@ -4,7 +4,7 @@ import { mapWithConcurrency } from "./concurrency";
 import { createDeepSeekFimTransport, type DeepSeekFimTransportOptions } from "./deepseek";
 import { JevSeekAbortError, JevSeekTimeoutError, JevSeekValidationError } from "./errors";
 import { normalizeCandidateLogprobs } from "./logprobs";
-import { buildPrompt } from "./prompt";
+import { buildPrompt, DEFAULT_PROMPT_TEMPLATE } from "./prompt";
 import { resolveRetryOptions, withRetry } from "./retry";
 import type {
   DeepSeekFimCompletion,
@@ -16,6 +16,7 @@ import type {
   JevSeekQuestionDiagnostic,
   JevSeekResponse,
   JevUsage,
+  PromptTemplate,
   QuestionSet,
   RetryOptions,
   SystemOneRequest,
@@ -52,6 +53,7 @@ export class JevSeekClient {
   readonly timeoutMs: number;
   readonly retry: RetryOptions;
   readonly diagnosticsEnabledByDefault: boolean;
+  readonly promptTemplate: PromptTemplate;
 
   private readonly transport: FimTransport;
   private readonly providerOptions: JevSeekOptions["providerOptions"];
@@ -74,6 +76,7 @@ export class JevSeekClient {
     this.retry = resolveRetryOptions(options.retry);
     this.diagnosticsEnabledByDefault = false;
     this.providerOptions = options.providerOptions;
+    this.promptTemplate = options.promptTemplate ?? DEFAULT_PROMPT_TEMPLATE;
 
     if (options.transport !== undefined) {
       this.transport = options.transport;
@@ -97,6 +100,7 @@ export class JevSeekClient {
 
     const entries = Object.entries(input.questions);
     const requestedModel = input.model ?? this.model;
+    const promptTemplate = input.promptTemplate ?? this.promptTemplate;
 
     const completed = await mapWithConcurrency(
       entries,
@@ -107,6 +111,7 @@ export class JevSeekClient {
           questionId,
           question,
           requestedModel,
+          promptTemplate,
           input.signal,
         );
       },
@@ -139,10 +144,11 @@ export class JevSeekClient {
     questionId: string,
     question: QuestionSet[string],
     model: string,
+    promptTemplate: PromptTemplate,
     signal?: AbortSignal,
   ): Promise<CompletedQuestion> {
     const codes = getQuestionCodes(question);
-    const prompt = buildPrompt(state, question, codes);
+    const prompt = buildPrompt(state, question, codes, promptTemplate);
     const request: DeepSeekFimRequest = {
       max_tokens: 1,
       temperature: 0,

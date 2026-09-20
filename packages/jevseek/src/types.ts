@@ -27,6 +27,16 @@ export interface NoulQuestion {
 export type JevQuestion = ChoiceQuestion | ScoreQuestion | NoulQuestion;
 export type QuestionSet = Record<string, JevQuestion>;
 
+export interface PromptTemplateContext {
+  state: string;
+  question: string;
+  questionType: JevQuestionType;
+  codes: readonly string[];
+  codeList: string;
+}
+
+export type PromptTemplate = string | ((context: PromptTemplateContext) => string);
+
 export interface ChoiceAnswer {
   type: "choice";
   choice: string;
@@ -60,6 +70,7 @@ export interface SystemOneRequest {
   model?: string;
   debug?: boolean;
   signal?: AbortSignal;
+  promptTemplate?: PromptTemplate;
 }
 
 export interface JevSeekResponse {
@@ -140,6 +151,7 @@ export interface JevSeekOptions {
   timeoutMs?: number;
   retry?: Partial<RetryOptions>;
   providerOptions?: DeepSeekFimProviderOptions;
+  promptTemplate?: PromptTemplate;
 }
 
 export interface JevSeekQuestionDiagnostic {

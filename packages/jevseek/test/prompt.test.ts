@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildPrompt, getQuestionCodes, JevSeekValidationError, stableStringify } from "../src";
+import {
+  buildPrompt,
+  getQuestionCodes,
+  JevSeekValidationError,
+  renderPromptTemplate,
+  stableStringify,
+} from "../src";
 
 describe("stableStringify", () => {
   it("sorts object keys recursively while preserving arrays", () => {
@@ -56,6 +62,49 @@ describe("buildPrompt", () => {
     expect(prompt).toContain('"0":{"description":"No urgency","value":false}');
     expect(prompt).toContain('"1":{"description":"Urgent","value":true}');
     expect(prompt).toContain("Allowed codes: 0, 1");
+  });
+
+  it("renders custom string templates", () => {
+    const prompt = buildPrompt(
+      { task: "refund" },
+      {
+        type: "noul",
+        instructions: "Is a refund requested?",
+      },
+      undefined,
+      "type={{questionType}}\ncodes={{codes}}\nstate={{state}}\nquestion={{question}}",
+    );
+
+    expect(prompt).toContain("type=noul");
+    expect(prompt).toContain("codes=0, 1");
+    expect(prompt).toContain('state={"task":"refund"}');
+    expect(prompt).toContain('"instructions":"Is a refund requested?"');
+  });
+
+  it("supports function templates", () => {
+    const prompt = buildPrompt(
+      "urgent",
+      {
+        type: "noul",
+        instructions: "Is it urgent?",
+      },
+      undefined,
+      ({ questionType, codeList, state }) => `${questionType}:${codeList}:${state}`,
+    );
+
+    expect(prompt).toBe('noul:0, 1:"urgent"');
+  });
+
+  it("rejects empty template output", () => {
+    expect(() =>
+      renderPromptTemplate(() => "  ", {
+        state: "state",
+        question: "question",
+        questionType: "noul",
+        codes: ["0", "1"],
+        codeList: "0, 1",
+      }),
+    ).toThrow(JevSeekValidationError);
   });
 });
 
