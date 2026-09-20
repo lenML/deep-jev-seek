@@ -266,11 +266,10 @@ async function handleSystemOne(
   env: Environment,
   clientFactory: ClientFactory,
 ): Promise<Response> {
-  let apiKey = "";
   const secrets: string[] = [];
 
   try {
-    apiKey = getApiKey(request, env);
+    const apiKey = getApiKey(request, env);
     secrets.push(apiKey);
 
     const parsed = await readJsonBody(request, readMaxBodyBytes(env.MAX_BODY_BYTES));

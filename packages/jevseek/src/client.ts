@@ -16,7 +16,6 @@ import type {
   DeepSeekUsage,
   FimTransport,
   JevAnswer,
-  JevSeekDiagnostics,
   JevSeekOptions,
   JevSeekQuestionDiagnostic,
   JevSeekResponse,

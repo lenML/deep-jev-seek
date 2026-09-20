@@ -1,0 +1,7 @@
+node_modules
+**/node_modules
+**/dist
+**/coverage
+.fetch-cache
+pnpm-lock.yaml
+docs/dev/deepseek-jev.md
