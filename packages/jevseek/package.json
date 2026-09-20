@@ -4,7 +4,31 @@
   "description": "Use DeepSeek FIM as a Jev-compatible SystemOne API",
   "type": "module",
   "license": "MIT",
+  "sideEffects": false,
   "files": ["dist"],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "deepseek",
+    "fim",
+    "jev",
+    "logprobs",
+    "systemone",
+    "typescript"
+  ],
+  "homepage": "https://github.com/lenML/deep-jev-seek#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lenML/deep-jev-seek.git",
+    "directory": "packages/jevseek"
+  },
+  "bugs": {
+    "url": "https://github.com/lenML/deep-jev-seek/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
