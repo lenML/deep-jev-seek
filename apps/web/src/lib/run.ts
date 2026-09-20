@@ -88,6 +88,7 @@ export async function runJevSeek({
     apiKey: connection.apiKey.trim(),
     baseUrl: connection.baseUrl.trim(),
     model: connection.model.trim(),
+    promptTemplate: connection.promptTemplate,
     timeoutMs: 90_000,
     fetch: recordingFetch,
   });

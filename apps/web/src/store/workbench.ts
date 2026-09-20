@@ -1,4 +1,4 @@
-import type { JevSeekResponse } from "@lenml/jevseek";
+import { DEFAULT_PROMPT_TEMPLATE, type JevSeekResponse } from "@lenml/jevseek";
 import { create } from "zustand";
 
 import { DEFAULT_QUESTIONS_TEXT, DEFAULT_STATE_TEXT } from "@/lib/default-examples";
@@ -12,6 +12,7 @@ const LANGUAGE_STORAGE_KEY = "jevseek.workbench.language";
 interface StoredPreferences {
   baseUrl: string;
   model: string;
+  promptTemplate: string;
 }
 
 interface WorkbenchState {
@@ -32,6 +33,7 @@ interface WorkbenchState {
   setLanguage: (language: Language) => void;
   setBaseUrl: (baseUrl: string) => void;
   setModel: (model: string) => void;
+  setPromptTemplate: (promptTemplate: string) => void;
   setStateText: (stateText: string) => void;
   setQuestionsText: (questionsText: string) => void;
   setRunning: (isRunning: boolean) => void;
@@ -89,6 +91,7 @@ function readPreferences(): StoredPreferences {
   const fallback = {
     baseUrl: "https://api.deepseek.com/beta",
     model: "deepseek-flash",
+    promptTemplate: DEFAULT_PROMPT_TEMPLATE,
   };
   if (typeof window === "undefined") {
     return fallback;
@@ -101,6 +104,8 @@ function readPreferences(): StoredPreferences {
     return {
       baseUrl: stored.baseUrl || fallback.baseUrl,
       model: stored.model || fallback.model,
+      promptTemplate:
+        typeof stored.promptTemplate === "string" ? stored.promptTemplate : fallback.promptTemplate,
     };
   } catch {
     return fallback;
@@ -156,12 +161,29 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   },
   setBaseUrl: (baseUrl) => {
     const next = { ...get().connection, baseUrl };
-    writePreferences({ baseUrl: next.baseUrl, model: next.model });
+    writePreferences({
+      baseUrl: next.baseUrl,
+      model: next.model,
+      promptTemplate: next.promptTemplate,
+    });
     set({ connection: next });
   },
   setModel: (model) => {
     const next = { ...get().connection, model };
-    writePreferences({ baseUrl: next.baseUrl, model: next.model });
+    writePreferences({
+      baseUrl: next.baseUrl,
+      model: next.model,
+      promptTemplate: next.promptTemplate,
+    });
+    set({ connection: next });
+  },
+  setPromptTemplate: (promptTemplate) => {
+    const next = { ...get().connection, promptTemplate };
+    writePreferences({
+      baseUrl: next.baseUrl,
+      model: next.model,
+      promptTemplate: next.promptTemplate,
+    });
     set({ connection: next });
   },
   setStateText: (stateText) => set({ stateText }),

@@ -1,6 +1,7 @@
 import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { PromptTemplateEditor } from "@/components/prompt-template-editor";
 import { useI18n } from "@/i18n/use-i18n";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,6 +100,7 @@ export function ConnectionSettings() {
           ))}
         </div>
       </div>
+      <PromptTemplateEditor />
       <p className="text-[11px] leading-4 text-muted-foreground lg:col-span-4">
         {t("connection.security")}
       </p>

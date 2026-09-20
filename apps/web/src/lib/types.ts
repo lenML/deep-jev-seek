@@ -17,6 +17,7 @@ export interface ConnectionSettings {
   apiKey: string;
   baseUrl: string;
   model: string;
+  promptTemplate: string;
 }
 
 export type KeyStorageMode = "session" | "local";

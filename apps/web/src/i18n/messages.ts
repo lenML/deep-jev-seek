@@ -23,6 +23,10 @@ const en = {
   "connection.clearKey": "Remove key",
   "connection.showKey": "Show API key",
   "connection.hideKey": "Hide API key",
+  "connection.promptTemplate": "Prompt template",
+  "connection.promptTemplateHint":
+    "Used for every question. Insert request data with the placeholders below. The default template is a starting point and can be replaced.",
+  "connection.resetPrompt": "Reset template",
   "connection.security":
     "API key stays in this browser. Requests go only to the configured DeepSeek endpoint.",
   "type.noul": "noul",
@@ -93,6 +97,10 @@ const zh: Record<keyof typeof en, string> = {
   "connection.clearKey": "移除 Key",
   "connection.showKey": "显示 API Key",
   "connection.hideKey": "隐藏 API Key",
+  "connection.promptTemplate": "Prompt 模板",
+  "connection.promptTemplateHint":
+    "每个问题都使用此模板。可用下方占位符插入请求数据；默认模板只是起点，可以直接替换。",
+  "connection.resetPrompt": "重置模板",
   "connection.security": "API Key 保存在当前浏览器，只发送到配置的 DeepSeek 端点。",
   "type.noul": "noul",
   "type.choice": "choice",
