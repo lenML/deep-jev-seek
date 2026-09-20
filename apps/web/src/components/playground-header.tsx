@@ -1,54 +1,21 @@
 import { Settings2, Sparkles } from "lucide-react";
 
 import { useI18n } from "@/i18n/use-i18n";
-import type { QuestionType } from "@/lib/playground";
 
 interface PlaygroundHeaderProps {
-  activeType: QuestionType;
   settingsOpen: boolean;
-  onTypeChange: (type: QuestionType) => void;
   onToggleSettings: () => void;
 }
 
-const typeLabels = {
-  noul: "case.noul",
-  choice: "case.choice",
-  score: "case.score",
-} as const;
-
-export function PlaygroundHeader({
-  activeType,
-  settingsOpen,
-  onTypeChange,
-  onToggleSettings,
-}: PlaygroundHeaderProps) {
+export function PlaygroundHeader({ settingsOpen, onToggleSettings }: PlaygroundHeaderProps) {
   const { language, setLanguage, t } = useI18n();
-  const types: QuestionType[] = ["noul", "choice", "score"];
 
   return (
-    <header className="flex min-h-14 flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 sm:px-4">
+    <header className="flex min-h-14 items-center gap-2 border-b border-border bg-background px-3 py-2 sm:px-4">
       <div className="flex items-center gap-2 text-sm font-medium">
         <Sparkles className="size-4 text-signal" />
         <h1 className="text-sm font-medium">{t("app.title")}</h1>
       </div>
-
-      <nav className="order-3 flex min-w-0 flex-1 basis-full items-center justify-center gap-1 overflow-x-auto sm:order-none sm:basis-auto">
-        {types.map((type) => (
-          <button
-            key={type}
-            type="button"
-            onClick={() => onTypeChange(type)}
-            className={`flex shrink-0 items-center gap-2 border-b-2 px-3 py-2 text-sm transition-colors ${
-              activeType === type
-                ? "border-signal text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <span className="font-mono text-xs text-signal">{t(`type.${type}`)}</span>
-            <span>{t(typeLabels[type])}</span>
-          </button>
-        ))}
-      </nav>
 
       <div className="ml-auto flex items-center gap-2">
         <div

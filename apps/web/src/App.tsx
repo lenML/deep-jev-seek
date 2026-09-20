@@ -134,9 +134,7 @@ export function App() {
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground lg:h-dvh">
       <PlaygroundHeader
-        activeType={activeType}
         settingsOpen={settingsOpen}
-        onTypeChange={setActiveType}
         onToggleSettings={() => setSettingsOpen((open) => !open)}
       />
       {settingsOpen ? <ConnectionSettings /> : null}
@@ -162,6 +160,7 @@ export function App() {
           onReset={handleReset}
           onRun={handleRun}
           onStateTextChange={setStateText}
+          onTypeChange={setActiveType}
         />
         <PlaygroundPreview
           threshold={threshold}

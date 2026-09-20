@@ -44,6 +44,7 @@ const en = {
   "description.score": "Map the state to ordered levels. Returns a weighted score.",
   "input.state": "State",
   "input.question": "Question",
+  "input.preset": "Preset template",
   "multimodal.title": "multimodal_data",
   "multimodal.hint":
     "llama.cpp only. JSON array of base64 strings. Add one entry for each media marker in the prompt.",
@@ -125,6 +126,7 @@ const zh: Record<keyof typeof en, string> = {
   "description.score": "将状态映射到有序等级，返回加权分数。",
   "input.state": "状态",
   "input.question": "问题",
+  "input.preset": "预设模板",
   "multimodal.title": "multimodal_data",
   "multimodal.hint":
     "仅 llama.cpp 可用。填写 base64 字符串 JSON 数组，每个数组项对应 prompt 中一个媒体标记。",

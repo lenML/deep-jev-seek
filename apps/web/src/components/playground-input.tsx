@@ -6,6 +6,7 @@ import { MultimodalDataField } from "@/components/multimodal-data-field";
 import { NoulForm } from "@/components/noul-form";
 import { ScoreForm } from "@/components/score-form";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n/use-i18n";
 import type { MessageKey } from "@/i18n/messages";
 import type { PlaygroundDrafts, QuestionType } from "@/lib/playground";
@@ -32,12 +33,19 @@ interface PlaygroundInputProps {
   onReset: () => void;
   onRun: () => void;
   onStateTextChange: (value: string) => void;
+  onTypeChange: (type: QuestionType) => void;
 }
 
 const descriptionKeys: Record<QuestionType, MessageKey> = {
   noul: "description.noul",
   choice: "description.choice",
   score: "description.score",
+};
+
+const presetKeys: Record<QuestionType, MessageKey> = {
+  noul: "case.noul",
+  choice: "case.choice",
+  score: "case.score",
 };
 
 export function PlaygroundInput({
@@ -60,6 +68,7 @@ export function PlaygroundInput({
   onReset,
   onRun,
   onStateTextChange,
+  onTypeChange,
 }: PlaygroundInputProps) {
   const { t } = useI18n();
 
@@ -109,9 +118,26 @@ export function PlaygroundInput({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
-        <p className="mb-5 text-sm leading-5 text-muted-foreground">
-          {t(descriptionKeys[activeType])}
-        </p>
+        {inputMode === "form" ? (
+          <div className="mb-5 space-y-2">
+            <Label htmlFor="preset-template">{t("input.preset")}</Label>
+            <select
+              id="preset-template"
+              value={activeType}
+              onChange={(event) => onTypeChange(event.target.value as QuestionType)}
+              className="focus:ring-ring/20 h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus:border-ring focus:ring-2"
+            >
+              {(["noul", "choice", "score"] as const).map((type) => (
+                <option key={type} value={type}>
+                  {t(presetKeys[type])}
+                </option>
+              ))}
+            </select>
+            <p className="text-sm leading-5 text-muted-foreground">
+              {t(descriptionKeys[activeType])}
+            </p>
+          </div>
+        ) : null}
         {inputMode === "form" ? (
           renderForm()
         ) : (
