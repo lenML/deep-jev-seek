@@ -58,6 +58,27 @@ const result = await client.systemOne({
 });
 ```
 
+### Prompt 模板
+
+默认模板只是起点。开发者可在客户端创建时覆盖，也可在单次 `systemOne` 请求中覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
+
+````ts
+const result = await client.systemOne({
+  state: { message: "I was charged twice." },
+  questions: {
+    refundRequested: {
+      type: "noul",
+      instructions: "Is a refund explicitly requested?",
+    },
+  },
+  promptTemplate: ({ state, question, codeList }) => `Classify this state.
+State: ${state}
+Question: ${question}
+Allowed codes: ${codeList}
+Answer code:`,
+});
+
+
 类型和 HTTP 契约见 [docs/api.md](docs/api.md)。
 
 ## WebUI
@@ -66,7 +87,7 @@ const result = await client.systemOne({
 
 ```text
 https://lenml.github.io/deep-jev-seek/
-```
+````
 
 浏览器直接调用 DeepSeek Beta FIM API。API Key 默认保存在当前标签页的 `sessionStorage`；选择「This browser」后改用 `localStorage`。项目不代理、不托管 Key。
 

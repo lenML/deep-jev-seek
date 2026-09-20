@@ -49,7 +49,7 @@ const result = await client.systemOne({
 
 ### 3.1 Prompt
 
-固定结构：
+默认结构：
 
 ```text
 You are a deterministic classifier.
@@ -70,6 +70,8 @@ Answer code:
 ```
 
 状态序列化保持稳定：对象 key 排序，避免等价状态因 JS 属性顺序变化导致缓存与结果不稳定。
+
+模板可通过 `createJevSeek({ promptTemplate })` 或 `systemOne({ promptTemplate })` 覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。请求级设置优先于客户端级设置。
 
 `instructions` 支持 `string | object | array`。对象和数组原样 JSON 序列化。`criteria` 同样进入 question JSON。
 
@@ -212,6 +214,7 @@ API Key 优先读取请求 `Authorization: Bearer ...`，其次读取 `DEEPSEEK_
 - 调用 JevSeek `systemOne` 能力。
 - 展示 answers、usage、原始响应与错误。
 - Key 可保存到 `sessionStorage` 或 `localStorage`，并在界面中明确选择。
+- 编辑、重置并持久化 prompt 模板。
 - 请求完全在浏览器内发起，不经过项目服务器。
 
 ## 7. Docker / CI

@@ -89,13 +89,52 @@ console.log(result.usage);
 }
 ```
 
+## Prompt 模板
+
+`createJevSeek()` 和 `systemOne()` 都接受 `promptTemplate`。请求级设置优先于客户端级设置。
+
+字符串模板支持以下占位符：
+
+- `{{state}}`：稳定序列化后的 state。
+- `{{question}}`：按候选码编码后的 question JSON。
+- `{{questionType}}`：`choice`、`score` 或 `noul`。
+- `{{codes}}`：逗号分隔的候选码。
+
+````ts
+const customClient = createJevSeek({
+  apiKey: process.env.DEEPSEEK_API_KEY!,
+  promptTemplate: `Classify the state.
+<state>{{state}}</state>
+<question>{{question}}</question>
+Allowed codes: {{codes}}
+Answer code:`,
+});
+
+await customClient.systemOne({
+  state: { message: "I was charged twice." },
+  questions: {
+    refundRequested: {
+      type: "noul",
+      instructions: "Is a refund explicitly requested?",
+    },
+  },
+  promptTemplate: ({ question, state, codeList }) => `Custom prompt
+State: ${state}
+Question: ${question}
+Codes: ${codeList}
+Answer code:`,
+});
+
+
+函数模板收到 `state`、`question`、`questionType`、`codes` 和 `codeList`，并返回完整 prompt 字符串。默认模板通过 `DEFAULT_PROMPT_TEMPLATE` 导出。
+
 ## HTTP 服务
 
 ```bash
 docker run --rm -p 8787:8787 \
   -e DEEPSEEK_API_KEY=sk-... \
   ghcr.io/lenml/deep-jev-seek:latest
-```
+````
 
 调用：
 

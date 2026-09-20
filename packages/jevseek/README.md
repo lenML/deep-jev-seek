@@ -42,6 +42,7 @@ Question types:
 
 Features:
 
+- Customizable prompt templates with safe defaults.
 - DeepSeek Beta FIM transport.
 - Top-logprob normalization.
 - Jev-shaped choice, score, and noul answers.
@@ -51,5 +52,7 @@ Features:
 - Debug diagnostics with usage, prompts, probabilities, and request IDs.
 
 The default DeepSeek base URL is `https://api.deepseek.com/beta`. Supports Node.js 18+, Bun, workers, and browsers.
+
+Set `promptTemplate` in `createJevSeek()` for a client-level override, or in `systemOne()` for one request. String templates support `{{state}}`, `{{question}}`, `{{questionType}}`, and `{{codes}}`; function templates receive the structured rendering context.
 
 See the repository documentation for the full HTTP and browser API.

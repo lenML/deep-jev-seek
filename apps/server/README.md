@@ -17,5 +17,6 @@ Bun HTTP adapter for `@lenml/jevseek`.
 - `HOST`: bind host; default `0.0.0.0`.
 - `PORT`: bind port; default `8787`.
 - `MAX_BODY_BYTES`: JSON request limit; default `1048576`.
+  `POST /v1/systemone` also accepts a string `promptTemplate` field. It supports `{{state}}`, `{{question}}`, `{{questionType}}`, and `{{codes}}`.
 
 Key precedence: `Authorization: Bearer <key>`, then `DEEPSEEK_API_KEY`.
