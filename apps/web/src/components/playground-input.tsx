@@ -74,7 +74,7 @@ export function PlaygroundInput({
   }
 
   return (
-    <section className="flex min-h-0 flex-col border-b border-border bg-card lg:border-b-0 lg:border-r">
+    <section className="flex min-h-0 min-w-0 flex-col border-b border-border bg-card lg:border-b-0 lg:border-r">
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">

@@ -1,3 +1,5 @@
+import type { JevSeekProvider } from "@lenml/jevseek";
+
 export interface RawRequest {
   method: string;
   url: string;
@@ -17,6 +19,7 @@ export interface ConnectionSettings {
   apiKey: string;
   baseUrl: string;
   model: string;
+  provider: JevSeekProvider;
   promptTemplate: string;
 }
 

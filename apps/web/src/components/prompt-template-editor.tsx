@@ -14,7 +14,7 @@ export function PromptTemplateEditor() {
   const setPromptTemplate = useWorkbenchStore((state) => state.setPromptTemplate);
 
   return (
-    <div className="space-y-3 lg:col-span-4">
+    <div className="space-y-3 lg:col-span-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
           <Label htmlFor="prompt-template">{t("connection.promptTemplate")}</Label>

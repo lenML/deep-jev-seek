@@ -1,4 +1,8 @@
-import { DEFAULT_PROMPT_TEMPLATE, type JevSeekResponse } from "@lenml/jevseek";
+import {
+  DEFAULT_PROMPT_TEMPLATE,
+  type JevSeekProvider,
+  type JevSeekResponse,
+} from "@lenml/jevseek";
 import { create } from "zustand";
 
 import { DEFAULT_QUESTIONS_TEXT, DEFAULT_STATE_TEXT } from "@/lib/default-examples";
@@ -8,10 +12,19 @@ const API_KEY_STORAGE_KEY = "jevseek.workbench.api-key";
 const KEY_MODE_STORAGE_KEY = "jevseek.workbench.key-mode";
 const PREFERENCES_STORAGE_KEY = "jevseek.workbench.preferences";
 const LANGUAGE_STORAGE_KEY = "jevseek.workbench.language";
+const DEFAULT_BASE_URLS: Record<JevSeekProvider, string> = {
+  deepseek: "https://api.deepseek.com/beta",
+  llamacpp: "http://127.0.0.1:8080/v1",
+};
+const DEFAULT_MODELS: Record<JevSeekProvider, string> = {
+  deepseek: "deepseek-flash",
+  llamacpp: "llamacpp",
+};
 
 interface StoredPreferences {
   baseUrl: string;
   model: string;
+  provider: JevSeekProvider;
   promptTemplate: string;
 }
 
@@ -31,6 +44,7 @@ interface WorkbenchState {
   setKeyStorageMode: (mode: KeyStorageMode) => void;
   clearApiKey: () => void;
   setLanguage: (language: Language) => void;
+  setProvider: (provider: JevSeekProvider) => void;
   setBaseUrl: (baseUrl: string) => void;
   setModel: (model: string) => void;
   setPromptTemplate: (promptTemplate: string) => void;
@@ -89,8 +103,9 @@ function readLanguage(): Language {
 
 function readPreferences(): StoredPreferences {
   const fallback = {
-    baseUrl: "https://api.deepseek.com/beta",
-    model: "deepseek-flash",
+    baseUrl: DEFAULT_BASE_URLS.deepseek,
+    model: DEFAULT_MODELS.deepseek,
+    provider: "deepseek" as const,
     promptTemplate: DEFAULT_PROMPT_TEMPLATE,
   };
   if (typeof window === "undefined") {
@@ -104,6 +119,7 @@ function readPreferences(): StoredPreferences {
     return {
       baseUrl: stored.baseUrl || fallback.baseUrl,
       model: stored.model || fallback.model,
+      provider: stored.provider === "llamacpp" ? "llamacpp" : fallback.provider,
       promptTemplate:
         typeof stored.promptTemplate === "string" ? stored.promptTemplate : fallback.promptTemplate,
     };
@@ -116,6 +132,15 @@ function writePreferences(preferences: StoredPreferences) {
   if (typeof window !== "undefined") {
     window.localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
   }
+}
+
+function persistConnection(connection: ConnectionSettings) {
+  writePreferences({
+    baseUrl: connection.baseUrl,
+    model: connection.model,
+    provider: connection.provider,
+    promptTemplate: connection.promptTemplate,
+  });
 }
 
 const keyStorageMode = readKeyStorageMode();
@@ -159,31 +184,36 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
     }
     set({ language });
   },
+  setProvider: (provider) => {
+    const current = get().connection;
+    const next = {
+      ...current,
+      provider,
+      baseUrl:
+        current.baseUrl === DEFAULT_BASE_URLS[current.provider]
+          ? DEFAULT_BASE_URLS[provider]
+          : current.baseUrl,
+      model:
+        current.model === DEFAULT_MODELS[current.provider]
+          ? DEFAULT_MODELS[provider]
+          : current.model,
+    };
+    persistConnection(next);
+    set({ connection: next });
+  },
   setBaseUrl: (baseUrl) => {
     const next = { ...get().connection, baseUrl };
-    writePreferences({
-      baseUrl: next.baseUrl,
-      model: next.model,
-      promptTemplate: next.promptTemplate,
-    });
+    persistConnection(next);
     set({ connection: next });
   },
   setModel: (model) => {
     const next = { ...get().connection, model };
-    writePreferences({
-      baseUrl: next.baseUrl,
-      model: next.model,
-      promptTemplate: next.promptTemplate,
-    });
+    persistConnection(next);
     set({ connection: next });
   },
   setPromptTemplate: (promptTemplate) => {
     const next = { ...get().connection, promptTemplate };
-    writePreferences({
-      baseUrl: next.baseUrl,
-      model: next.model,
-      promptTemplate: next.promptTemplate,
-    });
+    persistConnection(next);
     set({ connection: next });
   },
   setStateText: (stateText) => set({ stateText }),

@@ -52,7 +52,7 @@ export function App() {
   const jsonQuestionsError = jsonError(questionsText);
   const canRun =
     !isRunning &&
-    Boolean(connection.apiKey.trim()) &&
+    (connection.provider === "llamacpp" || Boolean(connection.apiKey.trim())) &&
     (inputMode === "form" || (!jsonStateError && !jsonQuestionsError));
 
   const threshold =
@@ -86,7 +86,7 @@ export function App() {
   }
 
   async function handleRun() {
-    if (!connection.apiKey.trim()) {
+    if (connection.provider === "deepseek" && !connection.apiKey.trim()) {
       setError(t("validation.apiKey"));
       return;
     }
@@ -128,7 +128,7 @@ export function App() {
       />
       {settingsOpen ? <ConnectionSettings /> : null}
 
-      <main className="grid min-h-0 flex-1 lg:grid-cols-[390px_minmax(0,1fr)]">
+      <main className="grid min-h-0 min-w-0 flex-1 lg:grid-cols-[390px_minmax(0,1fr)]">
         <PlaygroundInput
           activeType={activeType}
           canRun={canRun}

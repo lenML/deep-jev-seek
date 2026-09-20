@@ -14,6 +14,9 @@ const en = {
   "input.title": "Input",
   "preview.title": "Preview",
   "connection.title": "Connection",
+  "connection.provider": "Provider",
+  "connection.provider.deepseek": "DeepSeek",
+  "connection.provider.llamacpp": "llama.cpp",
   "connection.apiKey": "API key",
   "connection.baseUrl": "Base URL",
   "connection.model": "Model",
@@ -28,7 +31,7 @@ const en = {
     "Used for every question. Insert request data with the placeholders below. The default template is a starting point and can be replaced.",
   "connection.resetPrompt": "Reset template",
   "connection.security":
-    "API key stays in this browser. Requests go only to the configured DeepSeek endpoint.",
+    "DeepSeek mode sends the API key only to the configured DeepSeek endpoint. llama.cpp mode sends requests to its configured endpoint.",
   "type.noul": "noul",
   "type.choice": "choice",
   "type.score": "score",
@@ -88,6 +91,9 @@ const zh: Record<keyof typeof en, string> = {
   "input.title": "输入",
   "preview.title": "预览",
   "connection.title": "连接",
+  "connection.provider": "Provider",
+  "connection.provider.deepseek": "DeepSeek",
+  "connection.provider.llamacpp": "llama.cpp",
   "connection.apiKey": "API Key",
   "connection.baseUrl": "Base URL",
   "connection.model": "模型",
@@ -101,7 +107,8 @@ const zh: Record<keyof typeof en, string> = {
   "connection.promptTemplateHint":
     "每个问题都使用此模板。可用下方占位符插入请求数据；默认模板只是起点，可以直接替换。",
   "connection.resetPrompt": "重置模板",
-  "connection.security": "API Key 保存在当前浏览器，只发送到配置的 DeepSeek 端点。",
+  "connection.security":
+    "DeepSeek 模式只把 API Key 发送到配置的 DeepSeek 端点。llama.cpp 模式把请求发送到其配置的端点。",
   "type.noul": "noul",
   "type.choice": "choice",
   "type.score": "score",

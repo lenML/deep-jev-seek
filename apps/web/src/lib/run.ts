@@ -85,9 +85,10 @@ export async function runJevSeek({
 
   const startedAt = performance.now();
   const client = createJevSeek({
-    apiKey: connection.apiKey.trim(),
+    apiKey: connection.apiKey.trim() || undefined,
     baseUrl: connection.baseUrl.trim(),
     model: connection.model.trim(),
+    provider: connection.provider,
     promptTemplate: connection.promptTemplate,
     timeoutMs: 90_000,
     fetch: recordingFetch,
