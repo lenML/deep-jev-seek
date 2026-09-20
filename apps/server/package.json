@@ -1,0 +1,21 @@
+{
+  "name": "@lenml/jevseek-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal Bun HTTP server for Jev-compatible DeepSeek FIM requests",
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target bun --format esm --minify",
+    "dev": "bun --watch src/index.ts",
+    "start": "bun dist/index.js",
+    "test": "node scripts/static-check.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@lenml/jevseek": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.9.2"
+  }
+}
