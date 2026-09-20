@@ -164,23 +164,27 @@ export function ResultsPanel({
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="border-b border-border/70 bg-[#18211c] text-[#f4f1e8]">
+      <CardHeader className="border-b border-primary/15 bg-[#07100c] text-foreground">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#eaa36e]">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-accent">
               <Gauge className="size-3.5" />
               SystemOne output
             </div>
             <CardTitle>Decision ledger</CardTitle>
-            <CardDescription className="text-[#bdc6bf]">
+            <CardDescription className="text-muted-foreground">
               Normalized answers, token usage, and exact browser exchanges.
             </CardDescription>
           </div>
-          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[#d9ddd7]">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-secondary-foreground">
             <span
               className={cn(
                 "size-2 rounded-full",
-                isRunning ? "animate-pulse bg-[#eaa36e]" : result ? "bg-[#5fc18f]" : "bg-[#8d968f]",
+                isRunning
+                  ? "animate-pulse bg-accent"
+                  : result
+                    ? "bg-primary"
+                    : "bg-muted-foreground",
               )}
             />
             {isRunning ? "running" : result ? "complete" : "idle"}
@@ -258,7 +262,7 @@ export function ResultsPanel({
             </TabsContent>
 
             <TabsContent value="raw">
-              <pre className="editor-scroll max-h-[40rem] overflow-auto rounded-md bg-[#18211c] p-4 font-mono text-[11px] leading-5 text-[#e9eadf]">
+              <pre className="editor-scroll max-h-[40rem] overflow-auto rounded-md bg-[#060c09] p-4 font-mono text-[11px] leading-5 text-[#dce8df]">
                 {JSON.stringify(rawPayload, null, 2)}
               </pre>
             </TabsContent>

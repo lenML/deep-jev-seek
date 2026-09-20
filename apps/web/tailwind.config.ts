@@ -47,11 +47,11 @@ export default {
         mono: ["Space Grotesk Variable", "monospace"],
       },
       boxShadow: {
-        paper: "0 20px 50px -28px rgba(28, 38, 31, 0.42)",
-        lift: "6px 6px 0 rgba(24, 31, 27, 0.12)",
+        paper: "0 28px 70px -34px rgba(0, 0, 0, 0.9)",
+        lift: "5px 5px 0 rgba(239, 126, 55, 0.22)",
       },
       backgroundImage: {
-        grid: "linear-gradient(rgba(23, 35, 28, 0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(23, 35, 28, 0.055) 1px, transparent 1px)",
+        grid: "linear-gradient(rgba(141, 224, 181, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(141, 224, 181, 0.06) 1px, transparent 1px)",
       },
     },
   },

@@ -98,7 +98,7 @@ export function App() {
       <header className="border-b border-border/70 bg-background/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1480px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-md border border-foreground bg-foreground text-background shadow-lift">
+            <div className="grid size-9 place-items-center rounded-md border border-accent/70 bg-accent text-accent-foreground shadow-lift">
               <TerminalSquare className="size-4" />
             </div>
             <div>
@@ -166,24 +166,23 @@ export function App() {
         <div className="grid gap-6 xl:grid-cols-[22rem_minmax(0,1fr)]">
           <aside className="space-y-5 xl:sticky xl:top-5 xl:self-start">
             <ConnectionPanel />
-            <Card className="overflow-hidden bg-primary text-primary-foreground">
+            <Card className="overflow-hidden border-primary/25 bg-[#0d2119] text-foreground">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary-foreground/65">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary/70">
                       Run control
                     </p>
                     <p className="mt-1 font-display text-2xl">SystemOne</p>
                   </div>
-                  <Play className="size-5 text-primary-foreground/75" />
+                  <Play className="size-5 text-primary/75" />
                 </div>
                 <Button
                   type="button"
                   onClick={handleRun}
                   disabled={!canRun}
                   size="lg"
-                  variant="secondary"
-                  className="mt-5 w-full border-primary-foreground/15 bg-primary-foreground text-primary shadow-none hover:bg-primary-foreground/90"
+                  className="mt-5 w-full shadow-none"
                 >
                   {isRunning ? (
                     <>
@@ -197,7 +196,7 @@ export function App() {
                     </>
                   )}
                 </Button>
-                <p className="mt-3 text-xs leading-5 text-primary-foreground/65">
+                <p className="mt-3 text-xs leading-5 text-muted-foreground">
                   {connection.apiKey.trim()
                     ? "Key loaded locally."
                     : "Add an API key to enable the run."}
