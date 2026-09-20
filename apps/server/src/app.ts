@@ -223,16 +223,36 @@ function redactSecrets(message: string, secrets: string[]): string {
   return redacted;
 }
 
+function statusForError(code: unknown, rawStatus: unknown): number {
+  if (typeof rawStatus === "number" && rawStatus >= 400 && rawStatus <= 599) {
+    return rawStatus;
+  }
+
+  switch (code) {
+    case "VALIDATION_ERROR":
+    case "REQUEST_ERROR":
+      return 400;
+    case "AUTHENTICATION_ERROR":
+      return 401;
+    case "ABORT_ERROR":
+      return 408;
+    case "RATE_LIMIT_ERROR":
+      return 429;
+    default:
+      return 502;
+  }
+}
+
 function upstreamError(error: unknown, secrets: string[]): HttpError {
   if (error instanceof HttpError) {
     return error;
   }
 
   const details = isRecord(error) ? (error as ErrorDetails) : {};
+  const rawCode = typeof details.code === "string" ? details.code : undefined;
   const rawStatus = typeof details.status === "number" ? details.status : details.statusCode;
-  const status = typeof rawStatus === "number" && rawStatus >= 400 && rawStatus <= 599 ? rawStatus : 502;
-  const rawCode = typeof details.code === "string" ? details.code : status === 502 ? "upstream_error" : "request_failed";
-  const code = redactSecrets(rawCode, secrets);
+  const status = statusForError(rawCode, rawStatus);
+  const code = redactSecrets(rawCode ?? (status === 502 ? "upstream_error" : "request_failed"), secrets);
   const rawMessage = typeof details.message === "string" ? details.message : "Upstream request failed.";
   const message = redactSecrets(rawMessage, secrets);
 
