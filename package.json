@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "stats": "node scripts/code-stats.mjs",
+    "stats:check": "node scripts/code-stats.mjs --fail-over",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck"
   },

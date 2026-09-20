@@ -115,7 +115,10 @@ pnpm install
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm stats
 ```
+
+`pnpm stats` 按单文件行数或字符数输出代码规模。默认将 250 行以上文件标记为 `OVER`；CI 使用 `pnpm stats:check` 阻止超长文件回归。
 
 目录：
 
