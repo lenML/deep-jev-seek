@@ -2,11 +2,12 @@ import type { JevSeekResponse } from "@lenml/jevseek";
 import { create } from "zustand";
 
 import { DEFAULT_QUESTIONS_TEXT, DEFAULT_STATE_TEXT } from "@/lib/default-examples";
-import type { ConnectionSettings, KeyStorageMode, RawExchange } from "@/lib/types";
+import type { ConnectionSettings, KeyStorageMode, Language, RawExchange } from "@/lib/types";
 
 const API_KEY_STORAGE_KEY = "jevseek.workbench.api-key";
 const KEY_MODE_STORAGE_KEY = "jevseek.workbench.key-mode";
 const PREFERENCES_STORAGE_KEY = "jevseek.workbench.preferences";
+const LANGUAGE_STORAGE_KEY = "jevseek.workbench.language";
 
 interface StoredPreferences {
   baseUrl: string;
@@ -15,6 +16,7 @@ interface StoredPreferences {
 
 interface WorkbenchState {
   connection: ConnectionSettings;
+  language: Language;
   keyStorageMode: KeyStorageMode;
   stateText: string;
   questionsText: string;
@@ -27,6 +29,7 @@ interface WorkbenchState {
   setApiKey: (apiKey: string) => void;
   setKeyStorageMode: (mode: KeyStorageMode) => void;
   clearApiKey: () => void;
+  setLanguage: (language: Language) => void;
   setBaseUrl: (baseUrl: string) => void;
   setModel: (model: string) => void;
   setStateText: (stateText: string) => void;
@@ -69,6 +72,19 @@ function readKeyStorageMode(): KeyStorageMode {
   return window.localStorage.getItem(KEY_MODE_STORAGE_KEY) === "local" ? "local" : "session";
 }
 
+function readLanguage(): Language {
+  if (typeof window === "undefined") {
+    return "en";
+  }
+
+  const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  if (stored === "en" || stored === "zh") {
+    return stored;
+  }
+
+  return window.navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en";
+}
+
 function readPreferences(): StoredPreferences {
   const fallback = {
     baseUrl: "https://api.deepseek.com/beta",
@@ -99,12 +115,14 @@ function writePreferences(preferences: StoredPreferences) {
 
 const keyStorageMode = readKeyStorageMode();
 const preferences = readPreferences();
+const language = readLanguage();
 
 export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   connection: {
     apiKey: readStorage(keyStorageMode),
     ...preferences,
   },
+  language,
   keyStorageMode,
   stateText: DEFAULT_STATE_TEXT,
   questionsText: DEFAULT_QUESTIONS_TEXT,
@@ -129,6 +147,12 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
   clearApiKey: () => {
     writeStorage(get().keyStorageMode, "");
     set((state) => ({ connection: { ...state.connection, apiKey: "" } }));
+  },
+  setLanguage: (language) => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    }
+    set({ language });
   },
   setBaseUrl: (baseUrl) => {
     const next = { ...get().connection, baseUrl };

@@ -20,3 +20,4 @@ export interface ConnectionSettings {
 }
 
 export type KeyStorageMode = "session" | "local";
+export type Language = "en" | "zh";
