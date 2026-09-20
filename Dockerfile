@@ -13,11 +13,11 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
-ENV PORT=3000
+ENV PORT=8787
 
 COPY --from=build --chown=bun:bun /app/apps/server/dist/index.js /app/index.js
 
 USER bun
-EXPOSE 3000
+EXPOSE 8787
 
 CMD ["bun", "/app/index.js"]

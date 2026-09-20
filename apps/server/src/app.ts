@@ -2,6 +2,7 @@ import { createJevSeek } from "@lenml/jevseek";
 
 const DEFAULT_MODEL = "deepseek-flash";
 const DEFAULT_MAX_BODY_BYTES = 1024 * 1024;
+const DEFAULT_PORT = 8787;
 const MODEL_ALIASES = new Set(["jev-latest", "jev-preview"]);
 const KNOWN_MODELS = ["deepseek-flash", "deepseek-v4-pro"] as const;
 
@@ -93,8 +94,8 @@ function readPositiveInteger(value: string | undefined, fallback: number): numbe
 }
 
 function readPort(value: string | undefined): number {
-  const port = readPositiveInteger(value, 3000);
-  return port <= 65535 ? port : 3000;
+  const port = readPositiveInteger(value, DEFAULT_PORT);
+  return port <= 65535 ? port : DEFAULT_PORT;
 }
 
 function readMaxBodyBytes(value: string | undefined): number {
