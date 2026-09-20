@@ -21,6 +21,10 @@ for (const route of ["/", "/healthz", "/v1/models", "/v1/systemone"]) {
 for (const contract of [
   "Authorization",
   "DEEPSEEK_API_KEY",
+  "DEEPSEEK_BASE_URL",
+  "JEVSEEK_PROVIDER",
+  "LLAMACPP_API_KEY",
+  "LLAMACPP_BASE_URL",
   "jev-latest",
   "jev-preview",
   "DEEPSEEK_MODEL",
@@ -30,6 +34,8 @@ for (const contract of [
   "invalid_json",
   "invalid_prompt_template",
   "promptTemplate",
+  "multimodal_data",
+  "multimodal_not_supported",
   "server.stop(true)",
 ]) {
   assert.ok(source.includes(contract), `missing contract ${contract}`);

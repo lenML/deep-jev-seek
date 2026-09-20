@@ -1,6 +1,14 @@
-import { createJevSeek } from "@lenml/jevseek";
+import { createJevSeek, type JevSeekProvider } from "@lenml/jevseek";
 
-import { getApiKey, readMaxBodyBytes, readPort, resolveModel, type Environment } from "./config";
+import {
+  getApiKey,
+  readMaxBodyBytes,
+  readPort,
+  readProvider,
+  resolveBaseUrl,
+  resolveModel,
+  type Environment,
+} from "./config";
 import {
   CORS_HEADERS,
   HttpError,
@@ -14,34 +22,72 @@ import {
 import { listModels } from "./models";
 
 type JevSeekClient = ReturnType<typeof createJevSeek>;
-type ClientFactory = (options: { apiKey: string; model: string }) => JevSeekClient;
+type ClientFactory = (options: {
+  apiKey?: string;
+  model: string;
+  provider: JevSeekProvider;
+  baseUrl: string;
+}) => JevSeekClient;
 
 export interface AppOptions {
   clientFactory?: ClientFactory;
   env?: Environment;
 }
 
+function readMultimodalData(value: unknown, provider: JevSeekProvider): string[] | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (provider !== "llamacpp") {
+    throw new HttpError(
+      400,
+      "multimodal_not_supported",
+      "multimodal_data is only supported in llamacpp mode.",
+    );
+  }
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new HttpError(
+      400,
+      "invalid_multimodal_data",
+      "multimodal_data must be a non-empty array.",
+    );
+  }
+  if (value.some((item) => typeof item !== "string" || item.trim() === "")) {
+    throw new HttpError(
+      400,
+      "invalid_multimodal_data",
+      "multimodal_data entries must be non-empty strings.",
+    );
+  }
+  return value;
+}
+
 async function handleSystemOne(
   request: Request,
   env: Environment,
+  provider: JevSeekProvider,
+  baseUrl: string,
   clientFactory: ClientFactory,
 ): Promise<Response> {
   const secrets: string[] = [];
 
   try {
-    const apiKey = getApiKey(request, env);
-    secrets.push(apiKey);
+    const apiKey = getApiKey(request, env, provider, provider === "deepseek");
+    if (apiKey) {
+      secrets.push(apiKey);
+    }
 
     const parsed = await readJsonBody(request, readMaxBodyBytes(env.MAX_BODY_BYTES));
     if (!isRecord(parsed)) {
       throw new HttpError(400, "invalid_request", "Request body must be a JSON object.");
     }
 
-    const model = resolveModel(parsed.model, env);
+    const model = resolveModel(parsed.model, env, provider);
     if (parsed.promptTemplate !== undefined && typeof parsed.promptTemplate !== "string") {
       throw new HttpError(400, "invalid_prompt_template", "promptTemplate must be a string.");
     }
-    const client = clientFactory({ apiKey, model });
+    const multimodalData = readMultimodalData(parsed.multimodal_data, provider);
+    const client = clientFactory({ apiKey, model, provider, baseUrl });
     const input = {
       state: parsed.state,
       questions: parsed.questions,
@@ -50,6 +96,7 @@ async function handleSystemOne(
       ...(typeof parsed.promptTemplate === "string"
         ? { promptTemplate: parsed.promptTemplate }
         : {}),
+      ...(multimodalData === undefined ? {} : { multimodal_data: multimodalData }),
     } as Parameters<JevSeekClient["systemOne"]>[0];
     const result = await client.systemOne(input);
 
@@ -61,6 +108,8 @@ async function handleSystemOne(
 
 export function createApp(options: AppOptions = {}) {
   const env = options.env ?? process.env;
+  const provider = readProvider(env);
+  const baseUrl = resolveBaseUrl(env, provider);
   const clientFactory = options.clientFactory ?? createJevSeek;
 
   const fetch = async (request: Request): Promise<Response> => {
@@ -79,6 +128,7 @@ export function createApp(options: AppOptions = {}) {
         return jsonResponse({
           name: "@lenml/jevseek-server",
           version: "0.1.0",
+          provider,
           endpoints: ["/healthz", "/v1/models", "/v1/systemone"],
         });
       }
@@ -88,7 +138,7 @@ export function createApp(options: AppOptions = {}) {
           return methodNotAllowed("GET");
         }
 
-        return jsonResponse({ status: "ok", service: "jevseek-server" });
+        return jsonResponse({ status: "ok", service: "jevseek-server", provider });
       }
 
       if (pathname === "/v1/models") {
@@ -96,7 +146,7 @@ export function createApp(options: AppOptions = {}) {
           return methodNotAllowed("GET");
         }
 
-        return listModels(env);
+        return listModels(env, provider);
       }
 
       if (pathname === "/v1/systemone") {
@@ -104,7 +154,7 @@ export function createApp(options: AppOptions = {}) {
           return methodNotAllowed("POST");
         }
 
-        return handleSystemOne(request, env, clientFactory);
+        return handleSystemOne(request, env, provider, baseUrl, clientFactory);
       }
 
       return jsonResponse(

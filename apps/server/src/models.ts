@@ -1,11 +1,21 @@
-import { DEFAULT_MODEL, KNOWN_MODELS, MODEL_ALIASES, type Environment } from "./config";
+import type { JevSeekProvider } from "@lenml/jevseek";
+
+import {
+  DEFAULT_MODEL,
+  KNOWN_MODELS,
+  MODEL_ALIASES,
+  resolveModel,
+  type Environment,
+} from "./config";
 import { jsonResponse } from "./http";
 
-export function listModels(env: Environment): Response {
-  const defaultModel = env.DEEPSEEK_MODEL?.trim() || DEFAULT_MODEL;
-  const ids = [...MODEL_ALIASES, defaultModel, ...KNOWN_MODELS].filter(
-    (model, index, all) => all.indexOf(model) === index,
-  );
+export function listModels(env: Environment, provider: JevSeekProvider): Response {
+  const defaultModel = resolveModel(undefined, env, provider);
+  const ids = (
+    provider === "llamacpp"
+      ? [...MODEL_ALIASES, defaultModel]
+      : [...MODEL_ALIASES, defaultModel, ...KNOWN_MODELS, DEFAULT_MODEL]
+  ).filter((model, index, all) => all.indexOf(model) === index);
 
   return jsonResponse({
     object: "list",
@@ -13,7 +23,7 @@ export function listModels(env: Environment): Response {
       id,
       object: "model",
       created: 0,
-      owned_by: "lenml",
+      owned_by: provider === "llamacpp" ? "llamacpp" : "lenml",
     })),
   });
 }

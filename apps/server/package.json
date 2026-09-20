@@ -8,7 +8,7 @@
     "build": "tsup",
     "dev": "bun --watch src/index.ts",
     "start": "bun dist/index.js",
-    "test": "node scripts/static-check.mjs",
+    "test": "vitest run && node scripts/static-check.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
