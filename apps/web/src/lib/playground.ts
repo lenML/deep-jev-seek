@@ -69,7 +69,7 @@ export function createDrafts(language: Language): PlaygroundDrafts {
       },
       score: {
         state:
-          "主题：为 40 个席位询价。\n我们上个月试用过产品，两个团队都希望统一使用，工程师希望采用你的方案。",
+          "主题：为 40 个席位询价。\n我们上个月试用过产品，两个团队都希望统一使用，工程师倾向采用该方案。",
         question: "这条线索的购买准备度如何？",
         levels: [
           "0 · 仅浏览，没有明确需求",

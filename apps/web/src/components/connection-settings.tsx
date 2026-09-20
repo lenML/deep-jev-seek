@@ -50,7 +50,7 @@ export function ConnectionSettings() {
             type="button"
             onClick={() => setShowKey((visible) => !visible)}
             className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-2 text-muted-foreground hover:text-foreground"
-            aria-label={showKey ? "Hide API key" : "Show API key"}
+            aria-label={t(showKey ? "connection.hideKey" : "connection.showKey")}
           >
             {showKey ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
           </button>

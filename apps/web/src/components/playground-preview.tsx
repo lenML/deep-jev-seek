@@ -59,9 +59,7 @@ function AnswerView({ answer, threshold }: { answer: JevAnswer; threshold: numbe
           <p className="mt-2 font-mono text-sm text-signal">{percent(answer.noul)}</p>
         </div>
         <div className="border-signal/30 bg-signal/5 rounded-md border p-4">
-          <p className="text-xs uppercase tracking-[0.12em] text-signal">
-            {t("preview.yourCodeWould")}
-          </p>
+          <p className="text-xs uppercase tracking-[0.12em] text-signal">{t("preview.outcome")}</p>
           <p className="mt-2 text-sm text-foreground">{t("noul.action")}</p>
         </div>
       </div>
@@ -104,10 +102,10 @@ function AnswerView({ answer, threshold }: { answer: JevAnswer; threshold: numbe
         }`}
       >
         <p className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-          {t("preview.yourCodeWould")}
+          {t("preview.outcome")}
         </p>
         <p className="mt-2 text-sm text-foreground">
-          {answer.score >= threshold ? t("score.route") : t("score.threshold")}
+          {answer.score >= threshold ? t("score.route") : t("score.belowThreshold")}
         </p>
       </div>
       <ProbabilityBars probabilities={answer.probabilities} />
