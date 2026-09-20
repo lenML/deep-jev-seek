@@ -1,6 +1,7 @@
 import { JevSeekAbortError, JevSeekNetworkError, JevSeekParseError } from "./errors";
 import { httpError, parseCompletion, readResponse } from "./deepseek-response";
 import type {
+  CompletionTransportRequest,
   DeepSeekFimCompletion,
   DeepSeekFimRequest,
   FimTransport,
@@ -30,7 +31,7 @@ export class DeepSeekFimTransport implements FimTransport {
   }
 
   async complete(
-    request: DeepSeekFimRequest,
+    request: CompletionTransportRequest,
     context: FimTransportContext,
   ): Promise<DeepSeekFimCompletion> {
     const headers = new Headers(this.headers);
@@ -39,12 +40,23 @@ export class DeepSeekFimTransport implements FimTransport {
       headers.set("authorization", `Bearer ${this.apiKey}`);
     }
 
+    const requestBody: DeepSeekFimRequest = {
+      max_tokens: request.maxTokens,
+      temperature: request.temperature,
+      top_p: request.topP,
+      logprobs: request.topLogprobs,
+      ...request.providerOptions,
+      model: request.model,
+      prompt: request.prompt,
+      stream: false,
+    };
+
     let response: Response;
     try {
       response = await this.fetchImpl(`${this.baseUrl}/completions`, {
         method: "POST",
         headers,
-        body: JSON.stringify(request),
+        body: JSON.stringify(requestBody),
         signal: context.signal,
       });
     } catch (error) {

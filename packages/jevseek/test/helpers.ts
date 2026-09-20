@@ -1,4 +1,4 @@
-import type { DeepSeekFimCompletion, DeepSeekFimRequest, FimTransport } from "../src";
+import type { CompletionTransportRequest, DeepSeekFimCompletion, FimTransport } from "../src";
 
 export function completionBody(
   text: string,
@@ -51,7 +51,7 @@ export function completionResponse(
 
 export function makeTransport(
   implementation: (
-    request: DeepSeekFimRequest,
+    request: CompletionTransportRequest,
     signal: AbortSignal,
   ) => Promise<DeepSeekFimCompletion>,
 ): FimTransport {

@@ -71,6 +71,7 @@ export interface SystemOneRequest {
   debug?: boolean;
   signal?: AbortSignal;
   promptTemplate?: PromptTemplate;
+  multimodal_data?: string[];
 }
 
 export interface JevSeekResponse {
@@ -112,6 +113,43 @@ export type DeepSeekFimProviderOptions = Partial<
   Omit<DeepSeekFimRequest, "model" | "prompt" | "stream">
 >;
 
+export interface LLamaCppCompletionRequest {
+  model?: string;
+  prompt:
+    | string
+    | {
+        prompt_string: string;
+        multimodal_data?: string[];
+      };
+  n_predict?: number;
+  temperature?: number;
+  top_p?: number;
+  n_probs?: number;
+  stream?: false;
+  seed?: number;
+  stop?: string[];
+  cache_prompt?: boolean;
+  post_sampling_probs?: boolean;
+}
+
+export type LLamaCppFimProviderOptions = Partial<
+  Omit<LLamaCppCompletionRequest, "model" | "prompt" | "stream">
+>;
+
+export type JevSeekProvider = "deepseek" | "llamacpp";
+export type JevSeekProviderOptions = DeepSeekFimProviderOptions | LLamaCppFimProviderOptions;
+
+export interface CompletionTransportRequest {
+  model: string;
+  prompt: string;
+  maxTokens: number;
+  temperature: number;
+  topP: number;
+  topLogprobs: number;
+  multimodal_data?: string[];
+  providerOptions?: Record<string, unknown>;
+}
+
 export interface DeepSeekFimCompletion {
   text: string;
   logprobs?: DeepSeekLogprobs;
@@ -128,7 +166,7 @@ export interface FimTransportContext {
 
 export interface FimTransport {
   complete(
-    request: DeepSeekFimRequest,
+    request: CompletionTransportRequest,
     context: FimTransportContext,
   ): Promise<DeepSeekFimCompletion>;
 }
@@ -143,6 +181,7 @@ export interface RetryOptions {
 export interface JevSeekOptions {
   apiKey?: string;
   model?: string;
+  provider?: JevSeekProvider;
   baseUrl?: string;
   fetch?: typeof fetch;
   transport?: FimTransport;
@@ -150,13 +189,13 @@ export interface JevSeekOptions {
   concurrency?: number;
   timeoutMs?: number;
   retry?: Partial<RetryOptions>;
-  providerOptions?: DeepSeekFimProviderOptions;
+  providerOptions?: JevSeekProviderOptions;
   promptTemplate?: PromptTemplate;
 }
 
 export interface JevSeekQuestionDiagnostic {
   prompt: string;
-  request: DeepSeekFimRequest;
+  request: CompletionTransportRequest;
   probabilities: Record<string, number>;
   sampledText: string;
   topLogprobs: Array<Record<string, number>>;

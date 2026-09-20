@@ -5,6 +5,7 @@ export * from "./concurrency";
 export * from "./deepseek";
 export * from "./errors";
 export * from "./logprobs";
+export * from "./llamacpp";
 export * from "./prompt";
 export * from "./retry";
 export * from "./stable-json";
