@@ -1,6 +1,6 @@
 # @lenml/jevseek
 
-Use DeepSeek FIM token logprobs as a Jev-style SystemOne API.
+DeepSeek FIM adapter for Jev-style SystemOne decisions.
 
 ```bash
 pnpm add @lenml/jevseek
@@ -34,22 +34,22 @@ const result = await client.systemOne({
 });
 ```
 
-Supported question types:
+Question types:
 
 - `choice`
 - `score`
 - `noul`
 
-Main features:
+Features:
 
 - DeepSeek Beta FIM transport.
 - Top-logprob normalization.
 - Jev-shaped choice, score, and noul answers.
-- Per-question concurrency.
+- Per-question concurrency limits.
 - Timeout, AbortSignal, exponential retry, and `Retry-After`.
-- Injectable fetch and transport for tests or gateways.
+- Injectable fetch and transport.
 - Debug diagnostics with usage, prompts, probabilities, and request IDs.
 
-Default DeepSeek base URL is `https://api.deepseek.com/beta`. The package uses native `fetch` and supports Node.js 18+, Bun, workers, and browsers.
+The default DeepSeek base URL is `https://api.deepseek.com/beta`. Supports Node.js 18+, Bun, workers, and browsers.
 
 See the repository documentation for the full HTTP and browser API.

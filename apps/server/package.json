@@ -2,7 +2,7 @@
   "name": "@lenml/jevseek-server",
   "version": "0.1.0",
   "private": true,
-  "description": "Minimal Bun HTTP server for Jev-compatible DeepSeek FIM requests",
+  "description": "Bun HTTP adapter for Jev-compatible DeepSeek FIM requests",
   "type": "module",
   "scripts": {
     "build": "tsup",

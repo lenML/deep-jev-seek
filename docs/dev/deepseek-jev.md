@@ -1,8 +1,8 @@
-# DeepSeek JEV-style SystemOne NPM 包设计与实现文档
+# DeepSeek JEV-style SystemOne npm 包设计与实现文档
 
 ## 1. 文档目标
 
-本文描述如何把当前 Python 项目里的 DeepSeek 决策能力独立封装成一个 TypeScript/NPM 包，供其他 Node.js 或服务端项目复用。
+本文描述如何把当前 Python 项目里的 DeepSeek 决策能力独立封装成一个 TypeScript/npm 包，供其他 Node.js 或服务端项目复用。
 
 当前参考实现主要位于：
 
@@ -14,12 +14,12 @@
 
 核心结论：
 
-> DeepSeek 并不直接运行 JEV 权重。这里所谓“用 DeepSeek 模拟 JEV”，本质是把一个决策问题拆成若干简单的 SystemOne 选择问题，让 DeepSeek 只输出候选选项码，再用 `top_logprobs` 得到候选概率，最后由确定性代码组合这些概率得到最终答案。
+> DeepSeek 并不直接运行 JEV 权重。「用 DeepSeek 模拟 JEV」的做法是把一个决策问题拆成若干简单的 SystemOne 选择问题，让 DeepSeek 只输出候选选项码，再用 `top_logprobs` 得到候选概率，最后由确定性代码组合这些概率得到最终答案。
 
-NPM 包不应把“贪吃蛇逻辑”和“DeepSeek 分类能力”绑死。推荐分成两层：
+npm 包不应把「贪吃蛇逻辑」和「DeepSeek 分类能力」绑死。推荐分成两层：
 
 1. 通用核心包：调用 DeepSeek、构造问题、解析 logprobs、校准、并发、重试、缓存、诊断。
-2. 领域适配器：把具体状态转换成问题，并把回答组合成业务决策，例如贪吃蛇的 wall/body/food 原子问题。
+2. 领域适配器：把具体状态转换成问题，并把回答组合成业务决策，比如贪吃蛇的 wall/body/food 原子问题。
 
 ---
 
@@ -40,24 +40,24 @@ NPM 包不应把“贪吃蛇逻辑”和“DeepSeek 分类能力”绑死。推�
 
 - 不承诺获得 DeepSeek 隐藏层的真实 softmax。
 - 不承诺 DeepSeek 输出是数学意义上严格校准的概率。
-- 不把 API Key 安全地暴露给浏览器。NPM 包应主要面向 Node.js、服务端、Worker、Electron main process。
-- 不负责业务规则本身。例如“撞墙概率大于 0.5 就禁止某动作”属于 domain adapter。
+- 不把 API Key 安全地暴露给浏览器。npm 包应主要面向 Node.js、服务端、Worker、Electron main process。
+- 不负责业务规则本身。比如「撞墙概率大于 0.5 就禁止某动作」属于 domain adapter。
 - 不依赖 JEV 原始模型权重。
 
 ---
 
 ## 3. JEV-Style 原理
 
-### 3.1 JEV 的关键不是“让模型直接选动作”
+### 3.1 JEV 的关键：模型选择离散选项
 
 JEV 思路强调：
 
 1. 把复杂任务拆成更小的判断。
 2. 每个判断只回答局部事实。
-3. 输出离散选项，而不是自由文本。
+3. 只输出离散选项。
 4. 让模型输出概率或可比较分数。
 5. 用外部算法组合局部判断。
-6. 置信度应尽量满足“高置信度对应高准确率”。
+6. 置信度应尽量满足「高置信度对应高准确率」。
 
 对于贪吃蛇：
 
@@ -112,7 +112,7 @@ w_i = exp(logprob_i - m)
 p_i = w_i / sum_j w_j
 ```
 
-这只表示“候选选项 token 在模型分布中的相对权重”，不等价于模型对业务事实的真实校准概率。
+这只表示「候选选项 token 在模型分布中的相对权重」，不等价于模型对业务事实的真实校准概率。
 
 ### 3.3 为什么只取首 token
 
@@ -122,7 +122,7 @@ p_i = w_i / sum_j w_j
 Answer: A
 ```
 
-因此必须：
+需要满足：
 
 - 将 `max_tokens` 限制为 `1`。
 - 强制模型只输出候选选项码。
@@ -179,7 +179,7 @@ p_calibrated = sigmoid(scaled_logit)
 
 ---
 
-## 4. 当前实现链路
+## 4. 当前实现
 
 ### 4.1 贪吃蛇 atomic 模式
 
@@ -246,11 +246,11 @@ Atomic 模式每一步需要 9 次 DeepSeek 请求：
 - 延迟波动大。
 - 多局并行时请求量成倍增加。
 
-因此 NPM 包必须把并发控制和限速作为一级能力，而不是后补功能。
+npm 包需要从一开始就包含并发控制和限速。
 
 ---
 
-## 5. NPM 包总体架构
+## 5. npm 包总体架构
 
 推荐名称占位：
 
@@ -516,7 +516,7 @@ JSON 输出需要多 token 生成：
 - 模型可能在 JSON 中解释。
 - `max_tokens=1` 无法容纳完整 JSON。
 
-因此首选单 token 选项码。
+单 token 选项码更可靠。
 
 ---
 
@@ -575,7 +575,7 @@ providerOptions: {
 }
 ```
 
-模型名也必须配置化。参考实现使用 `deepseek-flash`、`deepseek-v4-pro`，但 NPM 包不应假设这些名称对所有 endpoint 有效。
+模型名也必须配置化。参考实现使用 `deepseek-flash`、`deepseek-v4-pro`，但 npm 包不应假设这些名称对所有 endpoint 有效。
 
 ---
 
@@ -778,7 +778,7 @@ score =
   + 0.002 * is_straight
 ```
 
-然后归一化三个动作的分数。这是一种工程化启发式，不是 JEV 官方定义。NPM 包应允许业务侧替换 composer。
+然后归一化三个动作的分数。这是工程化启发式，JEV 官方并未定义这种组合方式。npm 包应允许业务侧替换 composer。
 
 ---
 
@@ -798,7 +798,7 @@ concurrency: 4;
 concurrency: Math.min(userValue, 8);
 ```
 
-并发单位是“一个 atomic question 一次 HTTP 请求”，不是“一个游戏一步”。
+并发单位是「一个 atomic question 一次 HTTP 请求」。一个游戏步骤可以包含多个并发请求。
 
 ### 13.2 限速
 
@@ -817,7 +817,7 @@ interface RateLimitConfig {
 }
 ```
 
-单进程内用队列即可。多进程、多容器场景必须使用 Redis 或网关级共享限流。
+单进程内用队列即可。多进程或多容器部署需要使用 Redis 或网关级共享限流。
 
 ### 13.3 重试
 
@@ -918,7 +918,7 @@ cache: {
 }
 ```
 
-高并发游戏场景可缓存同一状态下的 9 个问题结果，但状态变化后 key 必须变化。
+高并发游戏中可以缓存同一状态下的 9 个问题结果，但状态变化后 key 必须变化。
 
 ### 14.4 Prompt Caching
 
@@ -1011,7 +1011,7 @@ export interface SystemOneDiagnostics {
 }
 ```
 
-默认生产模式不返回完整 prompt。调试模式显式开启：
+默认生产模式不返回完整 prompt。调试模式需要显式启用：
 
 ```ts
 debug: true;
@@ -1358,7 +1358,7 @@ output_tokens_per_decision ≈ 9
 6. 对低价值问题减少候选。
 7. 对多局共享同一状态的结果做内存缓存。
 8. 使用网关级限流和熔断。
-9. 在高频场景增加本地/规则 fallback。
+9. 在高频调用中增加本地或规则 fallback。
 10. 评估把多个问题合并为一次请求的可行性。
 
 ### 21.3 单请求多问题是否可行
@@ -1400,7 +1400,7 @@ Python 端协议：
 }
 ```
 
-NPM 包建议提供对应协议：
+npm 包建议提供对应协议：
 
 ```ts
 client.systemOne({
@@ -1410,7 +1410,7 @@ client.systemOne({
 });
 ```
 
-如果 NPM 包承担模型服务角色，HTTP 路由可以保持：
+如果 npm 包承担模型服务角色，HTTP 路由可以保持：
 
 ```text
 GET  /v1/models
@@ -1420,7 +1420,7 @@ POST /v1/systemone
 POST /v1/systemone/debug
 ```
 
-但“模型加载/卸载”对 DeepSeek 只表示初始化客户端和检查 API Key，不代表加载 GPU 权重。该语义应在接口文档中明确。
+但「模型加载/卸载」对 DeepSeek 只表示初始化客户端和检查 API Key，不代表加载 GPU 权重。该语义应在接口文档中明确。
 
 ---
 
@@ -1494,7 +1494,7 @@ POST /v1/systemone/debug
 
 ## 26. 验收标准
 
-NPM 包达到可用状态时，应满足：
+npm 包达到可用状态时，应满足：
 
 - `score()` 能返回归一化候选概率。
 - 9 个 atomic 问题并发调用受限。
@@ -1518,9 +1518,9 @@ NPM 包达到可用状态时，应满足：
 2. JEV-style 的核心是问题分解、离散答案、概率归一化、确定性组合与校准。
 3. 每个原子问题一次请求最可靠，但成本高，必须默认限流。
 4. 候选码必须严格限制，首 token 必须是唯一选项码。
-5. 置信度应使用“与均匀分布的距离”，不能简单使用 `max probability`。
+5. 置信度应使用「与均匀分布的距离」，不能简单使用 `max probability`。
 6. 校准必须按模型、prompt schema 和 question ID 版本化。
-7. 通用 core 与 snake domain 必须分离，否则 NPM 包无法复用。
+7. 通用 core 与 snake domain 必须分离，否则 npm 包无法复用。
 8. 默认面向 Node.js 服务端，浏览器只能通过 BFF 间接调用。
-9. 真实 API 集成测试必须显式开启，不能污染默认 CI 和费用。
+9. 真实 API 集成测试必须显式启用，不能污染默认 CI 和费用。
 10. 最终应提供两种输出：raw answer 与 calibrated answer，便于审计和回归比较。

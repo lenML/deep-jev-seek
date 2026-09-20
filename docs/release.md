@@ -1,8 +1,8 @@
-# Release
+# 发布
 
-## NPM
+## npm
 
-发布账号需属于 `@lenml` scope，并具备包发布权限。
+账号需属于 `@lenml` scope，并获得包发布权限。
 
 ```bash
 pnpm install
@@ -12,7 +12,7 @@ pnpm build
 pnpm --filter @lenml/jevseek publish --access public
 ```
 
-发布前检查：
+发布前确认：
 
 - `packages/jevseek/package.json` 版本已递增。
 - 工作树干净。
@@ -20,7 +20,7 @@ pnpm --filter @lenml/jevseek publish --access public
 - 远端 CI 通过。
 - 生成包内容只包含 `dist`、README、LICENSE 和 package metadata。
 
-本项目不自动发布 NPM 包。由维护者手动执行。
+npm 包由维护者手动发布。
 
 ## Docker
 

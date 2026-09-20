@@ -1,8 +1,8 @@
 # @lenml/jevseek-server
 
-Minimal Bun HTTP façade for `@lenml/jevseek`.
+Bun HTTP adapter for `@lenml/jevseek`.
 
-## Routes
+## Endpoints
 
 - `GET /`
 - `GET /healthz`
@@ -12,10 +12,10 @@ Minimal Bun HTTP façade for `@lenml/jevseek`.
 
 ## Environment
 
-- `DEEPSEEK_API_KEY`: fallback key when no request bearer token is supplied.
+- `DEEPSEEK_API_KEY`: fallback key when the request has no bearer token.
 - `DEEPSEEK_MODEL`: target for `jev-latest` and `jev-preview`; default `deepseek-flash`.
 - `HOST`: bind host; default `0.0.0.0`.
 - `PORT`: bind port; default `8787`.
-- `MAX_BODY_BYTES`: request JSON limit; default `1048576`.
+- `MAX_BODY_BYTES`: JSON request limit; default `1048576`.
 
-Request key precedence: `Authorization: Bearer <key>`, then `DEEPSEEK_API_KEY`.
+Key precedence: `Authorization: Bearer <key>`, then `DEEPSEEK_API_KEY`.

@@ -1,6 +1,6 @@
 # API
 
-## NPM 包
+## npm 包
 
 ```bash
 pnpm add @lenml/jevseek
@@ -46,7 +46,7 @@ console.log(result.answers);
 console.log(result.usage);
 ```
 
-返回形状：
+响应示例：
 
 ```json
 {
@@ -97,7 +97,7 @@ docker run --rm -p 8787:8787 \
   ghcr.io/lenml/deep-jev-seek:latest
 ```
 
-请求：
+调用：
 
 ```http
 POST /v1/systemone
@@ -105,18 +105,18 @@ Authorization: Bearer sk-...
 Content-Type: application/json
 ```
 
-请求体与 NPM 包一致。请求头 Key 优先于容器环境变量。
+请求体格式与 npm 包相同。请求头 Key 优先于容器环境变量。
 
-模型：
+模型映射：
 
 - `jev-latest`、`jev-preview`：映射到 `DEEPSEEK_MODEL`。
 - `deepseek-flash`、`deepseek-v4-pro`：直接传给 DeepSeek FIM。
 
-其他路由：
+其他端点：
 
 - `GET /healthz`
 - `GET /v1/models`
 
 ## 浏览器
 
-WebUI 直接调用 DeepSeek Beta FIM API。用户 API Key 只在浏览器中使用。生产页面由 GitHub Pages 托管，不提供 Key 托管或代理。
+WebUI 直接调用 DeepSeek Beta FIM API。API Key 只保存在浏览器中。生产页面由 GitHub Pages 托管，不代理请求，也不托管 Key。

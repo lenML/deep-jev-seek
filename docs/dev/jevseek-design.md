@@ -27,7 +27,7 @@
 - DeepSeek FIM 模型：`deepseek-flash`、`deepseek-v4-pro`。
 - DeepSeek FIM 支持 `prompt`、可选 `suffix`、`max_tokens`、`temperature`、`top_p`、`logprobs`。
 - `logprobs` 最大为 20；返回 token 排序候选，可用于分类概率归一化。
-- DeepSeek API 对 `https://lenml.github.io` 的浏览器 CORS 预检返回允许，因此 WebUI 可直接调用；仍然明确提示 Key 只保存在用户浏览器。
+- DeepSeek API 对 `https://lenml.github.io` 的浏览器 CORS 预检返回允许，因此 WebUI 可直接调用。WebUI 只把 Key 保存在用户浏览器中。
 
 ## 3. 协议映射
 
@@ -45,7 +45,7 @@ const result = await client.systemOne({
 });
 ```
 
-每个问题独立请求一次 DeepSeek。问题 key 只用于组装响应，不发送给 DeepSeek。这样与 Jev 文档中 “key is not sent to the model” 的语义一致，也避免 key 名影响模型判断。
+每个问题独立请求一次 DeepSeek。问题 key 只用于组装响应，不发送给 DeepSeek。这样与 Jev 文档中「key is not sent to the model」的语义一致，也避免 key 名影响模型判断。
 
 ### 3.1 Prompt
 
@@ -81,7 +81,7 @@ Answer code:
 
 首版限制每个问题单次最多 20 个可见候选。Jev 的 choice 文档允许 255 个候选，但 DeepSeek 单次最多返回 20 个 logprob 候选，超过该数量无法得到可靠的统一概率分布。
 
-后续如需完整支持 255 个 choice，应增加分组分类与校准方案，而不是静默截断。
+若要完整支持 255 个 choice，需要增加分组分类和校准方案；超过 20 个候选不能静默截断。
 
 ### 3.3 DeepSeek 请求
 
@@ -97,7 +97,7 @@ Answer code:
 }
 ```
 
-`temperature: 0` 用于降低输出采样波动；概率仍来自 logprobs，不依赖 sampled token 本身。若用户显式设置 provider options，可覆盖默认参数。
+`temperature: 0` 用于降低输出采样波动；概率仍来自 logprobs，不依赖 sampled token 本身。若调用方显式设置 provider options，可覆盖默认参数。
 
 ### 3.4 响应解析
 
@@ -150,7 +150,7 @@ score = Σ(index * probability[index])
 legend = { "0": criteria[0], "1": criteria[1], ... }
 ```
 
-## 4. NPM 包结构
+## 4. npm 包结构
 
 ```text
 packages/jevseek/
@@ -175,7 +175,7 @@ packages/jevseek/
 - `JevSeekError` 及各错误子类
 - prompt、logprob、回答编码工具，便于复用和测试
 
-运行时仅依赖浏览器/Node 原生 `fetch`，同时允许注入 `fetch`，方便 Bun、Worker、Node 与前端。
+运行时仅依赖浏览器/Node 原生 `fetch`，同时允许注入 `fetch`，可用于 Bun、Worker、Node 与前端。
 
 ## 5. 服务端
 
@@ -209,10 +209,10 @@ API Key 优先读取请求 `Authorization: Bearer ...`，其次读取 `DEEPSEEK_
 
 - 填写 DeepSeek API Key、Base URL、模型。
 - 编辑 state 与 questions JSON。
-- 一键调用 `/v1/systemone` 等价能力。
+- 调用 JevSeek `systemOne` 能力。
 - 展示 answers、usage、原始响应与错误。
-- Key 可明确选择“仅本次会话”或“保存到 localStorage”。
-- 完全浏览器执行，不经过本项目服务器。
+- Key 可保存到 `sessionStorage` 或 `localStorage`，并在界面中明确选择。
+- 请求完全在浏览器内发起，不经过项目服务器。
 
 ## 7. Docker / CI
 
@@ -248,9 +248,9 @@ ghcr.io/<owner>/<repo>:<sha>
 - 每个问题一次请求，问题多时成本线性增长。
 - 浏览器直连 DeepSeek 依赖上游 CORS 与浏览器网络环境。
 - 首版不支持 stream、batch 或 255 choice 的完整概率恢复。
-- 不提供 Key 托管。WebUI Key 始终由用户自带并留在浏览器。
+- WebUI 的 Key 由调用方自带，留在浏览器。
 
-## 10. 验收
+## 10. 验收标准
 
 - `pnpm test` 全部通过。
 - `pnpm typecheck` 全部通过。

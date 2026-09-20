@@ -1,7 +1,7 @@
 {
   "name": "@lenml/jevseek",
   "version": "0.1.0",
-  "description": "Use DeepSeek FIM as a Jev-compatible SystemOne API",
+  "description": "Jev-compatible SystemOne API backed by DeepSeek FIM",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
