@@ -1,0 +1,65 @@
+@import "@fontsource-variable/space-grotesk";
+@import "@fontsource-variable/newsreader";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 43 37% 93%;
+    --foreground: 132 12% 12%;
+    --card: 45 47% 97%;
+    --card-foreground: 132 12% 12%;
+    --popover: 45 47% 97%;
+    --popover-foreground: 132 12% 12%;
+    --primary: 151 48% 24%;
+    --primary-foreground: 42 50% 97%;
+    --secondary: 38 35% 87%;
+    --secondary-foreground: 132 12% 16%;
+    --muted: 39 27% 89%;
+    --muted-foreground: 130 8% 39%;
+    --accent: 22 88% 53%;
+    --accent-foreground: 33 45% 98%;
+    --destructive: 3 66% 44%;
+    --destructive-foreground: 40 50% 98%;
+    --border: 102 11% 73%;
+    --input: 102 11% 71%;
+    --ring: 151 48% 30%;
+    --radius: 0.85rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    min-width: 320px;
+    background: hsl(var(--background));
+  }
+
+  body {
+    @apply min-h-screen bg-background font-sans text-foreground antialiased;
+    background-image:
+      radial-gradient(circle at 8% 2%, rgba(240, 111, 35, 0.16), transparent 28rem),
+      radial-gradient(circle at 92% 8%, rgba(27, 105, 77, 0.13), transparent 30rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 22rem);
+  }
+
+  ::selection {
+    color: hsl(var(--primary-foreground));
+    background: hsl(var(--primary));
+  }
+}
+
+@layer components {
+  .surface-grid {
+    background-image: linear-gradient(rgba(23, 35, 28, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(23, 35, 28, 0.055) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .editor-scroll {
+    scrollbar-color: rgba(27, 74, 55, 0.48) transparent;
+  }
+}
