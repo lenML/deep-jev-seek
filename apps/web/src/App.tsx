@@ -8,6 +8,7 @@ import { PlaygroundPreview, type PreviewMode } from "@/components/playground-pre
 import { useI18n } from "@/i18n/use-i18n";
 import type { BuiltDecision, PlaygroundDrafts, QuestionType } from "@/lib/playground";
 import { buildDecision, createDrafts } from "@/lib/playground";
+import { parseMultimodalData } from "@/lib/multimodal";
 import { runJevSeek } from "@/lib/run";
 import { useWorkbenchStore } from "@/store/workbench";
 
@@ -47,12 +48,19 @@ export function App() {
   const [previewMode, setPreviewMode] = useState<PreviewMode>("preview");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [drafts, setDrafts] = useState<PlaygroundDrafts>(() => createDrafts(language));
+  const [multimodalDataText, setMultimodalDataText] = useState("");
 
   const jsonStateError = jsonError(stateText);
   const jsonQuestionsError = jsonError(questionsText);
+  const multimodalData = parseMultimodalData(multimodalDataText);
+  const multimodalDataError =
+    connection.provider === "llamacpp" && multimodalData.invalid
+      ? t("validation.multimodal")
+      : null;
   const canRun =
     !isRunning &&
     (connection.provider === "llamacpp" || Boolean(connection.apiKey.trim())) &&
+    !multimodalDataError &&
     (inputMode === "form" || (!jsonStateError && !jsonQuestionsError));
 
   const threshold =
@@ -94,6 +102,10 @@ export function App() {
       setError(t("validation.json"));
       return;
     }
+    if (multimodalDataError) {
+      setError(multimodalDataError);
+      return;
+    }
 
     clearOutput();
     setRunning(true);
@@ -103,6 +115,7 @@ export function App() {
         connection,
         state: payload.state,
         questions: payload.questions,
+        multimodal_data: connection.provider === "llamacpp" ? multimodalData.data : undefined,
       });
       setResult(output.result, output.rawExchanges, output.latencyMs);
     } catch (runError) {
@@ -128,7 +141,7 @@ export function App() {
       />
       {settingsOpen ? <ConnectionSettings /> : null}
 
-      <main className="grid min-h-0 min-w-0 flex-1 lg:grid-cols-[390px_minmax(0,1fr)]">
+      <main className="grid min-h-0 min-w-0 flex-1 grid-cols-1 lg:grid-cols-[390px_minmax(0,1fr)]">
         <PlaygroundInput
           activeType={activeType}
           canRun={canRun}
@@ -137,10 +150,14 @@ export function App() {
           isRunning={isRunning}
           jsonStateError={jsonStateError}
           jsonQuestionsError={jsonQuestionsError}
+          multimodalDataError={multimodalDataError}
+          multimodalDataText={multimodalDataText}
           questionsText={questionsText}
+          showMultimodalData={connection.provider === "llamacpp"}
           stateText={stateText}
           onDraftsChange={setDrafts}
           onInputModeChange={setInputMode}
+          onMultimodalDataTextChange={setMultimodalDataText}
           onQuestionsTextChange={setQuestionsText}
           onReset={handleReset}
           onRun={handleRun}

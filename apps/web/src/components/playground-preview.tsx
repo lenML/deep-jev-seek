@@ -60,7 +60,9 @@ function AnswerView({ answer, threshold }: { answer: JevAnswer; threshold: numbe
         </div>
         <div className="border-signal/30 bg-signal/5 rounded-md border p-4">
           <p className="text-xs uppercase tracking-[0.12em] text-signal">{t("preview.outcome")}</p>
-          <p className="mt-2 text-sm text-foreground">{t("noul.action")}</p>
+          <p className="mt-2 text-sm text-foreground">
+            {t(isTrue ? "noul.action" : "noul.noAction")}
+          </p>
         </div>
       </div>
     );

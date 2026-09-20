@@ -44,11 +44,15 @@ const en = {
   "description.score": "Map the state to ordered levels. Returns a weighted score.",
   "input.state": "State",
   "input.question": "Question",
+  "multimodal.title": "multimodal_data",
+  "multimodal.hint":
+    "llama.cpp only. JSON array of base64 strings. Add one entry for each media marker in the prompt.",
   "noul.trueWhen": "True when",
   "noul.falseWhen": "False when",
   "noul.threshold": "Threshold",
   "noul.trigger": "True probability: {value}% or higher",
   "noul.action": "Treat the condition as true",
+  "noul.noAction": "Treat the condition as false",
   "choice.options": "Options",
   "choice.returnedAs": "Returned as",
   "choice.chooseWhen": "Choose when",
@@ -73,6 +77,7 @@ const en = {
   "validation.apiKey": "Enter a DeepSeek API key.",
   "validation.json": "Correct the JSON input.",
   "validation.questions": "Questions must be a JSON object keyed by question name.",
+  "validation.multimodal": "multimodal_data must be a non-empty JSON array of non-empty strings.",
 } as const;
 
 const zh: Record<keyof typeof en, string> = {
@@ -120,11 +125,15 @@ const zh: Record<keyof typeof en, string> = {
   "description.score": "将状态映射到有序等级，返回加权分数。",
   "input.state": "状态",
   "input.question": "问题",
+  "multimodal.title": "multimodal_data",
+  "multimodal.hint":
+    "仅 llama.cpp 可用。填写 base64 字符串 JSON 数组，每个数组项对应 prompt 中一个媒体标记。",
   "noul.trueWhen": "成立条件",
   "noul.falseWhen": "不成立条件",
   "noul.threshold": "阈值",
   "noul.trigger": "成立概率达到或超过 {value}%",
   "noul.action": "视为成立",
+  "noul.noAction": "视为不成立",
   "choice.options": "选项",
   "choice.returnedAs": "返回字段",
   "choice.chooseWhen": "选择条件",
@@ -149,6 +158,7 @@ const zh: Record<keyof typeof en, string> = {
   "validation.apiKey": "填写 DeepSeek API Key。",
   "validation.json": "修正 JSON 输入。",
   "validation.questions": "questions 必须是以问题名为键的 JSON 对象。",
+  "validation.multimodal": "multimodal_data 必须是非空字符串 JSON 数组。",
 };
 
 export const messages = { en, zh } as const;

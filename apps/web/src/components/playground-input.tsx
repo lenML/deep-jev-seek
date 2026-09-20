@@ -2,6 +2,7 @@ import { Play, RotateCcw } from "lucide-react";
 
 import { ChoiceForm } from "@/components/choice-form";
 import { JsonForm } from "@/components/json-form";
+import { MultimodalDataField } from "@/components/multimodal-data-field";
 import { NoulForm } from "@/components/noul-form";
 import { ScoreForm } from "@/components/score-form";
 import { Button } from "@/components/ui/button";
@@ -19,10 +20,14 @@ interface PlaygroundInputProps {
   isRunning: boolean;
   jsonStateError: string | null;
   jsonQuestionsError: string | null;
+  multimodalDataError: string | null;
+  multimodalDataText: string;
   questionsText: string;
+  showMultimodalData: boolean;
   stateText: string;
   onDraftsChange: (drafts: PlaygroundDrafts) => void;
   onInputModeChange: (mode: InputMode) => void;
+  onMultimodalDataTextChange: (value: string) => void;
   onQuestionsTextChange: (value: string) => void;
   onReset: () => void;
   onRun: () => void;
@@ -43,10 +48,14 @@ export function PlaygroundInput({
   isRunning,
   jsonStateError,
   jsonQuestionsError,
+  multimodalDataError,
+  multimodalDataText,
   questionsText,
+  showMultimodalData,
   stateText,
   onDraftsChange,
   onInputModeChange,
+  onMultimodalDataTextChange,
   onQuestionsTextChange,
   onReset,
   onRun,
@@ -115,6 +124,13 @@ export function PlaygroundInput({
             onQuestionsChange={onQuestionsTextChange}
           />
         )}
+        {showMultimodalData ? (
+          <MultimodalDataField
+            error={multimodalDataError}
+            value={multimodalDataText}
+            onChange={onMultimodalDataTextChange}
+          />
+        ) : null}
       </div>
 
       <div className="flex items-center justify-between border-t border-border px-4 py-3">

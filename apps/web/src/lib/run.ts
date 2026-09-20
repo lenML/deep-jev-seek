@@ -11,6 +11,7 @@ interface RunJevSeekInput {
   connection: ConnectionSettings;
   state: unknown;
   questions: QuestionSet;
+  multimodal_data?: string[];
 }
 
 export interface RunJevSeekOutput {
@@ -57,6 +58,7 @@ export async function runJevSeek({
   connection,
   state,
   questions,
+  multimodal_data,
 }: RunJevSeekInput): Promise<RunJevSeekOutput> {
   const rawExchanges: RawExchange[] = [];
   const recordingFetch: typeof fetch = async (input, init) => {
@@ -97,6 +99,7 @@ export async function runJevSeek({
     state: state as JevState,
     questions,
     debug: true,
+    ...(multimodal_data === undefined ? {} : { multimodal_data }),
   });
 
   return {
