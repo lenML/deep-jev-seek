@@ -1,4 +1,9 @@
-import { createJevSeek, type JevSeekResponse, type QuestionSet } from "@lenml/jevseek";
+import {
+  createJevSeek,
+  type JevSeekResponse,
+  type JevState,
+  type QuestionSet,
+} from "@lenml/jevseek";
 
 import type { ConnectionSettings, RawExchange, RawRequest } from "@/lib/types";
 
@@ -86,10 +91,13 @@ export async function runJevSeek({
     baseUrl: connection.baseUrl.trim(),
     model: connection.model.trim(),
     timeoutMs: 90_000,
-    debug: true,
     fetch: recordingFetch,
   });
-  const result = await client.systemOne({ state, questions });
+  const result = await client.systemOne({
+    state: state as JevState,
+    questions,
+    debug: true,
+  });
 
   return {
     result,
