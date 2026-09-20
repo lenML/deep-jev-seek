@@ -184,6 +184,13 @@ function httpError(
   if (status === 401 || status === 403) {
     return new JevSeekAuthenticationError(message, options);
   }
+  if (status === 408) {
+    return new JevSeekHttpError(message, {
+      ...options,
+      code: "REQUEST_ERROR",
+      retryable: true,
+    });
+  }
   if (status === 429) {
     return new JevSeekRateLimitError(message, {
       ...options,

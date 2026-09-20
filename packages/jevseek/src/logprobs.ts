@@ -55,7 +55,15 @@ export function normalizeCandidateLogprobs(
 
   const sampledToken = logprobs.tokens?.[0] ?? sampledText;
   const sampledLogprob = logprobs.token_logprobs?.[0];
-  setMaximum(observed, sampledToken, sampledLogprob ?? 0, allowed);
+
+  if (typeof sampledLogprob === "number") {
+    setMaximum(observed, sampledToken, sampledLogprob, allowed);
+  } else if (observed.size === 0) {
+    // Some compatible gateways omit both sampled and top logprobs. A single
+    // valid sampled label is still useful, but an absent value must not
+    // override real top-logprob data with logprob 0.
+    setMaximum(observed, sampledToken, 0, allowed);
+  }
 
   if (observed.size === 0) {
     throw new JevSeekParseError(
