@@ -11,9 +11,7 @@ export function indexToChoiceCode(index: number): string {
 export function getQuestionCodes(question: JevQuestion): string[] {
   switch (question.type) {
     case "choice":
-      return Object.keys(question.criteria).map((_, index) =>
-        indexToChoiceCode(index),
-      );
+      return Object.keys(question.criteria).map((_, index) => indexToChoiceCode(index));
     case "score":
       return question.criteria.map((_, index) => String(index));
     case "noul":

@@ -123,11 +123,11 @@ export function App() {
               DeepSeek FIM, shaped like Jev
             </div>
             <h1 className="max-w-4xl font-display text-5xl leading-[0.94] tracking-[-0.035em] sm:text-6xl lg:text-7xl">
-              Turn token logprobs into a
-              <span className="italic text-primary"> decision.</span>
+              Turn token logprobs into a<span className="italic text-primary"> decision.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-              Edit one state and a question set. JevSeek calls the FIM endpoint directly from your browser and normalizes the result into choice, score, and noul answers.
+              Edit one state and a question set. JevSeek calls the FIM endpoint directly from your
+              browser and normalizes the result into choice, score, and noul answers.
             </p>
           </div>
 
@@ -154,7 +154,9 @@ export function App() {
                       {detail}
                     </p>
                   </div>
-                  {itemIndex < 2 ? <ArrowRight className="size-4 shrink-0 text-muted-foreground" /> : null}
+                  {itemIndex < 2 ? (
+                    <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -196,7 +198,9 @@ export function App() {
                   )}
                 </Button>
                 <p className="mt-3 text-xs leading-5 text-primary-foreground/65">
-                  {connection.apiKey.trim() ? "Key loaded locally." : "Add an API key to enable the run."}
+                  {connection.apiKey.trim()
+                    ? "Key loaded locally."
+                    : "Add an API key to enable the run."}
                 </p>
               </CardContent>
             </Card>

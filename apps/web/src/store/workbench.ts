@@ -42,9 +42,10 @@ function readStorage(mode: KeyStorageMode) {
   if (typeof window === "undefined") {
     return "";
   }
-  return (mode === "local" ? window.localStorage : window.sessionStorage).getItem(
-    API_KEY_STORAGE_KEY,
-  ) ?? "";
+  return (
+    (mode === "local" ? window.localStorage : window.sessionStorage).getItem(API_KEY_STORAGE_KEY) ??
+    ""
+  );
 }
 
 function writeStorage(mode: KeyStorageMode, value: string) {
@@ -65,9 +66,7 @@ function readKeyStorageMode(): KeyStorageMode {
   if (typeof window === "undefined") {
     return "session";
   }
-  return window.localStorage.getItem(KEY_MODE_STORAGE_KEY) === "local"
-    ? "local"
-    : "session";
+  return window.localStorage.getItem(KEY_MODE_STORAGE_KEY) === "local" ? "local" : "session";
 }
 
 function readPreferences(): StoredPreferences {

@@ -39,10 +39,7 @@ function serialize(value: unknown, stack: object[]): string | undefined {
 
     const entries: string[] = [];
     for (const key of Object.keys(value).sort()) {
-      const serialized = serialize(
-        (value as Record<string, unknown>)[key],
-        stack,
-      );
+      const serialized = serialize((value as Record<string, unknown>)[key], stack);
       if (serialized !== undefined) {
         entries.push(`${JSON.stringify(key)}:${serialized}`);
       }

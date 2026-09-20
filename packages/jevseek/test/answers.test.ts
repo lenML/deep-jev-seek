@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  computeConfidence,
-  encodeChoiceAnswer,
-  encodeNoulAnswer,
-  encodeScoreAnswer,
-} from "../src";
+import { computeConfidence, encodeChoiceAnswer, encodeNoulAnswer, encodeScoreAnswer } from "../src";
 
 describe("answer encoding", () => {
   it("encodes choice with original keys and separate confidence", () => {
@@ -42,10 +37,7 @@ describe("answer encoding", () => {
 
   it("encodes noul as probability of true without confidence", () => {
     expect(
-      encodeNoulAnswer(
-        { type: "noul", instructions: "Urgent?" },
-        { "0": 0.18, "1": 0.82 },
-      ),
+      encodeNoulAnswer({ type: "noul", instructions: "Urgent?" }, { "0": 0.18, "1": 0.82 }),
     ).toEqual({ type: "noul", noul: 0.82 });
   });
 

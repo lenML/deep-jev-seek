@@ -54,7 +54,8 @@
 
 @layer components {
   .surface-grid {
-    background-image: linear-gradient(rgba(23, 35, 28, 0.055) 1px, transparent 1px),
+    background-image:
+      linear-gradient(rgba(23, 35, 28, 0.055) 1px, transparent 1px),
       linear-gradient(90deg, rgba(23, 35, 28, 0.055) 1px, transparent 1px);
     background-size: 24px 24px;
   }

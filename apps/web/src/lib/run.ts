@@ -62,15 +62,13 @@ export async function runJevSeek({
   const recordingFetch: typeof fetch = async (input, init) => {
     const startedAt = performance.now();
     const url =
-      typeof input === "string"
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : input.url;
+      typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
     const request: RawRequest = {
       method: init?.method ?? (input instanceof Request ? input.method : "GET"),
       url,
-      headers: redactHeaders(init?.headers ?? (input instanceof Request ? input.headers : undefined)),
+      headers: redactHeaders(
+        init?.headers ?? (input instanceof Request ? input.headers : undefined),
+      ),
       body: parseRequestBody(init?.body),
     };
 

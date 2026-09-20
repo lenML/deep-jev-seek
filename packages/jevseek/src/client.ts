@@ -2,11 +2,7 @@ import { encodeAnswer } from "./answers";
 import { getQuestionCodes } from "./codes";
 import { mapWithConcurrency } from "./concurrency";
 import { createDeepSeekFimTransport, type DeepSeekFimTransportOptions } from "./deepseek";
-import {
-  JevSeekAbortError,
-  JevSeekTimeoutError,
-  JevSeekValidationError,
-} from "./errors";
+import { JevSeekAbortError, JevSeekTimeoutError, JevSeekValidationError } from "./errors";
 import { normalizeCandidateLogprobs } from "./logprobs";
 import { buildPrompt } from "./prompt";
 import { resolveRetryOptions, withRetry } from "./retry";
@@ -170,11 +166,7 @@ export class JevSeekClient {
     );
 
     const completion: DeepSeekFimCompletion = call.value;
-    const probabilities = normalizeCandidateLogprobs(
-      codes,
-      completion.logprobs,
-      completion.text,
-    );
+    const probabilities = normalizeCandidateLogprobs(codes, completion.logprobs, completion.text);
     const answer = encodeAnswer(question, probabilities, codes);
     const diagnostic: JevSeekQuestionDiagnostic = {
       prompt,

@@ -1,7 +1,6 @@
 import { Eye, EyeOff, KeyRound, ShieldCheck, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,10 +41,14 @@ export function ConnectionPanel() {
             </div>
             <CardTitle>Bring your own key</CardTitle>
             <CardDescription>
-              Requests go from this browser directly to your Base URL. This site has no proxy or key service.
+              Requests go from this browser directly to your Base URL. This site has no proxy or key
+              service.
             </CardDescription>
           </div>
-          <ShieldCheck className="mt-1 size-6 shrink-0 text-primary" aria-label="Browser-only credentials" />
+          <ShieldCheck
+            className="mt-1 size-6 shrink-0 text-primary"
+            aria-label="Browser-only credentials"
+          />
         </div>
       </CardHeader>
       <CardContent className="space-y-5 pt-5 sm:pt-6">
@@ -143,7 +146,8 @@ export function ConnectionPanel() {
         <div className="flex items-start gap-3 rounded-md border border-primary/20 bg-primary/5 p-3 text-xs leading-5 text-muted-foreground">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
           <span>
-            Your key is never sent to this project. Browser CORS and your network must allow direct access to DeepSeek.
+            Your key is never sent to this project. Browser CORS and your network must allow direct
+            access to DeepSeek.
           </span>
         </div>
       </CardContent>

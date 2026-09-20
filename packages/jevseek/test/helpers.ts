@@ -1,8 +1,4 @@
-import type {
-  DeepSeekFimCompletion,
-  DeepSeekFimRequest,
-  FimTransport,
-} from "../src";
+import type { DeepSeekFimCompletion, DeepSeekFimRequest, FimTransport } from "../src";
 
 export function completionBody(
   text: string,
@@ -34,10 +30,7 @@ export function completionBody(
   };
 }
 
-export function jsonResponse(
-  body: unknown,
-  init: ResponseInit = {},
-): Response {
+export function jsonResponse(body: unknown, init: ResponseInit = {}): Response {
   const headers = new Headers(init.headers);
   if (!headers.has("content-type")) {
     headers.set("content-type", "application/json");

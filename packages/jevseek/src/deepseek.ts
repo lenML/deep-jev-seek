@@ -52,9 +52,7 @@ function parseLogprobs(value: unknown): DeepSeekLogprobs | undefined {
 
   if (value.token_logprobs !== undefined) {
     if (!Array.isArray(value.token_logprobs)) {
-      throw new JevSeekParseError(
-        "completion logprobs.token_logprobs must be an array",
-      );
+      throw new JevSeekParseError("completion logprobs.token_logprobs must be an array");
     }
     logprobs.token_logprobs = value.token_logprobs.map((logprob) =>
       typeof logprob === "number" && Number.isFinite(logprob) ? logprob : null,
@@ -63,9 +61,7 @@ function parseLogprobs(value: unknown): DeepSeekLogprobs | undefined {
 
   if (value.top_logprobs !== undefined) {
     if (!Array.isArray(value.top_logprobs)) {
-      throw new JevSeekParseError(
-        "completion logprobs.top_logprobs must be an array",
-      );
+      throw new JevSeekParseError("completion logprobs.top_logprobs must be an array");
     }
     logprobs.top_logprobs = value.top_logprobs.map((entry) => {
       if (!isRecord(entry)) {
@@ -84,9 +80,7 @@ function parseLogprobs(value: unknown): DeepSeekLogprobs | undefined {
 }
 
 function nonNegativeNumber(value: unknown, fallback = 0): number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0
-    ? value
-    : fallback;
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : fallback;
 }
 
 function parseUsage(value: unknown): DeepSeekUsage {
@@ -97,9 +91,7 @@ function parseUsage(value: unknown): DeepSeekUsage {
     throw new JevSeekParseError("completion usage must be an object");
   }
 
-  const details = isRecord(value.prompt_tokens_details)
-    ? value.prompt_tokens_details
-    : undefined;
+  const details = isRecord(value.prompt_tokens_details) ? value.prompt_tokens_details : undefined;
   const usage: DeepSeekUsage = {
     prompt_tokens: nonNegativeNumber(value.prompt_tokens),
     completion_tokens: nonNegativeNumber(value.completion_tokens),
@@ -118,10 +110,7 @@ function parseUsage(value: unknown): DeepSeekUsage {
   return usage;
 }
 
-function parseCompletion(
-  raw: unknown,
-  headerRequestId?: string,
-): DeepSeekFimCompletion {
+function parseCompletion(raw: unknown, headerRequestId?: string): DeepSeekFimCompletion {
   if (!isRecord(raw)) {
     throw new JevSeekParseError("completion response must be an object");
   }
@@ -150,8 +139,7 @@ function parseCompletion(
   if (typeof raw.model === "string") {
     completion.model = raw.model;
   }
-  const requestId =
-    headerRequestId ?? (typeof raw.id === "string" ? raw.id : undefined);
+  const requestId = headerRequestId ?? (typeof raw.id === "string" ? raw.id : undefined);
   if (requestId !== undefined) {
     completion.requestId = requestId;
   }
@@ -168,11 +156,7 @@ function responseMessage(body: unknown, status: number): string {
   return `DeepSeek request failed with status ${status}`;
 }
 
-function httpError(
-  status: number,
-  body: unknown,
-  headers: Headers,
-): JevSeekHttpError {
+function httpError(status: number, body: unknown, headers: Headers): JevSeekHttpError {
   const requestId = headers.get("x-request-id") ?? undefined;
   const options = {
     status,
@@ -232,8 +216,7 @@ export class DeepSeekFimTransport implements FimTransport {
     this.apiKey = options.apiKey;
     this.baseUrl = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
     this.headers = options.headers;
-    this.fetchImpl =
-      options.fetch ?? ((input, init) => globalThis.fetch(input, init));
+    this.fetchImpl = options.fetch ?? ((input, init) => globalThis.fetch(input, init));
   }
 
   async complete(

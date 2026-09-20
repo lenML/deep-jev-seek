@@ -128,14 +128,22 @@ function getApiKey(request: Request, env: Environment): string {
     const match = /^Bearer\s+(.+)$/i.exec(authorization);
     const token = match?.[1]?.trim();
     if (!token) {
-      throw new HttpError(401, "invalid_authorization", "Authorization must use Bearer credentials.");
+      throw new HttpError(
+        401,
+        "invalid_authorization",
+        "Authorization must use Bearer credentials.",
+      );
     }
     return token;
   }
 
   const envKey = env.DEEPSEEK_API_KEY?.trim();
   if (!envKey) {
-    throw new HttpError(401, "missing_api_key", "Provide an Authorization Bearer token or DEEPSEEK_API_KEY.");
+    throw new HttpError(
+      401,
+      "missing_api_key",
+      "Provide an Authorization Bearer token or DEEPSEEK_API_KEY.",
+    );
   }
 
   return envKey;
@@ -254,8 +262,12 @@ function upstreamError(error: unknown, secrets: string[]): HttpError {
   const rawCode = typeof details.code === "string" ? details.code : undefined;
   const rawStatus = typeof details.status === "number" ? details.status : details.statusCode;
   const status = statusForError(rawCode, rawStatus);
-  const code = redactSecrets(rawCode ?? (status === 502 ? "upstream_error" : "request_failed"), secrets);
-  const rawMessage = typeof details.message === "string" ? details.message : "Upstream request failed.";
+  const code = redactSecrets(
+    rawCode ?? (status === 502 ? "upstream_error" : "request_failed"),
+    secrets,
+  );
+  const rawMessage =
+    typeof details.message === "string" ? details.message : "Upstream request failed.";
   const message = redactSecrets(rawMessage, secrets);
 
   return new HttpError(status, code, message);

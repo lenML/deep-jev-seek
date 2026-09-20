@@ -41,9 +41,7 @@ export function normalizeCandidateLogprobs(
     if (codes.length === 1 && sampledCode === codes[0]) {
       return { [codes[0] as string]: 1 };
     }
-    throw new JevSeekParseError(
-      "response did not contain logprobs for any candidate",
-    );
+    throw new JevSeekParseError("response did not contain logprobs for any candidate");
   }
 
   const observed = new Map<string, number>();
@@ -66,9 +64,7 @@ export function normalizeCandidateLogprobs(
   }
 
   if (observed.size === 0) {
-    throw new JevSeekParseError(
-      "response did not contain logprobs for any candidate",
-    );
+    throw new JevSeekParseError("response did not contain logprobs for any candidate");
   }
 
   const maximum = Math.max(...observed.values());
@@ -86,7 +82,5 @@ export function normalizeCandidateLogprobs(
     throw new JevSeekParseError("candidate probability mass is zero");
   }
 
-  return Object.fromEntries(
-    codes.map((code) => [code, (weights.get(code) as number) / total]),
-  );
+  return Object.fromEntries(codes.map((code) => [code, (weights.get(code) as number) / total]));
 }

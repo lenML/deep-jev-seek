@@ -7,10 +7,7 @@ Evaluate the source state against one question.
 Return exactly one option code from the allowed codes.
 Do not explain, reason, quote, or emit any other text.`;
 
-function promptQuestion(
-  question: JevQuestion,
-  codes: readonly string[],
-): Record<string, unknown> {
+function promptQuestion(question: JevQuestion, codes: readonly string[]): Record<string, unknown> {
   switch (question.type) {
     case "choice": {
       const criteria = Object.fromEntries(

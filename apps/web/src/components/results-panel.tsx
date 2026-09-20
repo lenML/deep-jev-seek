@@ -26,7 +26,9 @@ function ProbabilityRow({ label, value }: { label: string; value: number }) {
     <div className="space-y-1.5">
       <div className="flex items-center justify-between gap-3 text-xs">
         <span className="truncate font-medium text-foreground/85">{label}</span>
-        <span className="font-mono tabular-nums text-muted-foreground">{formatProbability(value)}</span>
+        <span className="font-mono tabular-nums text-muted-foreground">
+          {formatProbability(value)}
+        </span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-secondary">
         <div
@@ -47,7 +49,9 @@ function AnswerCard({ answerKey, answer }: { answerKey: string; answer: JevAnswe
       <>
         <div className="flex items-end justify-between gap-4">
           <div>
-            <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Choice</span>
+            <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Choice
+            </span>
             <p className="font-display text-4xl leading-none text-foreground">{answer.choice}</p>
           </div>
           <span className="rounded-full bg-accent/10 px-3 py-1 font-mono text-xs text-accent">
@@ -67,7 +71,9 @@ function AnswerCard({ answerKey, answer }: { answerKey: string; answer: JevAnswe
       <>
         <div className="flex items-end justify-between gap-4">
           <div>
-            <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Weighted score</span>
+            <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Weighted score
+            </span>
             <p className="font-display text-4xl leading-none text-foreground">
               {answer.score.toFixed(2)}
             </p>
@@ -78,11 +84,7 @@ function AnswerCard({ answerKey, answer }: { answerKey: string; answer: JevAnswe
         </div>
         <div className="space-y-3 border-t border-border/70 pt-4">
           {probabilities.map(([label, probability]) => (
-            <ProbabilityRow
-              key={label}
-              label={answer.legend[label] ?? label}
-              value={probability}
-            />
+            <ProbabilityRow key={label} label={answer.legend[label] ?? label} value={probability} />
           ))}
         </div>
       </>
@@ -93,7 +95,9 @@ function AnswerCard({ answerKey, answer }: { answerKey: string; answer: JevAnswe
       <>
         <div className="flex items-end justify-between gap-4">
           <div>
-            <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Noul probability</span>
+            <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Noul probability
+            </span>
             <p className="font-display text-4xl leading-none text-foreground">
               {isTrue ? "True" : "False"}
             </p>
@@ -173,7 +177,12 @@ export function ResultsPanel({
             </CardDescription>
           </div>
           <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] text-[#d9ddd7]">
-            <span className={cn("size-2 rounded-full", isRunning ? "animate-pulse bg-[#eaa36e]" : result ? "bg-[#5fc18f]" : "bg-[#8d968f]")} />
+            <span
+              className={cn(
+                "size-2 rounded-full",
+                isRunning ? "animate-pulse bg-[#eaa36e]" : result ? "bg-[#5fc18f]" : "bg-[#8d968f]",
+              )}
+            />
             {isRunning ? "running" : result ? "complete" : "idle"}
           </div>
         </div>
@@ -197,7 +206,9 @@ export function ResultsPanel({
               <span className="size-2 animate-bounce rounded-full bg-accent" />
             </div>
             <p className="font-display text-2xl">Querying DeepSeek FIM.</p>
-            <p className="mt-2 text-sm text-muted-foreground">Each question is classified independently.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Each question is classified independently.
+            </p>
           </div>
         ) : result ? (
           <Tabs defaultValue="answers">
@@ -216,21 +227,31 @@ export function ResultsPanel({
             <TabsContent value="usage">
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-md border border-border bg-secondary/35 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Input tokens</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Input tokens
+                  </p>
                   <p className="mt-2 font-display text-4xl">{usage?.input_tokens ?? "—"}</p>
                 </div>
                 <div className="rounded-md border border-border bg-secondary/35 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Output tokens</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Output tokens
+                  </p>
                   <p className="mt-2 font-display text-4xl">{usage?.output_tokens ?? "—"}</p>
                 </div>
                 <div className="rounded-md border border-border bg-secondary/35 p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">Browser latency</p>
-                  <p className="mt-2 font-display text-4xl">{latencyMs === null ? "—" : `${latencyMs}ms`}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    Browser latency
+                  </p>
+                  <p className="mt-2 font-display text-4xl">
+                    {latencyMs === null ? "—" : `${latencyMs}ms`}
+                  </p>
                 </div>
               </div>
               <div className="mt-3 flex items-center gap-2 rounded-md border border-border/70 px-4 py-3 text-xs text-muted-foreground">
                 <Clock3 className="size-3.5" />
-                {completedAt ? `Completed ${new Date(completedAt).toLocaleString()}` : "No timestamp"}
+                {completedAt
+                  ? `Completed ${new Date(completedAt).toLocaleString()}`
+                  : "No timestamp"}
                 <span className="text-border">/</span>
                 model {result.model}
               </div>

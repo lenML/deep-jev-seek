@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildPrompt,
-  getQuestionCodes,
-  JevSeekValidationError,
-  stableStringify,
-} from "../src";
+import { buildPrompt, getQuestionCodes, JevSeekValidationError, stableStringify } from "../src";
 
 describe("stableStringify", () => {
   it("sorts object keys recursively while preserving arrays", () => {
-    expect(
-      stableStringify({ z: 1, nested: { b: 2, a: 1 }, values: [3, 1] }),
-    ).toBe('{"nested":{"a":1,"b":2},"values":[3,1],"z":1}');
+    expect(stableStringify({ z: 1, nested: { b: 2, a: 1 }, values: [3, 1] })).toBe(
+      '{"nested":{"a":1,"b":2},"values":[3,1],"z":1}',
+    );
   });
 
   it("rejects circular values", () => {
@@ -80,8 +75,6 @@ describe("getQuestionCodes", () => {
         criteria: ["a", "b"],
       }),
     ).toEqual(["0", "1"]);
-    expect(
-      getQuestionCodes({ type: "noul", instructions: "Yes?" }),
-    ).toEqual(["0", "1"]);
+    expect(getQuestionCodes({ type: "noul", instructions: "Yes?" })).toEqual(["0", "1"]);
   });
 });

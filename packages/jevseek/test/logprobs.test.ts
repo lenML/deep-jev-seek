@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  JevSeekParseError,
-  MISSING_CANDIDATE_LOGPROB,
-  normalizeCandidateLogprobs,
-} from "../src";
+import { JevSeekParseError, MISSING_CANDIDATE_LOGPROB, normalizeCandidateLogprobs } from "../src";
 
 describe("normalizeCandidateLogprobs", () => {
   it("trims, case-folds, drops unrelated tokens, and normalizes", () => {
@@ -39,11 +35,7 @@ describe("normalizeCandidateLogprobs", () => {
   });
 
   it("fills missing candidates with the sentinel logprob", () => {
-    const probabilities = normalizeCandidateLogprobs(
-      ["A", "B"],
-      { top_logprobs: [{ A: 0 }] },
-      "A",
-    );
+    const probabilities = normalizeCandidateLogprobs(["A", "B"], { top_logprobs: [{ A: 0 }] }, "A");
 
     expect(probabilities.A!).toBeGreaterThan(0.999);
     expect(probabilities.A! / probabilities.B!).toBeCloseTo(
@@ -54,18 +46,12 @@ describe("normalizeCandidateLogprobs", () => {
 
   it("allows one-hot fallback only for a single valid sampled candidate", () => {
     expect(normalizeCandidateLogprobs(["A"], undefined, " A ")).toEqual({ A: 1 });
-    expect(() =>
-      normalizeCandidateLogprobs(["A", "B"], undefined, "A"),
-    ).toThrow(JevSeekParseError);
+    expect(() => normalizeCandidateLogprobs(["A", "B"], undefined, "A")).toThrow(JevSeekParseError);
   });
 
   it("throws when no valid candidate is present", () => {
     expect(() =>
-      normalizeCandidateLogprobs(
-        ["A", "B"],
-        { tokens: ["X"], top_logprobs: [{ X: -0.1 }] },
-        "X",
-      ),
+      normalizeCandidateLogprobs(["A", "B"], { tokens: ["X"], top_logprobs: [{ X: -0.1 }] }, "X"),
     ).toThrow(JevSeekParseError);
   });
 });

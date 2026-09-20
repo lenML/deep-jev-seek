@@ -22,9 +22,7 @@ export function computeConfidence(probabilities: Record<string, number>): number
 
   const maximum = Math.max(...Object.values(probabilities));
   const baseline = 1 / candidateCount;
-  return clampProbability(
-    (maximum - baseline) / (1 - baseline),
-  );
+  return clampProbability((maximum - baseline) / (1 - baseline));
 }
 
 export function encodeChoiceAnswer(
@@ -36,7 +34,10 @@ export function encodeChoiceAnswer(
   let bestIndex = 0;
 
   for (let index = 1; index < keys.length; index += 1) {
-    if ((probabilities[codes[index] as string] ?? 0) > (probabilities[codes[bestIndex] as string] ?? 0)) {
+    if (
+      (probabilities[codes[index] as string] ?? 0) >
+      (probabilities[codes[bestIndex] as string] ?? 0)
+    ) {
       bestIndex = index;
     }
   }
@@ -56,10 +57,7 @@ export function encodeScoreAnswer(
   probabilities: Record<string, number>,
   codes: readonly string[] = getQuestionCodes(question),
 ): ScoreAnswer {
-  const score = codes.reduce(
-    (total, code, index) => total + index * (probabilities[code] ?? 0),
-    0,
-  );
+  const score = codes.reduce((total, code, index) => total + index * (probabilities[code] ?? 0), 0);
 
   return {
     type: "score",

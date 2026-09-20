@@ -5,7 +5,9 @@
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "engines": {
     "node": ">=18"
   },

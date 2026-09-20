@@ -14,9 +14,7 @@ export const DEFAULT_RETRY_OPTIONS: RetryOptions = {
   jitter: true,
 };
 
-export function resolveRetryOptions(
-  options: Partial<RetryOptions> | undefined,
-): RetryOptions {
+export function resolveRetryOptions(options: Partial<RetryOptions> | undefined): RetryOptions {
   const resolved = { ...DEFAULT_RETRY_OPTIONS, ...options };
   if (!Number.isInteger(resolved.maxAttempts) || resolved.maxAttempts < 1) {
     throw new JevSeekValidationError("retry.maxAttempts must be a positive integer");
@@ -51,10 +49,7 @@ export function parseRetryAfter(
 }
 
 function backoffDelay(attempt: number, options: RetryOptions): number {
-  const exponential = Math.min(
-    options.maxDelayMs,
-    options.baseDelayMs * 2 ** (attempt - 1),
-  );
+  const exponential = Math.min(options.maxDelayMs, options.baseDelayMs * 2 ** (attempt - 1));
   if (!options.jitter || exponential === 0) {
     return exponential;
   }
@@ -63,9 +58,7 @@ function backoffDelay(attempt: number, options: RetryOptions): number {
 
 function sleep(milliseconds: number, signal?: AbortSignal): Promise<void> {
   if (milliseconds <= 0) {
-    return signal?.aborted
-      ? Promise.reject(new JevSeekAbortError())
-      : Promise.resolve();
+    return signal?.aborted ? Promise.reject(new JevSeekAbortError()) : Promise.resolve();
   }
 
   return new Promise((resolve, reject) => {
@@ -128,8 +121,7 @@ export async function withRetry<T>(
         throw error;
       }
 
-      const retryAfter =
-        error instanceof JevSeekRateLimitError ? error.retryAfterMs : undefined;
+      const retryAfter = error instanceof JevSeekRateLimitError ? error.retryAfterMs : undefined;
       const delay = retryAfter ?? backoffDelay(attempt, options);
       await sleep(delay, signal);
     }

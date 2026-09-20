@@ -104,10 +104,7 @@ export class JevSeekAbortError extends JevSeekError {
 }
 
 export class JevSeekParseError extends JevSeekError {
-  constructor(
-    message: string,
-    options: Omit<JevSeekErrorOptions, "code" | "retryable"> = {},
-  ) {
+  constructor(message: string, options: Omit<JevSeekErrorOptions, "code" | "retryable"> = {}) {
     super(message, { ...options, code: "PARSE_ERROR", retryable: true });
   }
 }
