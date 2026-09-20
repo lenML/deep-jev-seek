@@ -1,17 +1,21 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const app = readFileSync(resolve(root, "src/app.ts"), "utf8");
+const sourceDirectory = resolve(root, "src");
+const source = readdirSync(sourceDirectory)
+  .filter((name) => name.endsWith(".ts"))
+  .map((name) => readFileSync(resolve(sourceDirectory, name), "utf8"))
+  .join("\n");
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
 
 assert.equal(pkg.name, "@lenml/jevseek-server");
 assert.equal(pkg.dependencies["@lenml/jevseek"], "workspace:*");
 
 for (const route of ["/", "/healthz", "/v1/models", "/v1/systemone"]) {
-  assert.ok(app.includes(`pathname === "${route}"`), `missing route ${route}`);
+  assert.ok(source.includes(`pathname === "${route}"`), `missing route ${route}`);
 }
 
 for (const contract of [
@@ -26,7 +30,7 @@ for (const contract of [
   "invalid_json",
   "server.stop(true)",
 ]) {
-  assert.ok(app.includes(contract), `missing contract ${contract}`);
+  assert.ok(source.includes(contract), `missing contract ${contract}`);
 }
 
 console.log("server static contract checks passed");
