@@ -6,34 +6,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: "var(--border)",
+        input: "var(--input)",
+        ring: "var(--ring)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "var(--destructive)",
+          foreground: "var(--destructive-foreground)",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
+        },
+        signal: {
+          DEFAULT: "var(--signal)",
+          foreground: "var(--signal-foreground)",
         },
       },
       borderRadius: {
@@ -42,16 +46,13 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Space Grotesk Variable", "sans-serif"],
-        display: ["Newsreader Variable", "serif"],
-        mono: ["Space Grotesk Variable", "monospace"],
+        sans: ["Geist Variable", "sans-serif"],
+        display: ["Geist Variable", "sans-serif"],
+        mono: ["Geist Mono Variable", "monospace"],
       },
       boxShadow: {
-        paper: "0 28px 70px -34px rgba(0, 0, 0, 0.9)",
-        lift: "5px 5px 0 rgba(239, 126, 55, 0.22)",
-      },
-      backgroundImage: {
-        grid: "linear-gradient(rgba(141, 224, 181, 0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(141, 224, 181, 0.06) 1px, transparent 1px)",
+        paper: "0 1px 2px hsl(0 0% 0% / 0.45)",
+        lift: "0 1px 2px hsl(0 0% 0% / 0.35)",
       },
     },
   },
