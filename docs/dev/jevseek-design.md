@@ -67,7 +67,7 @@ Do not explain, reason, quote, or emit any other text.
 </question>
 
 Allowed codes: A, B, C
-Answer code:
+Answer code: "
 ```
 
 状态序列化保持稳定：对象 key 排序，避免等价状态因 JS 属性顺序变化导致缓存与结果不稳定。

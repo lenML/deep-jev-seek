@@ -17,7 +17,7 @@ Do not explain, reason, quote, or emit any other text.
 </question>
 
 Allowed codes: {{codes}}
-Answer code:`;
+Answer code: "`;
 
 const PLACEHOLDER_PATTERN = /\{\{\s*(\w+)\s*\}\}/gu;
 
