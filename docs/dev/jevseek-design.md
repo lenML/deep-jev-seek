@@ -2,7 +2,7 @@
 
 ## 1. 目标
 
-`@lenml/jevseek` 提供接近 TypeSafe Jev SystemOne 的 API：接收 `state` 与 `questions`，返回 `answers` 与 `usage`。底层通过 DeepSeek FIM Completion API 获取每个候选答案的 token logprob，再转换为 Jev 风格的 choice、score、noul 响应。
+`@lenml/jevseek` 提供接近 TypeSafe Jev SystemOne 的 API：接收 `state` 与 `questions`，返回 `answers` 与 `usage`。底层通过 DeepSeek FIM 或 llama.cpp Completion API 获取每个候选答案的 token logprob，再转换为 Jev 风格的 choice、score、noul 响应。
 
 同时提供：
 
@@ -14,6 +14,7 @@
 - Jev API: <https://learnjev.com/reference>
 - DeepSeek FIM: <https://api-docs.deepseek.com/zh-cn/api/create-completion/>
 - DeepSeek FIM 指南: <https://api-docs.deepseek.com/zh-cn/guides/fim_completion/>
+- llama.cpp server: <https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md>
 
 调研时的关键事实：
 
@@ -100,6 +101,39 @@ Answer code:
 ```
 
 `temperature: 0` 用于降低输出采样波动；概率仍来自 logprobs，不依赖 sampled token 本身。若调用方显式设置 provider options，可覆盖默认参数。
+
+### 3.3.1 llama.cpp 请求
+
+当 `provider: "llamacpp"` 时，transport 请求 llama.cpp 原生 `POST /completion`：
+
+```json
+{
+  "model": "local-model",
+  "prompt": "<prompt above>",
+  "n_predict": 1,
+  "temperature": 0,
+  "top_p": 1,
+  "n_probs": 20,
+  "stream": false
+}
+```
+
+`baseUrl` 默认是 `http://127.0.0.1:8080/v1`。transport 会移除末尾 `/v1`，因为 `/completion` 不在 OpenAI 兼容命名空间下。
+
+响应从 `completion_probabilities[0]` 读取 sampled token 与 `top_logprobs[*].logprob`，再映射到统一 `DeepSeekLogprobs` 结构。`tokens_evaluated` 与 `tokens_predicted` 映射为 usage。
+
+### 3.3.2 multimodal_data
+
+`multimodal_data` 只允许 llama.cpp provider。transport 将 prompt 包装为：
+
+```json
+{
+  "prompt_string": "<prompt above>",
+  "multimodal_data": ["<base64-data>"]
+}
+```
+
+prompt 中必须有同等数量的服务器媒体标记。模型需要加载 mmproj。DeepSeek provider 在发送请求前拒绝该字段。
 
 ### 3.4 响应解析
 

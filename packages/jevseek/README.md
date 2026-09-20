@@ -1,6 +1,6 @@
 # @lenml/jevseek
 
-DeepSeek FIM adapter for Jev-style SystemOne decisions.
+DeepSeek FIM and llama.cpp completion adapter for Jev-style SystemOne decisions.
 
 ```bash
 pnpm add @lenml/jevseek
@@ -44,6 +44,7 @@ Features:
 
 - Customizable prompt templates with safe defaults.
 - DeepSeek Beta FIM transport.
+- llama.cpp native `/completion` transport and `multimodal_data`.
 - Top-logprob normalization.
 - Jev-shaped choice, score, and noul answers.
 - Per-question concurrency limits.
@@ -52,6 +53,31 @@ Features:
 - Debug diagnostics with usage, prompts, probabilities, and request IDs.
 
 The default DeepSeek base URL is `https://api.deepseek.com/beta`. Supports Node.js 18+, Bun, workers, and browsers.
+
+## llama.cpp
+
+```ts
+const local = createJevSeek({
+  provider: "llamacpp",
+  baseUrl: "http://127.0.0.1:8080/v1",
+  model: "local-model",
+});
+
+const result = await local.systemOne({
+  state: "The request is urgent.",
+  questions: {
+    urgent: {
+      type: "noul",
+      instructions: "Is it urgent?",
+    },
+  },
+  multimodal_data: ["<base64-data>"],
+});
+```
+
+llama.cpp mode sends `POST /completion` with `n_probs`. A `/v1` base URL suffix is removed because `/completion` is a native server route. `multimodal_data` is accepted only in this mode; DeepSeek mode rejects it before sending a request. The model must have the matching multimodal projector loaded, and the prompt must contain the server media marker for every data entry.
+
+The default llama.cpp base URL is `http://127.0.0.1:8080/v1`.
 
 Set `promptTemplate` in `createJevSeek()` for a client-level override, or in `systemOne()` for one request. String templates support `{{state}}`, `{{question}}`, `{{questionType}}`, and `{{codes}}`; function templates receive the structured rendering context.
 
