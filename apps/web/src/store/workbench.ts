@@ -72,7 +72,7 @@ function readKeyStorageMode(): KeyStorageMode {
 
 function readPreferences(): StoredPreferences {
   const fallback = {
-    baseUrl: "https://api.deepseek.com",
+    baseUrl: "https://api.deepseek.com/beta",
     model: "deepseek-flash",
   };
   if (typeof window === "undefined") {

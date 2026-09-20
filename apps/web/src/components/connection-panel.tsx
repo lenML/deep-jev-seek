@@ -118,7 +118,7 @@ export function ConnectionPanel() {
             id="base-url"
             value={connection.baseUrl}
             onChange={(event) => setBaseUrl(event.target.value)}
-            placeholder="https://api.deepseek.com"
+            placeholder="https://api.deepseek.com/beta"
             inputMode="url"
             spellCheck={false}
           />
