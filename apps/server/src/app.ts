@@ -236,6 +236,8 @@ function statusForError(code: unknown, rawStatus: unknown): number {
       return 401;
     case "ABORT_ERROR":
       return 408;
+    case "TIMEOUT_ERROR":
+      return 504;
     case "RATE_LIMIT_ERROR":
       return 429;
     default:
@@ -278,7 +280,12 @@ async function handleSystemOne(
 
     const model = resolveModel(parsed.model, env);
     const client = clientFactory({ apiKey, model });
-    const input = { ...parsed, model } as Parameters<JevSeekClient["systemOne"]>[0];
+    const input = {
+      state: parsed.state,
+      questions: parsed.questions,
+      model,
+      ...(typeof parsed.debug === "boolean" ? { debug: parsed.debug } : {}),
+    } as Parameters<JevSeekClient["systemOne"]>[0];
     const result = await client.systemOne(input);
 
     return jsonResponse(result);

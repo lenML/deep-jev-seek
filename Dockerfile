@@ -4,7 +4,7 @@ FROM oven/bun:1-alpine AS build
 WORKDIR /app
 
 COPY . .
-RUN bunx pnpm@10.12.4 install --no-frozen-lockfile
+RUN bunx pnpm@10.12.4 install --frozen-lockfile
 RUN bunx pnpm@10.12.4 --filter @lenml/jevseek build
 RUN bunx pnpm@10.12.4 --filter @lenml/jevseek-server build
 
