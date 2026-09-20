@@ -1,0 +1,12 @@
+.git
+.github
+.fetch-cache
+.env
+.env.*
+node_modules
+**/node_modules
+**/dist
+**/coverage
+**/.vite
+docs
+*.log
