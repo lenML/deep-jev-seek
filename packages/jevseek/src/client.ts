@@ -1,9 +1,18 @@
 import { encodeAnswer } from "./answers";
 import { getQuestionCodes } from "./codes";
 import { mapWithConcurrency } from "./concurrency";
-import { createDeepSeekFimTransport, type DeepSeekFimTransportOptions } from "./deepseek";
+import { createTransport } from "./client-transport";
 import { JevSeekAbortError, JevSeekTimeoutError, JevSeekValidationError } from "./errors";
-import { createLLamaCppFimTransport, type LLamaCppFimTransportOptions } from "./llamacpp";
+import {
+  DEFAULT_CONCURRENCY,
+  DEFAULT_LLAMACPP_MODEL,
+  DEFAULT_MODEL,
+  DEFAULT_TIMEOUT_MS,
+  validateMultimodalData,
+  validatePositiveInteger,
+  validateProvider,
+  validateTimeout,
+} from "./client-validation";
 import { normalizeCandidateLogprobs } from "./logprobs";
 import { buildPrompt, DEFAULT_PROMPT_TEMPLATE } from "./prompt";
 import { resolveRetryOptions, withRetry } from "./retry";
@@ -25,57 +34,12 @@ import type {
 } from "./types";
 import { validateQuestions, validateState } from "./validation";
 
-const DEFAULT_MODEL = "deepseek-flash";
-const DEFAULT_LLAMACPP_MODEL = "llamacpp";
-const DEFAULT_CONCURRENCY = 4;
-const DEFAULT_TIMEOUT_MS = 90_000;
-
 interface CompletedQuestion {
   questionId: string;
   answer: JevAnswer;
   usage: DeepSeekUsage;
   model?: string;
   diagnostic: JevSeekQuestionDiagnostic;
-}
-
-function validatePositiveInteger(value: number, label: string): void {
-  if (!Number.isInteger(value) || value < 1) {
-    throw new JevSeekValidationError(`${label} must be a positive integer`);
-  }
-}
-
-function validateTimeout(value: number): void {
-  if (!Number.isFinite(value) || value <= 0) {
-    throw new JevSeekValidationError("timeoutMs must be a positive number");
-  }
-}
-
-function validateProvider(value: string | undefined): JevSeekProvider {
-  if (value === undefined || value === "deepseek") {
-    return "deepseek";
-  }
-  if (value === "llamacpp") {
-    return value;
-  }
-  throw new JevSeekValidationError('provider must be "deepseek" or "llamacpp"');
-}
-
-function validateMultimodalData(
-  value: unknown,
-  provider: JevSeekProvider,
-): asserts value is string[] | undefined {
-  if (value === undefined) {
-    return;
-  }
-  if (provider !== "llamacpp") {
-    throw new JevSeekValidationError("multimodal_data is only supported when provider is llamacpp");
-  }
-  if (!Array.isArray(value) || value.length === 0) {
-    throw new JevSeekValidationError("multimodal_data must be a non-empty array");
-  }
-  if (value.some((item) => typeof item !== "string" || item.trim() === "")) {
-    throw new JevSeekValidationError("multimodal_data entries must be non-empty strings");
-  }
 }
 
 export class JevSeekClient {
@@ -113,25 +77,7 @@ export class JevSeekClient {
     this.providerOptions = options.providerOptions as Record<string, unknown> | undefined;
     this.promptTemplate = options.promptTemplate ?? DEFAULT_PROMPT_TEMPLATE;
 
-    if (options.transport !== undefined) {
-      this.transport = options.transport;
-    } else if (provider === "llamacpp") {
-      const transportOptions: LLamaCppFimTransportOptions = {
-        apiKey: options.apiKey,
-        baseUrl: options.baseUrl,
-        fetch: options.fetch,
-        headers: options.headers,
-      };
-      this.transport = createLLamaCppFimTransport(transportOptions);
-    } else {
-      const transportOptions: DeepSeekFimTransportOptions = {
-        apiKey: options.apiKey,
-        baseUrl: options.baseUrl,
-        fetch: options.fetch,
-        headers: options.headers,
-      };
-      this.transport = createDeepSeekFimTransport(transportOptions);
-    }
+    this.transport = createTransport(options, provider);
   }
 
   async systemOne(input: SystemOneRequest): Promise<JevSeekResponse> {
