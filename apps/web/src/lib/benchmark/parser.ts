@@ -93,7 +93,7 @@ function parseJsonLines(text: string): unknown[] | null {
   }
 }
 
-function parsePayload(text: string): unknown[] {
+export function parseDataRecords(text: string): unknown[] {
   const trimmed = text.replace(/^\uFEFF/u, "").trim();
   if (!trimmed) {
     return [];
@@ -119,7 +119,7 @@ function parsePayload(text: string): unknown[] {
 }
 
 export function parseBenchmarkDataset(text: string, source: BenchmarkSource): BenchmarkDataset {
-  const records = parsePayload(text);
+  const records = parseDataRecords(text);
   const rows = records.flatMap((record, index) => {
     const row = normalizeBenchmarkRecord(record, source, index);
     return row ? [row] : [];

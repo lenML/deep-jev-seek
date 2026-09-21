@@ -1,6 +1,7 @@
 import type { QuestionSet } from "@lenml/jevseek";
 import { useState } from "react";
 
+import { BatchPanel } from "@/components/batch-panel";
 import { BenchmarkPanel } from "@/components/benchmark-panel";
 import { ConnectionSettings } from "@/components/connection-settings";
 import { PlaygroundHeader, type Workspace } from "@/components/playground-header";
@@ -171,6 +172,8 @@ export function App() {
 
       {workspace === "benchmark" ? (
         <BenchmarkPanel />
+      ) : workspace === "batch" ? (
+        <BatchPanel />
       ) : (
         <main className="grid min-h-0 min-w-0 flex-1 grid-cols-1 lg:grid-cols-[390px_minmax(0,1fr)]">
           <PlaygroundInput

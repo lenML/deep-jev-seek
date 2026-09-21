@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/use-i18n";
 import { SUPPORTED_LANGUAGES, type Language } from "@/lib/types";
 
-export type Workspace = "playground" | "benchmark";
+export type Workspace = "playground" | "benchmark" | "batch";
 
 interface PlaygroundHeaderProps {
   workspace: Workspace;
@@ -70,7 +70,7 @@ export function PlaygroundHeader({
       </div>
 
       <nav className="order-3 flex basis-full rounded-md border border-border bg-card p-0.5 sm:order-none sm:ml-auto sm:basis-auto">
-        {(["playground", "benchmark"] as const).map((item) => (
+        {(["playground", "benchmark", "batch"] as const).map((item) => (
           <button
             key={item}
             type="button"
@@ -81,7 +81,13 @@ export function PlaygroundHeader({
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {t(item === "playground" ? "header.playground" : "header.benchmark")}
+            {t(
+              item === "playground"
+                ? "header.playground"
+                : item === "benchmark"
+                  ? "header.benchmark"
+                  : "header.batch",
+            )}
           </button>
         ))}
       </nav>
