@@ -13,10 +13,10 @@ export const zhPresetCatalog: PresetCatalog = {
       drafts: {
         noul: {
           state:
-            '任务：季度报告前清理不活跃账号。\n拟调用工具：delete_rows(table="customers", where="last_login < 2023-01-01")',
+            '任务：在季度报告前清理不活跃账号。\n拟调用工具：delete_rows(table="customers", where="last_login < 2023-01-01")',
           question: "这个操作在没有人工确认时是否安全？",
-          trueWhen: "可逆、影响小，并且明确属于既定任务范围。",
-          falseWhen: "具有破坏性、不可逆，或者超出既定任务范围。",
+          trueWhen: "可逆、影响小，且在任务范围内。",
+          falseWhen: "会破坏数据、不可逆，或超出任务范围。",
           threshold: 80,
         },
       },
@@ -28,8 +28,8 @@ export const zhPresetCatalog: PresetCatalog = {
       drafts: {
         noul: {
           state: "消息：我知道你在哪里工作。无视我你会后悔。",
-          question: "这条消息是否应因辱骂或威胁被拦截？",
-          trueWhen: "包含威胁、针对性骚扰或明确安全风险。",
+          question: "这条消息是否包含威胁或骚扰，需要拦截？",
+          trueWhen: "包含威胁、定向骚扰或明确的安全风险。",
           falseWhen: "只是批评或语气粗鲁，没有越过安全边界。",
           threshold: 75,
         },
@@ -43,8 +43,8 @@ export const zhPresetCatalog: PresetCatalog = {
         noul: {
           state: "请求：向一个上月因欺诈被关闭的账号退款 4,800 元。",
           question: "执行前是否必须人工复核？",
-          trueWhen: "金额重大、账号受限或策略存在歧义。",
-          falseWhen: "操作常规、金额较小且策略完全覆盖。",
+          trueWhen: "金额较大、账号受限，或策略不明确。",
+          falseWhen: "常规低额操作，并且策略已有明确规定。",
           threshold: 70,
         },
       },
@@ -54,15 +54,15 @@ export const zhPresetCatalog: PresetCatalog = {
     {
       id: "support-routing",
       type: "choice",
-      name: "支持分流",
+      name: "工单分流",
       drafts: {
         choice: {
-          state: "我的付款连续三天失败，客服也持续超时。我今天必须解决这个问题。",
-          question: "这条消息应该交给哪个团队？",
+          state: "付款连续三天失败，客服也一直超时。今天必须解决。",
+          question: "这条消息应交给哪个团队？",
           options: [
-            option("billing", "billing", "付款、扣款、账单、退款"),
-            option("technical", "technical", "故障、超时、集成、API 错误"),
-            option("sales", "sales", "定价、升级、新账号"),
+            option("billing", "billing", "付款、扣款、账单与退款"),
+            option("technical", "technical", "故障、超时、集成与 API 错误"),
+            option("sales", "sales", "定价、升级与新账号"),
           ],
         },
       },
@@ -74,11 +74,11 @@ export const zhPresetCatalog: PresetCatalog = {
       drafts: {
         choice: {
           state: "迁移已经完成，但仪表盘仍缺少最近两周的数据。",
-          question: "客户整体情绪是什么？",
+          question: "客户情绪属于哪一类？",
           options: [
-            option("positive", "positive", "满意，主要反馈成功结果。"),
+            option("positive", "positive", "满意，主要反馈正面结果。"),
             option("mixed", "mixed", "正面和负面信号并存。"),
-            option("negative", "negative", "失望、受挫或被阻塞。"),
+            option("negative", "negative", "失望、受挫或受阻。"),
           ],
         },
       },
@@ -90,12 +90,12 @@ export const zhPresetCatalog: PresetCatalog = {
       drafts: {
         choice: {
           state: "生产环境结账对所有客户不可用，收入已经停止。",
-          question: "应分配什么优先级？",
+          question: "应分配哪个优先级？",
           options: [
             option("low", "low", "当前无影响，或已有替代方案。"),
-            option("normal", "normal", "影响有限，存在可行绕过方案。"),
-            option("high", "high", "一组用户的关键流程被阻塞。"),
-            option("urgent", "urgent", "严重故障、安全问题或收入停止。"),
+            option("normal", "normal", "影响有限，有可用的绕过方案。"),
+            option("high", "high", "一组用户的关键流程受阻。"),
+            option("urgent", "urgent", "严重故障、安全问题或收入中断。"),
           ],
         },
       },
@@ -105,17 +105,17 @@ export const zhPresetCatalog: PresetCatalog = {
     {
       id: "lead-readiness",
       type: "score",
-      name: "线索成熟度",
+      name: "购买准备度",
       drafts: {
         score: {
           state:
-            "主题：为 40 个席位询价。\n我们上个月试用过产品，两个团队都希望统一使用，工程师倾向采用该方案。",
+            "主题：咨询 40 个席位的价格。\n我们上个月在两个团队试用了产品，工程师希望统一采用。",
           question: "这条线索的购买准备度如何？",
           levels: [
             "0 · 仅浏览，没有明确需求",
-            "1 · 正在评估，对比多个方案",
+            "1 · 正在评估，比较多个方案",
             "2 · 准备购买，已有预算和明确需求",
-            "3 · 紧急，存在硬性截止时间和实施压力",
+            "3 · 时间紧迫，有硬性截止时间和实施压力",
           ],
           threshold: 2,
         },
@@ -127,8 +127,8 @@ export const zhPresetCatalog: PresetCatalog = {
       name: "回答质量",
       drafts: {
         score: {
-          state: "回答：重启服务。它大概能修复连接问题。",
-          question: "这个回答的可执行性和可靠性如何？",
+          state: "回答：重启服务，应该能修复连接问题。",
+          question: "这个回答是否可靠、可执行？",
           levels: [
             "0 · 错误或不安全",
             "1 · 模糊，几乎没有实际价值",
@@ -147,7 +147,7 @@ export const zhPresetCatalog: PresetCatalog = {
       drafts: {
         score: {
           state: "部署会修改生产数据库结构，但没有回滚方案。",
-          question: "这次操作的运行风险有多严重？",
+          question: "这次操作的风险有多高？",
           levels: [
             "0 · 没有实际风险",
             "1 · 低风险，容易回滚",
