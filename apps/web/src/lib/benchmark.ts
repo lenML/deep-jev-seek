@@ -1,3 +1,4 @@
+export { downloadBenchmarkCsv, downloadBenchmarkJson } from "./benchmark/export";
 export { loadBenchmarkDataset, clearBenchmarkDatasetCache } from "./benchmark/loader";
 export { parseBenchmarkDataset } from "./benchmark/parser";
 export {

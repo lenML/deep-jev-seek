@@ -1,4 +1,4 @@
-import { LoaderCircle, Play, RotateCcw } from "lucide-react";
+import { Download, LoaderCircle, Play, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ interface BenchmarkControlsProps {
   hasResults: boolean;
   onClear: () => void;
   onCustomUrlChange: (value: string) => void;
+  onExportCsv: () => void;
+  onExportJson: () => void;
   onLoadCustom: () => void;
   onRun: () => void;
   onRunCountChange: (value: number) => void;
@@ -36,6 +38,8 @@ export function BenchmarkControls({
   hasResults,
   onClear,
   onCustomUrlChange,
+  onExportCsv,
+  onExportJson,
   onLoadCustom,
   onRun,
   onRunCountChange,
@@ -114,7 +118,27 @@ export function BenchmarkControls({
             ))}
           </select>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!hasResults}
+            onClick={onExportJson}
+          >
+            <Download className="size-3.5" />
+            {t("benchmark.exportJson")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!hasResults}
+            onClick={onExportCsv}
+          >
+            <Download className="size-3.5" />
+            {t("benchmark.exportCsv")}
+          </Button>
           <Button
             type="button"
             variant="ghost"

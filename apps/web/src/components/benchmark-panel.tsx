@@ -4,12 +4,20 @@ import { useEffect, useState } from "react";
 import { BenchmarkControls } from "@/components/benchmark-controls";
 import { BenchmarkHeader } from "@/components/benchmark-header";
 import { BenchmarkQuestion } from "@/components/benchmark-question";
+import { BenchmarkResultsTable } from "@/components/benchmark-results-table";
+import {
+  BenchmarkViewControls,
+  type BenchmarkColumnCount,
+  type BenchmarkViewMode,
+} from "@/components/benchmark-view-controls";
 import { useI18n } from "@/i18n/use-i18n";
 import {
   BUILT_IN_BENCHMARKS,
   CUSTOM_BENCHMARK_ID,
   benchmarkQuestionKey,
   createCustomBenchmarkSource,
+  downloadBenchmarkCsv,
+  downloadBenchmarkJson,
   findBuiltInBenchmark,
   loadBenchmarkDataset,
   runBenchmarkRows,
@@ -30,6 +38,21 @@ function sourceForSelection(sourceId: string, customUrl: string): BenchmarkSourc
   return createCustomBenchmarkSource(customUrl);
 }
 
+function gridColumnClass(columnCount: BenchmarkColumnCount): string {
+  switch (columnCount) {
+    case 1:
+      return "grid-cols-1";
+    case 2:
+      return "grid-cols-1 md:grid-cols-2";
+    case 3:
+      return "grid-cols-1 md:grid-cols-2 xl:grid-cols-3";
+    case 4:
+      return "grid-cols-1 md:grid-cols-2 xl:grid-cols-4";
+    default:
+      return "grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3";
+  }
+}
+
 export function BenchmarkPanel() {
   const { t } = useI18n();
   const connection = useWorkbenchStore((state) => state.connection);
@@ -45,6 +68,8 @@ export function BenchmarkPanel() {
   const [isLoading, setLoading] = useState(true);
   const [isRunning, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<BenchmarkViewMode>("cards");
+  const [columnCount, setColumnCount] = useState<BenchmarkColumnCount>(0);
   const sourceName = sourceForSelection(selectedSourceId, customUrl)?.name ?? t("benchmark.custom");
 
   useEffect(() => {
@@ -131,6 +156,20 @@ export function BenchmarkPanel() {
     setLastRunLatencyMs(null);
   }
 
+  function handleExport(format: "csv" | "json") {
+    const input = {
+      modelName: connection.model,
+      results,
+      rows,
+      taskName: sourceName,
+    };
+    if (format === "csv") {
+      downloadBenchmarkCsv(input);
+    } else {
+      downloadBenchmarkJson(input);
+    }
+  }
+
   return (
     <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-background">
       <BenchmarkHeader
@@ -152,14 +191,23 @@ export function BenchmarkPanel() {
           hasResults={completed > 0}
           onClear={handleClear}
           onCustomUrlChange={setCustomUrlInput}
+          onExportCsv={() => handleExport("csv")}
+          onExportJson={() => handleExport("json")}
           onLoadCustom={handleLoadCustom}
           onRun={handleRun}
           onRunCountChange={setRunCount}
           onSourceChange={handleSourceChange}
         />
 
+        <BenchmarkViewControls
+          columnCount={columnCount}
+          viewMode={viewMode}
+          onColumnCountChange={setColumnCount}
+          onViewModeChange={setViewMode}
+        />
+
         {error ? (
-          <div className="border-destructive/30 bg-destructive/5 rounded-md border p-4 text-sm text-destructive">
+          <div className="rounded-md border border-destructive bg-card p-4 text-sm text-destructive">
             {error}
           </div>
         ) : null}
@@ -168,8 +216,10 @@ export function BenchmarkPanel() {
           <div className="flex min-h-64 items-center justify-center">
             <LoaderCircle className="size-6 animate-spin text-signal" />
           </div>
+        ) : viewMode === "table" ? (
+          <BenchmarkResultsTable results={results} rows={rows} />
         ) : (
-          <div className="grid min-w-0 grid-cols-1 items-start gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+          <div className={`grid min-w-0 items-start gap-3 ${gridColumnClass(columnCount)}`}>
             {rows.map((row, index) => (
               <BenchmarkQuestion
                 key={benchmarkQuestionKey(row)}

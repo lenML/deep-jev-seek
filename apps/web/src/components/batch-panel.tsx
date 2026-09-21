@@ -97,6 +97,22 @@ export function BatchPanel() {
     });
   }
 
+  function handleDeleteColumn(columnId: string) {
+    setBatch((current) => {
+      const index = current.columns.findIndex((column) => column.id === columnId);
+      if (index < 0) {
+        return current;
+      }
+      return {
+        columns: current.columns.filter((column) => column.id !== columnId),
+        rows: current.rows.map((row) => ({
+          ...clearScores(row),
+          cells: row.cells.filter((_, cellIndex) => cellIndex !== index),
+        })),
+      };
+    });
+  }
+
   function handleImport(value: string): string | null {
     try {
       setBatch(parseBatchText(value));
@@ -184,35 +200,25 @@ export function BatchPanel() {
         <section className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-sm font-medium">{t("batch.table")}</h3>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isRunning}
-                onClick={handleAddOption}
-              >
-                <Plus className="size-3.5" />
-                {t("batch.addOption")}
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                disabled={isRunning}
-                onClick={handleAddRow}
-              >
-                <Plus className="size-3.5" />
-                {t("batch.addRow")}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isRunning}
+              onClick={handleAddOption}
+            >
+              <Plus className="size-3.5" />
+              {t("batch.addOption")}
+            </Button>
           </div>
           <BatchTable
             columns={columns}
             rows={rows}
             runningIds={runningIds}
+            onAddRow={handleAddRow}
             onClearRow={handleClearRow}
             onColumnChange={handleColumnChange}
+            onDeleteColumn={handleDeleteColumn}
             onDeleteRow={handleDeleteRow}
             onPromptChange={handlePromptChange}
             onRunRow={(rowId) => {
