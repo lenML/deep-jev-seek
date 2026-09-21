@@ -31,6 +31,7 @@ export function BenchmarkPanel() {
   const [total, setTotal] = useState(0);
   const [runCount, setRunCount] = useState(5);
   const [results, setResults] = useState<Record<string, BenchmarkResult>>({});
+  const [lastRunLatencyMs, setLastRunLatencyMs] = useState<number | null>(null);
   const [isLoading, setLoading] = useState(true);
   const [isRunning, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,13 +75,22 @@ export function BenchmarkPanel() {
         state: { dataset: "TIGER-Lab/MMLU-Pro", split: "validation" },
         questions: buildBenchmarkQuestions(selectedRows),
       });
+      const diagnostics = output.result.diagnostics?.questions;
       const nextResults = Object.fromEntries(
         selectedRows.map((row) => {
           const key = benchmarkQuestionKey(row);
-          return [key, benchmarkResultFromAnswer(row, output.result.answers[key])];
+          return [
+            key,
+            benchmarkResultFromAnswer(
+              row,
+              output.result.answers[key],
+              diagnostics?.[key]?.durationMs,
+            ),
+          ];
         }),
       );
       setResults((current) => ({ ...current, ...nextResults }));
+      setLastRunLatencyMs(output.latencyMs);
     } catch (runError) {
       setError(errorMessage(runError));
     } finally {
@@ -89,10 +99,10 @@ export function BenchmarkPanel() {
   }
 
   return (
-    <main className="min-h-0 flex-1 overflow-y-auto bg-background">
+    <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-background">
       <div className="bg-card/40 border-b border-border">
-        <div className="mx-auto grid max-w-6xl gap-4 px-4 py-6 sm:grid-cols-[minmax(0,1fr)_repeat(3,9rem)]">
-          <div>
+        <div className="mx-auto grid max-w-[1600px] gap-4 px-4 py-6 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_repeat(4,9rem)]">
+          <div className="sm:col-span-2 lg:col-span-1">
             <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-signal">
               <Database className="size-3.5" />
               MMLU-Pro
@@ -122,10 +132,20 @@ export function BenchmarkPanel() {
               {accuracy === null ? "—" : `${accuracy.toFixed(1)}%`}
             </p>
           </div>
+          <div className="rounded-md border border-border bg-background p-3">
+            <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              {t("benchmark.lastRun")}
+            </p>
+            <p className="mt-2 font-mono text-xl">
+              {lastRunLatencyMs === null
+                ? "—"
+                : t("benchmark.questionDuration", { value: lastRunLatencyMs })}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl space-y-4 p-4 sm:p-6">
+      <div className="mx-auto max-w-[1600px] space-y-4 p-4 sm:p-6">
         <div className="flex flex-wrap items-end justify-between gap-4 rounded-lg border border-border bg-card p-4">
           <div className="space-y-2">
             <label htmlFor="benchmark-count" className="text-xs font-medium">
@@ -151,7 +171,10 @@ export function BenchmarkPanel() {
               variant="ghost"
               size="sm"
               disabled={isRunning || completed === 0}
-              onClick={() => setResults({})}
+              onClick={() => {
+                setResults({});
+                setLastRunLatencyMs(null);
+              }}
             >
               <RotateCcw className="size-3.5" />
               {t("benchmark.clear")}
@@ -184,7 +207,7 @@ export function BenchmarkPanel() {
             <LoaderCircle className="size-6 animate-spin text-signal" />
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid min-w-0 grid-cols-1 items-start gap-3 lg:grid-cols-2 2xl:grid-cols-3">
             {rows.map((row, index) => (
               <BenchmarkQuestion
                 key={benchmarkQuestionKey(row)}

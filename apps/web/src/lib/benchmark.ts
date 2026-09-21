@@ -23,6 +23,8 @@ export interface BenchmarkResult {
   expected: string;
   correct: boolean;
   confidence: number | null;
+  probabilities: Record<string, number>;
+  durationMs: number | null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -95,17 +97,31 @@ export function buildBenchmarkQuestions(rows: MMLUProRow[]): QuestionSet {
   );
 }
 
-export function benchmarkResultFromAnswer(row: MMLUProRow, answer: unknown): BenchmarkResult {
+export function benchmarkResultFromAnswer(
+  row: MMLUProRow,
+  answer: unknown,
+  durationMs?: number,
+): BenchmarkResult {
   const predicted =
     isRecord(answer) && answer.type === "choice" && typeof answer.choice === "string"
       ? answer.choice
       : null;
   const confidence =
     isRecord(answer) && typeof answer.confidence === "number" ? answer.confidence : null;
+  const probabilities: Record<string, number> = {};
+  if (isRecord(answer) && isRecord(answer.probabilities)) {
+    for (const [code, value] of Object.entries(answer.probabilities)) {
+      if (typeof value === "number" && Number.isFinite(value)) {
+        probabilities[code] = value;
+      }
+    }
+  }
   return {
     predicted,
     expected: row.answer,
     correct: predicted === row.answer,
     confidence,
+    probabilities,
+    durationMs: typeof durationMs === "number" ? durationMs : null,
   };
 }
