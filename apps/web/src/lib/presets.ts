@@ -2,6 +2,8 @@ import type { PlaygroundDrafts } from "@/lib/playground";
 import type { Language } from "@/lib/types";
 
 import { enPresetCatalog } from "./preset-catalog/en";
+import { jaPresetCatalog } from "./preset-catalog/ja";
+import { koPresetCatalog } from "./preset-catalog/ko";
 import { zhPresetCatalog } from "./preset-catalog/zh";
 import {
   DEFAULT_PRESET_IDS,
@@ -13,7 +15,16 @@ export { DEFAULT_PRESET_IDS };
 export type { PlaygroundPreset, PresetCatalog };
 
 export function createPresetCatalog(language: Language): PresetCatalog {
-  return language === "zh" ? zhPresetCatalog : enPresetCatalog;
+  switch (language) {
+    case "zh":
+      return zhPresetCatalog;
+    case "ja":
+      return jaPresetCatalog;
+    case "ko":
+      return koPresetCatalog;
+    case "en":
+      return enPresetCatalog;
+  }
 }
 
 export function findPreset(
