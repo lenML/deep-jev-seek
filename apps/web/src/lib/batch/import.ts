@@ -1,16 +1,21 @@
-import { parseDataRecords } from "@/lib/benchmark/parser";
 import { normalizeOptions } from "@/lib/benchmark/options";
+import { parseDataRecords } from "@/lib/benchmark/parser";
 
-import type { BatchOption, BatchRow } from "./types";
+import type { BatchCell, BatchColumn, BatchData, BatchRow } from "./types";
 
-export const DEFAULT_OPTION_COLUMNS = 5;
+export const DEFAULT_OPTION_LABELS = ["Negative", "Neutral", "Positive"] as const;
+const DEFAULT_PROMPTS = [
+  "I love this product. It works perfectly.",
+  "The package arrived today.",
+  "This is the worst support experience I have ever had.",
+];
 
 let batchSequence = 0;
 
-function nextBatchId() {
+function nextBatchId(prefix: string) {
   batchSequence += 1;
   const random = globalThis.crypto?.randomUUID?.();
-  return random ? `batch-${random}` : `batch-${Date.now()}-${batchSequence}`;
+  return random ? `${prefix}-${random}` : `${prefix}-${Date.now()}-${batchSequence}`;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -31,25 +36,44 @@ function stringify(value: unknown): string | null {
   }
 }
 
-function emptyOption(): BatchOption {
-  return { text: "", code: null, probability: null };
+function emptyCell(): BatchCell {
+  return { probability: null };
 }
 
-export function createEmptyBatchRow(columnCount = DEFAULT_OPTION_COLUMNS): BatchRow {
+export function createBatchColumn(text = ""): BatchColumn {
+  return { id: nextBatchId("batch-column"), text };
+}
+
+export function createDefaultBatchColumns(): BatchColumn[] {
+  return DEFAULT_OPTION_LABELS.map((label) => createBatchColumn(label));
+}
+
+export function createEmptyBatchRow(cellCount: number = DEFAULT_OPTION_LABELS.length): BatchRow {
   return {
-    id: nextBatchId(),
+    id: nextBatchId("batch-row"),
     prompt: "",
-    options: Array.from({ length: columnCount }, emptyOption),
+    cells: Array.from({ length: cellCount }, emptyCell),
     status: "idle",
     error: null,
     durationMs: null,
   };
 }
 
-export function resizeBatchRows(rows: BatchRow[], columnCount: number): BatchRow[] {
+export function createDefaultBatchRows(
+  columnCount: number = DEFAULT_OPTION_LABELS.length,
+): BatchRow[] {
+  return DEFAULT_PROMPTS.map((prompt) => ({ ...createEmptyBatchRow(columnCount), prompt }));
+}
+
+export function createInitialBatch(): BatchData {
+  const columns = createDefaultBatchColumns();
+  return { columns, rows: createDefaultBatchRows(columns.length) };
+}
+
+export function resizeBatchRows(rows: BatchRow[], cellCount: number): BatchRow[] {
   return rows.map((row) => ({
     ...row,
-    options: Array.from({ length: columnCount }, (_, index) => row.options[index] ?? emptyOption()),
+    cells: Array.from({ length: cellCount }, (_, index) => row.cells[index] ?? emptyCell()),
   }));
 }
 
@@ -74,6 +98,44 @@ function positionalOptions(record: Record<string, unknown>): string[] {
     .map((item) => item.value);
 }
 
+const IGNORED_OPTION_FIELDS = new Set([
+  "answer",
+  "answer_index",
+  "category",
+  "context",
+  "expected",
+  "family",
+  "group",
+  "id",
+  "input",
+  "instructions",
+  "key",
+  "label",
+  "prompt",
+  "provenance",
+  "question",
+  "question_id",
+  "source",
+  "src",
+  "state",
+  "subject",
+  "target",
+  "text",
+  "uid",
+]);
+
+function unlabeledOptionFields(record: Record<string, unknown>): string[] {
+  return Object.entries(record).flatMap(([key, value]) => {
+    if (IGNORED_OPTION_FIELDS.has(key.toLowerCase())) {
+      return [];
+    }
+    if (isRecord(value) || Array.isArray(value)) {
+      return [];
+    }
+    return [key];
+  });
+}
+
 function optionValues(record: Record<string, unknown>): string[] {
   const direct = normalizeOptions(record.options ?? record.choices ?? record.labels);
   if (direct) {
@@ -86,10 +148,11 @@ function optionValues(record: Record<string, unknown>): string[] {
     return nested.options;
   }
 
-  return positionalOptions(record);
+  const positional = positionalOptions(record);
+  return positional.length > 0 ? positional : unlabeledOptionFields(record);
 }
 
-export function parseBatchText(text: string): BatchRow[] {
+export function parseBatchText(text: string): BatchData {
   const records = parseDataRecords(text);
   const parsed = records.flatMap((record) => {
     if (typeof record === "string" && record.trim()) {
@@ -105,20 +168,22 @@ export function parseBatchText(text: string): BatchRow[] {
     throw new Error("No supported batch records found");
   }
 
-  const optionCount = Math.max(
-    DEFAULT_OPTION_COLUMNS,
-    ...parsed.map((item) => item.options.length),
-  );
-  return parsed.map((item) => ({
-    id: nextBatchId(),
-    prompt: item.prompt,
-    options: Array.from({ length: optionCount }, (_, index) => ({
-      text: item.options[index] ?? "",
-      code: null,
-      probability: null,
+  const importedOptionCount = Math.max(0, ...parsed.map((item) => item.options.length));
+  const columnCount = importedOptionCount || DEFAULT_OPTION_LABELS.length;
+  const columns = Array.from({ length: columnCount }, (_, index) => {
+    const imported = parsed.find((item) => item.options[index]?.trim());
+    return createBatchColumn(imported?.options[index] ?? `Option ${index + 1}`);
+  });
+
+  return {
+    columns,
+    rows: parsed.map((item) => ({
+      id: nextBatchId("batch-row"),
+      prompt: item.prompt,
+      cells: Array.from({ length: columnCount }, emptyCell),
+      status: "idle",
+      error: null,
+      durationMs: null,
     })),
-    status: "idle",
-    error: null,
-    durationMs: null,
-  }));
+  };
 }

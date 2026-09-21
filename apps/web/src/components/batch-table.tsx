@@ -1,17 +1,16 @@
 import { Eraser, LoaderCircle, RefreshCw, Trash2 } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n/use-i18n";
-import type { BatchRow } from "@/lib/batch";
+import type { BatchColumn, BatchRow } from "@/lib/batch";
 
 interface BatchTableProps {
+  columns: BatchColumn[];
   rows: BatchRow[];
-  columnCount: number;
   runningIds: Set<string>;
   onClearRow: (rowId: string) => void;
+  onColumnChange: (columnId: string, value: string) => void;
   onDeleteRow: (rowId: string) => void;
-  onOptionChange: (rowId: string, optionIndex: number, value: string) => void;
   onPromptChange: (rowId: string, value: string) => void;
   onRunRow: (rowId: string) => void;
 }
@@ -21,13 +20,18 @@ function formatPercent(value: number): string {
   return `${(probability * 100).toFixed(probability >= 0.995 || probability <= 0.005 ? 0 : 1)}%`;
 }
 
+function highestProbability(row: BatchRow): number | null {
+  const values = row.cells.flatMap((cell) => (cell.probability === null ? [] : [cell.probability]));
+  return values.length > 0 ? Math.max(...values) : null;
+}
+
 export function BatchTable({
+  columns,
   rows,
-  columnCount,
   runningIds,
   onClearRow,
+  onColumnChange,
   onDeleteRow,
-  onOptionChange,
   onPromptChange,
   onRunRow,
 }: BatchTableProps) {
@@ -35,68 +39,80 @@ export function BatchTable({
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-card">
-      <table className="w-full min-w-[1100px] border-separate border-spacing-0">
+      <table className="w-full min-w-[960px] table-fixed border-separate border-spacing-0">
         <thead className="sticky top-0 z-10 bg-card">
           <tr>
-            <th className="w-[30rem] border-b border-border px-3 py-3 text-left text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              {t("batch.prompt")}
+            <th className="w-[24rem] border-b border-border p-0 text-left text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              <div className="flex min-h-16 items-center px-3 py-3">{t("batch.prompt")}</div>
             </th>
-            {Array.from({ length: columnCount }, (_, index) => (
-              <th
-                key={index}
-                className="w-64 border-b border-l border-border px-3 py-3 text-left text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
-              >
-                {t("batch.option", { value: index + 1 })}
+            {columns.map((column, index) => (
+              <th key={column.id} className="w-52 border-b border-l border-border p-0">
+                <Textarea
+                  value={column.text}
+                  onChange={(event) => onColumnChange(column.id, event.target.value)}
+                  aria-label={t("batch.option", { value: index + 1 })}
+                  placeholder={t("batch.optionPlaceholder", { value: index + 1 })}
+                  className="min-h-16 resize-none rounded-none border-0 bg-card px-3 py-3 text-center text-xs font-medium leading-5 shadow-none"
+                />
               </th>
             ))}
-            <th className="w-28 border-b border-l border-border px-3 py-3 text-left text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              {t("batch.actions")}
+            <th className="w-32 border-b border-l border-border p-0 text-left text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+              <div className="flex min-h-16 items-center px-3 py-3">{t("batch.actions")}</div>
             </th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row) => {
             const running = runningIds.has(row.id);
+            const highest = highestProbability(row);
             return (
               <tr key={row.id} className="align-top">
-                <td className="border-b border-border p-3">
+                <td className="border-b border-border p-0">
                   <Textarea
                     value={row.prompt}
                     disabled={running}
                     onChange={(event) => onPromptChange(row.id, event.target.value)}
                     aria-label={t("batch.prompt")}
                     placeholder={t("batch.promptPlaceholder")}
-                    className="min-h-24 resize-y bg-background text-xs leading-5"
+                    className="min-h-28 resize-none rounded-none border-0 bg-transparent px-3 py-3 text-xs leading-5 shadow-none"
                   />
                   {row.error ? (
-                    <p className="mt-2 text-[11px] leading-4 text-destructive">{row.error}</p>
+                    <p className="border-t border-destructive px-3 py-2 text-[11px] leading-4 text-destructive">
+                      {row.error}
+                    </p>
                   ) : null}
                 </td>
-                {row.options.map((option, optionIndex) => {
-                  const probability = option.probability;
+                {columns.map((column, columnIndex) => {
+                  const probability = row.cells[columnIndex]?.probability ?? null;
                   const width =
                     probability === null ? 0 : Math.min(100, Math.max(0, probability * 100));
+                  const isHighest = probability !== null && probability === highest;
                   return (
-                    <td key={optionIndex} className="border-b border-l border-border p-3">
-                      <Input
-                        value={option.text}
-                        disabled={running}
-                        onChange={(event) =>
-                          onOptionChange(row.id, optionIndex, event.target.value)
-                        }
-                        aria-label={t("batch.option", { value: optionIndex + 1 })}
-                        placeholder={t("batch.optionPlaceholder", { value: optionIndex + 1 })}
-                        className="h-9 bg-background text-xs"
-                      />
-                      <div className="mt-3 flex items-center gap-2">
-                        <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-secondary">
-                          <div
-                            aria-hidden="true"
-                            className="h-full rounded-full bg-signal transition-[width] duration-500"
-                            style={{ width: `${width}%` }}
-                          />
-                        </div>
-                        <span className="w-14 shrink-0 text-right font-mono text-[11px] text-muted-foreground">
+                    <td key={column.id} className="border-b border-l border-border p-0">
+                      <div
+                        className={`relative flex min-h-28 items-center justify-center overflow-hidden ${
+                          isHighest ? "ring-2 ring-inset ring-signal" : ""
+                        }`}
+                        role="progressbar"
+                        aria-label={`${column.text || t("batch.option", { value: columnIndex + 1 })}: ${
+                          probability === null ? "—" : formatPercent(probability)
+                        }`}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={Math.round(width)}
+                      >
+                        <div
+                          aria-hidden="true"
+                          className={`absolute inset-y-0 left-0 transition-[width] duration-500 ${
+                            isHighest ? "bg-signal" : "bg-signal opacity-30"
+                          }`}
+                          style={{ width: `${width}%` }}
+                        />
+                        <span
+                          className={`relative font-mono text-xs ${
+                            isHighest ? "font-semibold text-signal-foreground" : "text-foreground"
+                          }`}
+                        >
                           {probability === null ? "—" : formatPercent(probability)}
                         </span>
                       </div>
@@ -104,7 +120,7 @@ export function BatchTable({
                   );
                 })}
                 <td className="border-b border-l border-border p-3">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center justify-center gap-1">
                     <button
                       type="button"
                       disabled={running}
@@ -141,7 +157,7 @@ export function BatchTable({
                     </button>
                   </div>
                   {row.durationMs === null ? null : (
-                    <p className="mt-2 font-mono text-[10px] text-signal">
+                    <p className="mt-2 text-center font-mono text-[10px] text-signal">
                       {t("benchmark.questionDuration", { value: row.durationMs })}
                     </p>
                   )}

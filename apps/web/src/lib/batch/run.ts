@@ -2,7 +2,7 @@ import { indexToChoiceCode, mapWithConcurrency, type ChoiceQuestion } from "@len
 
 import { runJevSeek } from "@/lib/run";
 
-import type { BatchOption, BatchRow, BatchRunUpdate } from "./types";
+import type { BatchColumn, BatchRow, BatchRunUpdate } from "./types";
 
 const BATCH_CONCURRENCY = 4;
 
@@ -16,22 +16,23 @@ function buildInstructions(commonPrefix: string, prompt: string): string {
   return prefix ? `${prefix}\n\n${body}` : body;
 }
 
-function activeOptions(options: BatchOption[]) {
-  return options.flatMap((option, index) =>
-    option.text.trim() ? [{ option, index, code: indexToChoiceCode(index) }] : [],
+function activeColumns(columns: BatchColumn[]) {
+  return columns.flatMap((column, index) =>
+    column.text.trim() ? [{ column, index, code: indexToChoiceCode(index) }] : [],
   );
 }
 
 async function runRow(input: {
   connection: Parameters<typeof runJevSeek>[0]["connection"];
+  columns: BatchColumn[];
   commonPrefix: string;
   row: BatchRow;
 }): Promise<BatchRunUpdate> {
-  const active = activeOptions(input.row.options);
+  const active = activeColumns(input.columns);
   if (!input.row.prompt.trim() || active.length === 0) {
     return {
       status: "error",
-      options: input.row.options.map((option) => ({ ...option, probability: null })),
+      cells: input.columns.map(() => ({ probability: null })),
       error: "Prompt and at least one option are required.",
       durationMs: null,
     };
@@ -40,7 +41,7 @@ async function runRow(input: {
   const question: ChoiceQuestion = {
     type: "choice",
     instructions: buildInstructions(input.commonPrefix, input.row.prompt),
-    criteria: Object.fromEntries(active.map(({ option, code }) => [code, option.text.trim()])),
+    criteria: Object.fromEntries(active.map(({ column, code }) => [code, column.text.trim()])),
   };
 
   try {
@@ -59,14 +60,9 @@ async function runRow(input: {
     );
     return {
       status: "done",
-      options: input.row.options.map((option, index) => {
-        const code = indexToChoiceCode(index);
-        return {
-          ...option,
-          code: option.text.trim() ? code : null,
-          probability: option.text.trim() ? (probabilities.get(code) ?? 0) : null,
-        };
-      }),
+      cells: input.columns.map((column, index) => ({
+        probability: column.text.trim() ? (probabilities.get(indexToChoiceCode(index)) ?? 0) : null,
+      })),
       error: null,
       durationMs:
         output.result.diagnostics?.questions[input.row.id]?.durationMs ?? output.latencyMs,
@@ -74,7 +70,7 @@ async function runRow(input: {
   } catch (error) {
     return {
       status: "error",
-      options: input.row.options.map((option) => ({ ...option, probability: null })),
+      cells: input.columns.map(() => ({ probability: null })),
       error: errorMessage(error),
       durationMs: null,
     };
@@ -83,11 +79,17 @@ async function runRow(input: {
 
 export async function runBatchRows(input: {
   connection: Parameters<typeof runJevSeek>[0]["connection"];
+  columns: BatchColumn[];
   commonPrefix: string;
   rows: BatchRow[];
 }): Promise<Record<string, BatchRunUpdate>> {
   const updates = await mapWithConcurrency(input.rows, BATCH_CONCURRENCY, (row) =>
-    runRow({ connection: input.connection, commonPrefix: input.commonPrefix, row }),
+    runRow({
+      columns: input.columns,
+      connection: input.connection,
+      commonPrefix: input.commonPrefix,
+      row,
+    }),
   );
   return Object.fromEntries(input.rows.map((row, index) => [row.id, updates[index]!]));
 }

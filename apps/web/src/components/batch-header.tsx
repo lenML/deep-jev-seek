@@ -1,4 +1,4 @@
-import { Eraser, Layers3, LoaderCircle, Play } from "lucide-react";
+import { Eraser, FileUp, Layers3, LoaderCircle, Play } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/use-i18n";
@@ -8,6 +8,7 @@ interface BatchHeaderProps {
   canRun: boolean;
   isRunning: boolean;
   onClearAll: () => void;
+  onImport: () => void;
   onRunAll: () => void;
 }
 
@@ -16,6 +17,7 @@ export function BatchHeader({
   canRun,
   isRunning,
   onClearAll,
+  onImport,
   onRunAll,
 }: BatchHeaderProps) {
   const { t } = useI18n();
@@ -33,7 +35,11 @@ export function BatchHeader({
             {t("batch.description")}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" disabled={isRunning} onClick={onImport}>
+            <FileUp className="size-3.5" />
+            {t("batch.importTitle")}
+          </Button>
           <Button
             type="button"
             variant="ghost"
@@ -49,7 +55,7 @@ export function BatchHeader({
             size="sm"
             disabled={isRunning || !canRun}
             onClick={onRunAll}
-            className="hover:bg-signal/90 border-signal bg-signal px-4 text-signal-foreground"
+            className="border-signal bg-signal px-4 text-signal-foreground hover:opacity-90"
           >
             {isRunning ? (
               <LoaderCircle className="size-3.5 animate-spin" />
