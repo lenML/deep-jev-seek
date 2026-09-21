@@ -31,8 +31,8 @@ export function BenchmarkQuestion({ index, result, row }: BenchmarkQuestionProps
           <span
             className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium ${
               result.correct
-                ? "border-signal/40 bg-signal/10 text-signal"
-                : "border-destructive/40 bg-destructive/10 text-destructive"
+                ? "border-signal bg-signal text-signal-foreground"
+                : "border-destructive bg-destructive text-destructive-foreground"
             }`}
           >
             {result.correct ? <CheckCircle2 className="size-3" /> : <CircleX className="size-3" />}
@@ -71,11 +71,11 @@ export function BenchmarkQuestion({ index, result, row }: BenchmarkQuestionProps
           const width =
             probability === undefined ? 0 : Math.min(100, Math.max(0, probability * 100));
           const borderClass = isCorrectPick
-            ? "border-signal ring-1 ring-inset ring-signal/40"
+            ? "border-2 border-signal"
             : isPredicted
-              ? "border-destructive/70"
+              ? "border-destructive"
               : isExpected && result
-                ? "border-signal/55"
+                ? "border-signal"
                 : "border-border";
           const indicatorClass = isCorrectPick
             ? "text-signal"
@@ -85,12 +85,12 @@ export function BenchmarkQuestion({ index, result, row }: BenchmarkQuestionProps
                 ? "text-signal"
                 : "text-muted-foreground";
           const fillClass = isCorrectPick
-            ? "bg-signal/35"
+            ? "bg-signal opacity-80"
             : isPredicted
-              ? "bg-destructive/20"
+              ? "bg-destructive opacity-75"
               : isExpected && result
-                ? "bg-signal/20"
-                : "bg-foreground/10";
+                ? "bg-signal opacity-65"
+                : "bg-signal opacity-45";
 
           return (
             <div
