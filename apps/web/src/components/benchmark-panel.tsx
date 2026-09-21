@@ -8,7 +8,7 @@ import {
   benchmarkQuestionKey,
   benchmarkResultFromAnswer,
   buildBenchmarkQuestions,
-  loadMMLUProRows,
+  loadCachedMMLUProRows,
   type BenchmarkResult,
   type MMLUProRow,
 } from "@/lib/benchmark";
@@ -37,24 +37,29 @@ export function BenchmarkPanel() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const controller = new AbortController();
-    loadMMLUProRows(fetch, controller.signal)
+    let active = true;
+    loadCachedMMLUProRows(fetch)
       .then((dataset) => {
+        if (!active) {
+          return;
+        }
         setRows(dataset.rows);
         setTotal(dataset.total);
         setRunCount(Math.min(5, dataset.rows.length));
       })
       .catch((loadError: unknown) => {
-        if (!controller.signal.aborted) {
+        if (active) {
           setError(errorMessage(loadError));
         }
       })
       .finally(() => {
-        if (!controller.signal.aborted) {
+        if (active) {
           setLoading(false);
         }
       });
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const completed = Object.values(results).length;

@@ -18,6 +18,9 @@ export interface MMLUProDataset {
   total: number;
 }
 
+let mmluProDatasetCache: MMLUProDataset | null = null;
+let mmluProDatasetRequest: Promise<MMLUProDataset> | null = null;
+
 export interface BenchmarkResult {
   predicted: string | null;
   expected: string;
@@ -75,6 +78,26 @@ export async function loadMMLUProRows(
     rows,
     total: typeof payload.num_rows_total === "number" ? payload.num_rows_total : rows.length,
   };
+}
+
+export function loadCachedMMLUProRows(fetchImpl: typeof fetch = fetch): Promise<MMLUProDataset> {
+  if (mmluProDatasetCache) {
+    return Promise.resolve(mmluProDatasetCache);
+  }
+
+  if (!mmluProDatasetRequest) {
+    mmluProDatasetRequest = loadMMLUProRows(fetchImpl)
+      .then((dataset) => {
+        mmluProDatasetCache = dataset;
+        return dataset;
+      })
+      .catch((error: unknown) => {
+        mmluProDatasetRequest = null;
+        throw error;
+      });
+  }
+
+  return mmluProDatasetRequest;
 }
 
 export function benchmarkQuestionKey(row: MMLUProRow): string {
