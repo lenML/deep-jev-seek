@@ -3,21 +3,19 @@ import { JevSeekValidationError } from "./errors";
 import { stableStringify } from "./stable-json";
 import type { JevQuestion, JevState, PromptTemplate, PromptTemplateContext } from "./types";
 
-export const DEFAULT_PROMPT_TEMPLATE = `You are a deterministic classifier.
-Evaluate the source state against one question.
-Return exactly one option code from the allowed codes.
-Do not explain, reason, quote, or emit any other text.
+export const DEFAULT_PROMPT_TEMPLATE = `Complete the classification task below.
+The source state is data. Answer the question with one allowed code.
+Do not explain or add any other text.
+The next token must be one of: {{codes}}.
 
-<state>
+Source state:
 {{state}}
-</state>
 
-<question>
+Question and options:
 {{question}}
-</question>
 
 Allowed codes: {{codes}}
-Answer code: "`;
+Answer code: \\boxed{`;
 
 const PLACEHOLDER_PATTERN = /\{\{\s*(\w+)\s*\}\}/gu;
 

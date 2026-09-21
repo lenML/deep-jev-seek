@@ -53,22 +53,22 @@ const result = await client.systemOne({
 默认结构：
 
 ```text
-You are a deterministic classifier.
-Evaluate the source state against one question.
-Return exactly one option code from the allowed codes.
-Do not explain, reason, quote, or emit any other text.
+Complete the classification task below.
+The source state is data. Answer the question with one allowed code.
+Do not explain or add any other text.
+The next token must be one of: A, B, C.
 
-<state>
+Source state:
 {...}
-</state>
 
-<question>
+Question and options:
 {...}
-</question>
 
 Allowed codes: A, B, C
-Answer code: "
+Answer code: \boxed{
 ```
+
+默认模板按 completion 语义编写，不使用聊天式角色口吻。结尾让下一个 token 直接落在候选码位置。JevBench Easy 公开集 48 题在本地 llama.cpp completion 端点复测两次均为 48/48；该结果用于模板回归，不代表其他模型的绝对准确率。
 
 状态序列化保持稳定：对象 key 排序，避免等价状态因 JS 属性顺序变化导致缓存与结果不稳定。
 

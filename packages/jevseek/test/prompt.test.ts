@@ -22,6 +22,17 @@ describe("stableStringify", () => {
 });
 
 describe("buildPrompt", () => {
+  it("uses a completion-style default ending with a boxed answer", () => {
+    const prompt = buildPrompt("state", {
+      type: "noul",
+      instructions: "Is it true?",
+    });
+
+    expect(prompt.startsWith("Complete the classification task below.")).toBe(true);
+    expect(prompt.endsWith("Answer code: \\boxed{")).toBe(true);
+    expect(prompt).not.toContain("You are");
+  });
+
   it("keeps state stable and maps choice criteria to codes", () => {
     const prompt = buildPrompt(
       { b: 2, a: 1 },
@@ -32,7 +43,7 @@ describe("buildPrompt", () => {
       },
     );
 
-    expect(prompt).toContain('<state>\n{"a":1,"b":2}\n</state>');
+    expect(prompt).toContain('Source state:\n{"a":1,"b":2}');
     expect(prompt).toContain('"A":{"description":"Second option","id":"second"}');
     expect(prompt).toContain('"B":{"description":"First option","id":"first"}');
     expect(prompt).toContain("Allowed codes: A, B");
@@ -45,7 +56,7 @@ describe("buildPrompt", () => {
       criteria: ["low", "middle", "high"],
     });
 
-    expect(prompt).toContain('<state>\n["one","two"]\n</state>');
+    expect(prompt).toContain('Source state:\n["one","two"]');
     expect(prompt).toContain(
       '"criteria":[{"code":"0","description":"low"},{"code":"1","description":"middle"},{"code":"2","description":"high"}]',
     );
