@@ -24,6 +24,8 @@ export const en = {
   "batch.importHint":
     "Paste or upload CSV, TSV, JSONL, or a JSON array. Import replaces the table.",
   "batch.chooseFile": "Choose file",
+  "batch.fileTooLarge": "File exceeds 10 MB.",
+  "batch.fileType": "Unsupported file type.",
   "batch.import": "Import",
   "batch.importOverwriteTitle": "Replace current batch?",
   "batch.importOverwriteHint": "Current rows and option headers will be replaced.",
@@ -133,6 +135,8 @@ export const en = {
   "multimodal.empty": "No images uploaded.",
   "multimodal.base64": "Base64 JSON",
   "multimodal.uploadError": "Select valid image files.",
+  "multimodal.fileTooLarge": "Each image must be 10 MB or smaller.",
+  "multimodal.tooManyFiles": "Upload up to 8 images at a time.",
   "noul.trueWhen": "True when",
   "noul.falseWhen": "False when",
   "noul.threshold": "Threshold",

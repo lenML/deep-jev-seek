@@ -26,6 +26,8 @@ export const ja: Record<keyof typeof enMessages, string> = {
   "batch.importHint":
     "CSV、TSV、JSONL、JSON 配列を貼り付けるかアップロードします。インポートすると現在の表を置き換えます。",
   "batch.chooseFile": "ファイルを選択",
+  "batch.fileTooLarge": "ファイルが 10 MB を超えています。",
+  "batch.fileType": "対応していないファイル形式です。",
   "batch.import": "インポート",
   "batch.importOverwriteTitle": "現在のバッチを置き換えますか？",
   "batch.importOverwriteHint": "現在の行と選択肢ヘッダーは置き換えられます。",
@@ -133,6 +135,8 @@ export const ja: Record<keyof typeof enMessages, string> = {
   "multimodal.empty": "画像はまだありません。",
   "multimodal.base64": "Base64 JSON",
   "multimodal.uploadError": "有効な画像ファイルを選択してください。",
+  "multimodal.fileTooLarge": "画像 1 枚の上限は 10 MB です。",
+  "multimodal.tooManyFiles": "一度にアップロードできる画像は 8 枚までです。",
   "noul.trueWhen": "成立条件",
   "noul.falseWhen": "不成立条件",
   "noul.threshold": "しきい値",

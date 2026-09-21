@@ -1,5 +1,6 @@
 import { FileUp, LoaderCircle, Upload, X } from "lucide-react";
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +13,8 @@ interface BatchImportDialogProps {
   onImport: (value: string) => string | null;
 }
 
+const MAX_IMPORT_BYTES = 10 * 1024 * 1024;
+
 export function BatchImportDialog({
   disabled,
   hasExistingData,
@@ -22,6 +25,31 @@ export function BatchImportDialog({
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const { getInputProps, getRootProps, isDragActive } = useDropzone({
+    accept: {
+      "application/json": [".json"],
+      "application/x-ndjson": [".jsonl"],
+      "text/csv": [".csv"],
+      "text/plain": [".jsonl", ".txt"],
+      "text/tab-separated-values": [".tsv"],
+    },
+    disabled,
+    maxFiles: 1,
+    maxSize: MAX_IMPORT_BYTES,
+    multiple: false,
+    onDropAccepted: ([file]) => {
+      if (file) {
+        void handleFile(file);
+      }
+    },
+    onDropRejected: ([rejection]) => {
+      setError(
+        rejection?.errors[0]?.code === "file-too-large"
+          ? t("batch.fileTooLarge")
+          : t("batch.fileType"),
+      );
+    },
+  });
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -65,13 +93,9 @@ export function BatchImportDialog({
     submit();
   }
 
-  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (file) {
-      setValue(await file.text());
-      setError(null);
-    }
-    event.target.value = "";
+  async function handleFile(file: File) {
+    setValue(await file.text());
+    setError(null);
   }
 
   return (
@@ -125,21 +149,17 @@ export function BatchImportDialog({
         ) : (
           <>
             <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
-              <label
-                className={`inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-border px-3 text-xs font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground ${
-                  disabled ? "pointer-events-none opacity-50" : ""
-                }`}
+              <div
+                {...getRootProps({
+                  className: `flex h-11 w-full cursor-pointer items-center gap-2 rounded-md border border-dashed border-border px-3 text-xs font-semibold text-muted-foreground transition-colors hover:border-signal/60 hover:bg-signal/5 hover:text-foreground ${
+                    isDragActive ? "border-signal bg-signal/5 text-foreground" : ""
+                  } ${disabled ? "pointer-events-none opacity-50" : ""}`,
+                })}
               >
+                <input {...getInputProps({ "aria-label": t("batch.chooseFile") })} />
                 <Upload className="size-3.5" />
                 {t("batch.chooseFile")}
-                <input
-                  type="file"
-                  accept=".csv,.tsv,.json,.jsonl,.txt,text/csv,application/json"
-                  disabled={disabled}
-                  onChange={(event) => void handleFile(event)}
-                  className="sr-only"
-                />
-              </label>
+              </div>
               <Textarea
                 value={value}
                 disabled={disabled}

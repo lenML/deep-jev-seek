@@ -26,6 +26,8 @@ export const ko: Record<keyof typeof enMessages, string> = {
   "batch.importHint":
     "CSV, TSV, JSONL, JSON 배열을 붙여넣거나 업로드합니다. 가져오면 현재 표가 교체됩니다.",
   "batch.chooseFile": "파일 선택",
+  "batch.fileTooLarge": "파일이 10 MB를 초과합니다.",
+  "batch.fileType": "지원하지 않는 파일 형식입니다.",
   "batch.import": "가져오기",
   "batch.importOverwriteTitle": "현재 배치를 교체할까요?",
   "batch.importOverwriteHint": "현재 행과 선택지 헤더가 교체됩니다.",
@@ -133,6 +135,8 @@ export const ko: Record<keyof typeof enMessages, string> = {
   "multimodal.empty": "업로드한 이미지가 없습니다.",
   "multimodal.base64": "Base64 JSON",
   "multimodal.uploadError": "유효한 이미지 파일을 선택하세요.",
+  "multimodal.fileTooLarge": "이미지 한 장은 10 MB 이하여야 합니다.",
+  "multimodal.tooManyFiles": "한 번에 이미지 8장까지 업로드할 수 있습니다.",
   "noul.trueWhen": "성립 조건",
   "noul.falseWhen": "불성립 조건",
   "noul.threshold": "임계값",

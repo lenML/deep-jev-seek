@@ -20,6 +20,7 @@
     "papaparse": "^5.7.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-dropzone": "^20.1.2",
     "tailwind-merge": "^3.3.1",
     "zustand": "^5.0.8"
   },
