@@ -1,8 +1,9 @@
 import type { QuestionSet } from "@lenml/jevseek";
 import { useState } from "react";
 
+import { BenchmarkPanel } from "@/components/benchmark-panel";
 import { ConnectionSettings } from "@/components/connection-settings";
-import { PlaygroundHeader } from "@/components/playground-header";
+import { PlaygroundHeader, type Workspace } from "@/components/playground-header";
 import { PlaygroundInput, type InputMode } from "@/components/playground-input";
 import { PlaygroundPreview, type PreviewMode } from "@/components/playground-preview";
 import { useI18n } from "@/i18n/use-i18n";
@@ -47,6 +48,7 @@ export function App() {
   const [inputMode, setInputMode] = useState<InputMode>("form");
   const [previewMode, setPreviewMode] = useState<PreviewMode>("preview");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [workspace, setWorkspace] = useState<Workspace>("playground");
   const [drafts, setDrafts] = useState<PlaygroundDrafts>(() => createDrafts(language));
   const [multimodalDataText, setMultimodalDataText] = useState("");
 
@@ -134,45 +136,51 @@ export function App() {
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground lg:h-dvh">
       <PlaygroundHeader
+        workspace={workspace}
         settingsOpen={settingsOpen}
+        onWorkspaceChange={setWorkspace}
         onToggleSettings={() => setSettingsOpen((open) => !open)}
       />
       {settingsOpen ? <ConnectionSettings /> : null}
 
-      <main className="grid min-h-0 min-w-0 flex-1 grid-cols-1 lg:grid-cols-[390px_minmax(0,1fr)]">
-        <PlaygroundInput
-          activeType={activeType}
-          canRun={canRun}
-          drafts={drafts}
-          inputMode={inputMode}
-          isRunning={isRunning}
-          jsonStateError={jsonStateError}
-          jsonQuestionsError={jsonQuestionsError}
-          multimodalDataError={multimodalDataError}
-          multimodalDataText={multimodalDataText}
-          questionsText={questionsText}
-          showMultimodalData={connection.provider === "llamacpp"}
-          stateText={stateText}
-          onDraftsChange={setDrafts}
-          onInputModeChange={setInputMode}
-          onMultimodalDataTextChange={setMultimodalDataText}
-          onQuestionsTextChange={setQuestionsText}
-          onReset={handleReset}
-          onRun={handleRun}
-          onStateTextChange={setStateText}
-          onTypeChange={setActiveType}
-        />
-        <PlaygroundPreview
-          threshold={threshold}
-          result={result}
-          rawExchanges={rawExchanges}
-          error={error}
-          isRunning={isRunning}
-          mode={previewMode}
-          latencyMs={latencyMs}
-          onModeChange={setPreviewMode}
-        />
-      </main>
+      {workspace === "benchmark" ? (
+        <BenchmarkPanel />
+      ) : (
+        <main className="grid min-h-0 min-w-0 flex-1 grid-cols-1 lg:grid-cols-[390px_minmax(0,1fr)]">
+          <PlaygroundInput
+            activeType={activeType}
+            canRun={canRun}
+            drafts={drafts}
+            inputMode={inputMode}
+            isRunning={isRunning}
+            jsonStateError={jsonStateError}
+            jsonQuestionsError={jsonQuestionsError}
+            multimodalDataError={multimodalDataError}
+            multimodalDataText={multimodalDataText}
+            questionsText={questionsText}
+            showMultimodalData={connection.provider === "llamacpp"}
+            stateText={stateText}
+            onDraftsChange={setDrafts}
+            onInputModeChange={setInputMode}
+            onMultimodalDataTextChange={setMultimodalDataText}
+            onQuestionsTextChange={setQuestionsText}
+            onReset={handleReset}
+            onRun={handleRun}
+            onStateTextChange={setStateText}
+            onTypeChange={setActiveType}
+          />
+          <PlaygroundPreview
+            threshold={threshold}
+            result={result}
+            rawExchanges={rawExchanges}
+            error={error}
+            isRunning={isRunning}
+            mode={previewMode}
+            latencyMs={latencyMs}
+            onModeChange={setPreviewMode}
+          />{" "}
+        </main>
+      )}
     </div>
   );
 }

@@ -131,6 +131,8 @@ https://lenml.github.io/deep-jev-seek/
 
 浏览器可直接连接 DeepSeek 或 llama.cpp。DeepSeek API Key 默认保存在当前标签页的 `sessionStorage`；选择「This browser」后改用 `localStorage`。项目不代理、不托管 Key。
 
+Benchmark 模式加载 MMLU-Pro validation 题目，可运行前 N 题并对比标准答案与正确率。题目来自 [Hugging Face datasets-server](https://datasets-server.huggingface.co/rows?dataset=TIGER-Lab%2FMMLU-Pro&config=default&split=validation&offset=0&length=100)。
+
 本地开发：
 
 ```bash
