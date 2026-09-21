@@ -8,8 +8,15 @@ import { PlaygroundInput, type InputMode } from "@/components/playground-input";
 import { PlaygroundPreview, type PreviewMode } from "@/components/playground-preview";
 import { useI18n } from "@/i18n/use-i18n";
 import type { BuiltDecision, PlaygroundDrafts, QuestionType } from "@/lib/playground";
-import { buildDecision, createDrafts } from "@/lib/playground";
+import { buildDecision } from "@/lib/playground";
 import { parseMultimodalData } from "@/lib/multimodal";
+import {
+  applyPresetDrafts,
+  createInitialDrafts,
+  createPresetCatalog,
+  DEFAULT_PRESET_IDS,
+  findPreset,
+} from "@/lib/presets";
 import { runJevSeek } from "@/lib/run";
 import { useWorkbenchStore } from "@/store/workbench";
 
@@ -49,8 +56,13 @@ export function App() {
   const [previewMode, setPreviewMode] = useState<PreviewMode>("preview");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [workspace, setWorkspace] = useState<Workspace>("playground");
-  const [drafts, setDrafts] = useState<PlaygroundDrafts>(() => createDrafts(language));
+  const [presetIds, setPresetIds] = useState(() => ({ ...DEFAULT_PRESET_IDS }));
+  const [drafts, setDrafts] = useState<PlaygroundDrafts>(() =>
+    createInitialDrafts(createPresetCatalog(language)),
+  );
   const [multimodalDataText, setMultimodalDataText] = useState("");
+  const presetCatalog = createPresetCatalog(language);
+  const activePreset = findPreset(presetCatalog, activeType, presetIds[activeType]);
 
   const jsonStateError = jsonError(stateText);
   const jsonQuestionsError = jsonError(questionsText);
@@ -128,8 +140,22 @@ export function App() {
   }
 
   function handleReset() {
-    setDrafts(createDrafts(language));
+    setDrafts((current) => applyPresetDrafts(current, activePreset));
     resetExamples();
+    clearOutput();
+  }
+
+  function handleTypeChange(type: QuestionType) {
+    const preset = findPreset(presetCatalog, type, presetIds[type]);
+    setActiveType(type);
+    setDrafts((current) => applyPresetDrafts(current, preset));
+    clearOutput();
+  }
+
+  function handlePresetChange(presetId: string) {
+    const preset = findPreset(presetCatalog, activeType, presetId);
+    setPresetIds((current) => ({ ...current, [activeType]: presetId }));
+    setDrafts((current) => applyPresetDrafts(current, preset));
     clearOutput();
   }
 
@@ -148,6 +174,7 @@ export function App() {
       ) : (
         <main className="grid min-h-0 min-w-0 flex-1 grid-cols-1 lg:grid-cols-[390px_minmax(0,1fr)]">
           <PlaygroundInput
+            activePresetId={activePreset.id}
             activeType={activeType}
             canRun={canRun}
             drafts={drafts}
@@ -157,17 +184,19 @@ export function App() {
             jsonQuestionsError={jsonQuestionsError}
             multimodalDataError={multimodalDataError}
             multimodalDataText={multimodalDataText}
+            presets={presetCatalog[activeType]}
             questionsText={questionsText}
             showMultimodalData={connection.provider === "llamacpp"}
             stateText={stateText}
             onDraftsChange={setDrafts}
             onInputModeChange={setInputMode}
             onMultimodalDataTextChange={setMultimodalDataText}
+            onPresetChange={handlePresetChange}
             onQuestionsTextChange={setQuestionsText}
             onReset={handleReset}
             onRun={handleRun}
             onStateTextChange={setStateText}
-            onTypeChange={setActiveType}
+            onTypeChange={handleTypeChange}
           />
           <PlaygroundPreview
             threshold={threshold}

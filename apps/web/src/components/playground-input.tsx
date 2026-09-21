@@ -10,11 +10,13 @@ import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n/use-i18n";
 import type { MessageKey } from "@/i18n/messages";
 import type { PlaygroundDrafts, QuestionType } from "@/lib/playground";
+import type { PlaygroundPreset } from "@/lib/presets";
 
 export type InputMode = "form" | "json";
 
 interface PlaygroundInputProps {
   activeType: QuestionType;
+  activePresetId: string;
   canRun: boolean;
   drafts: PlaygroundDrafts;
   inputMode: InputMode;
@@ -23,12 +25,14 @@ interface PlaygroundInputProps {
   jsonQuestionsError: string | null;
   multimodalDataError: string | null;
   multimodalDataText: string;
+  presets: PlaygroundPreset[];
   questionsText: string;
   showMultimodalData: boolean;
   stateText: string;
   onDraftsChange: (drafts: PlaygroundDrafts) => void;
   onInputModeChange: (mode: InputMode) => void;
   onMultimodalDataTextChange: (value: string) => void;
+  onPresetChange: (presetId: string) => void;
   onQuestionsTextChange: (value: string) => void;
   onReset: () => void;
   onRun: () => void;
@@ -42,14 +46,15 @@ const descriptionKeys: Record<QuestionType, MessageKey> = {
   score: "description.score",
 };
 
-const presetKeys: Record<QuestionType, MessageKey> = {
-  noul: "case.noul",
-  choice: "case.choice",
-  score: "case.score",
+const categoryKeys: Record<QuestionType, MessageKey> = {
+  noul: "type.noul",
+  choice: "type.choice",
+  score: "type.score",
 };
 
 export function PlaygroundInput({
   activeType,
+  activePresetId,
   canRun,
   drafts,
   inputMode,
@@ -58,12 +63,14 @@ export function PlaygroundInput({
   jsonQuestionsError,
   multimodalDataError,
   multimodalDataText,
+  presets,
   questionsText,
   showMultimodalData,
   stateText,
   onDraftsChange,
   onInputModeChange,
   onMultimodalDataTextChange,
+  onPresetChange,
   onQuestionsTextChange,
   onReset,
   onRun,
@@ -119,20 +126,39 @@ export function PlaygroundInput({
 
       <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {inputMode === "form" ? (
-          <div className="mb-5 space-y-2">
-            <Label htmlFor="preset-template">{t("input.preset")}</Label>
-            <select
-              id="preset-template"
-              value={activeType}
-              onChange={(event) => onTypeChange(event.target.value as QuestionType)}
-              className="focus:ring-ring/20 h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus:border-ring focus:ring-2"
-            >
-              {(["noul", "choice", "score"] as const).map((type) => (
-                <option key={type} value={type}>
-                  {t(presetKeys[type])}
-                </option>
-              ))}
-            </select>
+          <div className="mb-5 space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="preset-category">{t("input.category")}</Label>
+                <select
+                  id="preset-category"
+                  value={activeType}
+                  onChange={(event) => onTypeChange(event.target.value as QuestionType)}
+                  className="focus:ring-ring/20 h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus:border-ring focus:ring-2"
+                >
+                  {(["noul", "choice", "score"] as const).map((type) => (
+                    <option key={type} value={type}>
+                      {t(categoryKeys[type])}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="preset-template">{t("input.template")}</Label>
+                <select
+                  id="preset-template"
+                  value={activePresetId}
+                  onChange={(event) => onPresetChange(event.target.value)}
+                  className="focus:ring-ring/20 h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus:border-ring focus:ring-2"
+                >
+                  {presets.map((preset) => (
+                    <option key={preset.id} value={preset.id}>
+                      {preset.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
             <p className="text-sm leading-5 text-muted-foreground">
               {t(descriptionKeys[activeType])}
             </p>
