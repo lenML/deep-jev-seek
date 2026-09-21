@@ -1,6 +1,8 @@
-import { Settings2, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Github, Languages, Package, Settings2, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { useI18n } from "@/i18n/use-i18n";
+import { SUPPORTED_LANGUAGES, type Language } from "@/lib/types";
 
 export type Workspace = "playground" | "benchmark";
 
@@ -11,6 +13,16 @@ interface PlaygroundHeaderProps {
   onToggleSettings: () => void;
 }
 
+const NPM_URL = "https://www.npmjs.com/package/@lenml/jevseek";
+const GITHUB_URL = "https://github.com/lenML/deep-jev-seek";
+
+const LANGUAGE_LABELS: Record<Language, { code: string; name: string }> = {
+  en: { code: "EN", name: "English" },
+  zh: { code: "ZH", name: "简体中文" },
+  ja: { code: "JA", name: "日本語" },
+  ko: { code: "KO", name: "한국어" },
+};
+
 export function PlaygroundHeader({
   workspace,
   settingsOpen,
@@ -18,6 +30,37 @@ export function PlaygroundHeader({
   onToggleSettings,
 }: PlaygroundHeaderProps) {
   const { language, setLanguage, t } = useI18n();
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const languageMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!languageMenuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!languageMenuRef.current?.contains(event.target as Node)) {
+        setLanguageMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setLanguageMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [languageMenuOpen]);
+
+  function selectLanguage(nextLanguage: Language) {
+    setLanguage(nextLanguage);
+    setLanguageMenuOpen(false);
+  }
 
   return (
     <header className="flex min-h-14 flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 sm:px-4">
@@ -43,27 +86,76 @@ export function PlaygroundHeader({
         ))}
       </nav>
 
-      <div className="ml-auto flex items-center gap-2">
-        <div
-          className="flex rounded-md border border-border bg-card p-0.5"
-          role="group"
-          aria-label={t("header.language")}
-        >
-          {(["en", "zh"] as const).map((locale) => (
-            <button
-              key={locale}
-              type="button"
-              onClick={() => setLanguage(locale)}
-              className={`rounded px-2 py-1 text-[10px] font-semibold uppercase ${
-                language === locale
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+      <div className="ml-auto flex items-center gap-1.5">
+        <div ref={languageMenuRef} className="relative">
+          <button
+            type="button"
+            aria-label={t("header.language")}
+            aria-haspopup="menu"
+            aria-expanded={languageMenuOpen}
+            aria-controls="language-menu"
+            onClick={() => setLanguageMenuOpen((open) => !open)}
+            className="flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-2 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Languages className="size-4" />
+            <span className="hidden font-mono text-[10px] font-semibold sm:inline">
+              {LANGUAGE_LABELS[language].code}
+            </span>
+            <ChevronDown
+              className={`size-3 transition-transform ${languageMenuOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {languageMenuOpen ? (
+            <div
+              id="language-menu"
+              role="menu"
+              className="bg-popover absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-md border border-border p-1 shadow-2xl"
             >
-              {locale === "en" ? "EN" : "中文"}
-            </button>
-          ))}
+              {SUPPORTED_LANGUAGES.map((locale) => (
+                <button
+                  key={locale}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={language === locale}
+                  onClick={() => selectLanguage(locale)}
+                  className={`flex w-full items-center gap-3 rounded px-2.5 py-2 text-left text-xs transition-colors ${
+                    language === locale
+                      ? "bg-secondary text-foreground"
+                      : "hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Check
+                    className={`size-3.5 ${language === locale ? "opacity-100" : "opacity-0"}`}
+                  />
+                  <span className="flex-1">{LANGUAGE_LABELS[locale].name}</span>
+                  <span className="font-mono text-[10px]">{LANGUAGE_LABELS[locale].code}</span>
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
+
+        <a
+          href={NPM_URL}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t("header.npm")}
+          title={t("header.npm")}
+          className="rounded-md border border-border p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Package className="size-4" />
+        </a>
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t("header.github")}
+          title={t("header.github")}
+          className="rounded-md border border-border p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Github className="size-4" />
+        </a>
         <button
           type="button"
           onClick={onToggleSettings}
