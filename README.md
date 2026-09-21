@@ -131,6 +131,8 @@ https://lenml.github.io/deep-jev-seek/
 
 浏览器可直接连接 DeepSeek 或 llama.cpp。DeepSeek API Key 默认保存在当前标签页的 `sessionStorage`；选择「This browser」后改用 `localStorage`。项目不代理、不托管 Key。
 
+Playground、Benchmark、Batch 标签使用 hash 路由，地址分别为 `#/playground`、`#/benchmark`、`#/batch`，支持直达链接与浏览器前进后退。
+
 选择 llama.cpp 后，输入表单会显示图片上传区。上传的图片会转成 `multimodal_data` 所需的 base64 数组，也可在 Base64 JSON 区域手动微调。
 
 Benchmark 模式加载 MMLU-Pro validation 题目，可运行前 N 题并对比标准答案与正确率。题目来自 [Hugging Face datasets-server](https://datasets-server.huggingface.co/rows?dataset=TIGER-Lab%2FMMLU-Pro&config=default&split=validation&offset=0&length=100)。

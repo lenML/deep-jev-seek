@@ -2,9 +2,8 @@ import { Check, ChevronDown, Github, Languages, Package, Settings2, Sparkles } f
 import { useEffect, useRef, useState } from "react";
 
 import { useI18n } from "@/i18n/use-i18n";
+import { WORKSPACES, type Workspace } from "@/lib/hash-workspace";
 import { SUPPORTED_LANGUAGES, type Language } from "@/lib/types";
-
-export type Workspace = "playground" | "benchmark" | "batch";
 
 interface PlaygroundHeaderProps {
   workspace: Workspace;
@@ -70,10 +69,11 @@ export function PlaygroundHeader({
       </div>
 
       <nav className="order-3 flex basis-full rounded-md border border-border bg-card p-0.5 sm:order-none sm:ml-auto sm:basis-auto">
-        {(["playground", "benchmark", "batch"] as const).map((item) => (
+        {WORKSPACES.map((item) => (
           <button
             key={item}
             type="button"
+            aria-current={workspace === item ? "page" : undefined}
             onClick={() => onWorkspaceChange(item)}
             className={`flex-1 rounded px-2.5 py-1.5 text-xs transition-colors sm:flex-none ${
               workspace === item

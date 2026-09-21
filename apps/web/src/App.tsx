@@ -4,10 +4,11 @@ import { useState } from "react";
 import { BatchPanel } from "@/components/batch-panel";
 import { BenchmarkPanel } from "@/components/benchmark-panel";
 import { ConnectionSettings } from "@/components/connection-settings";
-import { PlaygroundHeader, type Workspace } from "@/components/playground-header";
+import { PlaygroundHeader } from "@/components/playground-header";
 import { PlaygroundInput, type InputMode } from "@/components/playground-input";
 import { PlaygroundPreview, type PreviewMode } from "@/components/playground-preview";
 import { useI18n } from "@/i18n/use-i18n";
+import { useHashWorkspace } from "@/lib/hash-workspace";
 import type { BuiltDecision, PlaygroundDrafts, QuestionType } from "@/lib/playground";
 import { buildDecision } from "@/lib/playground";
 import { parseMultimodalData } from "@/lib/multimodal";
@@ -56,7 +57,7 @@ export function App() {
   const [inputMode, setInputMode] = useState<InputMode>("form");
   const [previewMode, setPreviewMode] = useState<PreviewMode>("preview");
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [workspace, setWorkspace] = useState<Workspace>("playground");
+  const [workspace, setWorkspace] = useHashWorkspace();
   const [presetIds, setPresetIds] = useState(() => ({ ...DEFAULT_PRESET_IDS }));
   const [drafts, setDrafts] = useState<PlaygroundDrafts>(() =>
     createInitialDrafts(createPresetCatalog(language)),
