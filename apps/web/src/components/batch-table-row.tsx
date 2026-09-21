@@ -1,6 +1,6 @@
 import { Eraser, LoaderCircle, RefreshCw, Trash2 } from "lucide-react";
-import type { PointerEvent as ReactPointerEvent } from "react";
 
+import { BatchResizeHandle } from "@/components/batch-resize-handle";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n/use-i18n";
 import type { BatchColumn, BatchRow } from "@/lib/batch";
@@ -13,7 +13,7 @@ interface BatchTableRowProps {
   onClearRow: (rowId: string) => void;
   onDeleteRow: (rowId: string) => void;
   onPromptChange: (rowId: string, value: string) => void;
-  onResizeRow: (event: ReactPointerEvent<HTMLButtonElement>) => void;
+  onRowHeightChange: (value: number) => void;
   onRunRow: (rowId: string) => void;
 }
 
@@ -35,7 +35,7 @@ export function BatchTableRow({
   onClearRow,
   onDeleteRow,
   onPromptChange,
-  onResizeRow,
+  onRowHeightChange,
   onRunRow,
 }: BatchTableRowProps) {
   const { t } = useI18n();
@@ -58,11 +58,13 @@ export function BatchTableRow({
             {row.error}
           </p>
         ) : null}
-        <button
-          type="button"
-          aria-label={t("batch.resizeRow")}
-          onPointerDown={onResizeRow}
-          className="absolute inset-x-0 bottom-0 z-20 h-1.5 cursor-row-resize touch-none"
+        <BatchResizeHandle
+          axis="y"
+          ariaLabel={t("batch.resizeRow")}
+          max={240}
+          min={44}
+          value={rowHeight}
+          onValueChange={onRowHeightChange}
         />
       </td>
       {columns.map((column, columnIndex) => {

@@ -2,6 +2,7 @@ import { Plus, X } from "lucide-react";
 import { useState } from "react";
 
 import { BatchDeleteColumnDialog } from "@/components/batch-delete-column-dialog";
+import { BatchResizeHandle } from "@/components/batch-resize-handle";
 import { BatchTableRow } from "@/components/batch-table-row";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n/use-i18n";
@@ -67,11 +68,13 @@ export function BatchTable({
               <tr>
                 <th className="group relative border-b border-border p-0 text-left text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
                   <div className="flex h-11 items-center px-3">{t("batch.prompt")}</div>
-                  <button
-                    type="button"
-                    aria-label={t("batch.resizeColumn")}
-                    onPointerDown={sizes.startPromptResize}
-                    className="absolute right-0 top-0 z-20 h-full w-2 cursor-col-resize touch-none"
+                  <BatchResizeHandle
+                    axis="x"
+                    ariaLabel={t("batch.resizeColumn")}
+                    max={720}
+                    min={180}
+                    value={sizes.promptWidth}
+                    onValueChange={sizes.updatePromptWidth}
                   />
                 </th>
                 {columns.map((column, index) => (
@@ -95,11 +98,13 @@ export function BatchTable({
                     >
                       <X className="size-3.5" />
                     </button>
-                    <button
-                      type="button"
-                      aria-label={t("batch.resizeColumn")}
-                      onPointerDown={(event) => sizes.startColumnResize(event, column.id)}
-                      className="absolute right-0 top-0 z-20 h-full w-2 cursor-col-resize touch-none"
+                    <BatchResizeHandle
+                      axis="x"
+                      ariaLabel={t("batch.resizeColumn")}
+                      max={480}
+                      min={96}
+                      value={sizes.columnWidth(column.id)}
+                      onValueChange={(value) => sizes.updateColumnWidth(column.id, value)}
                     />
                   </th>
                 ))}
@@ -124,7 +129,7 @@ export function BatchTable({
                     onClearRow={onClearRow}
                     onDeleteRow={onDeleteRow}
                     onPromptChange={onPromptChange}
-                    onResizeRow={(event) => sizes.startRowResize(event, row.id)}
+                    onRowHeightChange={(value) => sizes.updateRowHeight(row.id, value)}
                     onRunRow={onRunRow}
                   />
                 );
