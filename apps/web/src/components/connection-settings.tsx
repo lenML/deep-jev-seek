@@ -37,7 +37,7 @@ export function ConnectionSettings({ open, onOpenChange }: ConnectionSettingsPro
       <DialogContent
         aria-labelledby="connection-title"
         aria-describedby="connection-description"
-        className="left-auto top-0 flex h-dvh max-h-dvh w-full max-w-3xl translate-x-0 translate-y-0 flex-col rounded-none border-y-0 border-r-0 bg-background duration-300 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right"
+        className="left-auto right-0 top-0 flex h-dvh max-h-dvh w-full max-w-3xl translate-x-0 translate-y-0 flex-col rounded-none border-y-0 border-r-0 bg-background duration-300 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right"
       >
         <div className="flex items-start justify-between gap-4 border-b border-border px-4 py-4 sm:px-5">
           <div>

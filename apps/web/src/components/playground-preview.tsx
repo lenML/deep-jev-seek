@@ -1,9 +1,13 @@
 import type { JevAnswer, JevSeekResponse } from "@lenml/jevseek";
 import { Braces, Eye, LoaderCircle, Play } from "lucide-react";
+import { lazy, Suspense } from "react";
 
 import { useI18n } from "@/i18n/use-i18n";
-
 import type { RawExchange } from "@/lib/types";
+
+const JsonHighlight = lazy(() =>
+  import("@/components/json-highlight").then((module) => ({ default: module.JsonHighlight })),
+);
 
 export type PreviewMode = "preview" | "json";
 
@@ -128,6 +132,7 @@ export function PlaygroundPreview({
   const { t } = useI18n();
   const answer = result ? Object.values(result.answers)[0] : undefined;
   const rawPayload = { normalized: result, exchanges: rawExchanges };
+  const rawJson = JSON.stringify(rawPayload, null, 2);
 
   return (
     <section className="flex min-h-[34rem] flex-1 flex-col bg-background lg:min-h-0">
@@ -167,9 +172,15 @@ export function PlaygroundPreview({
         ) : null}
 
         {mode === "json" ? (
-          <pre className="min-h-full rounded-md border border-border bg-card p-4 font-mono text-xs leading-5 text-foreground">
-            {JSON.stringify(rawPayload, null, 2)}
-          </pre>
+          <Suspense
+            fallback={
+              <div className="flex min-h-full items-center justify-center">
+                <LoaderCircle className="size-6 animate-spin text-signal" />
+              </div>
+            }
+          >
+            <JsonHighlight code={rawJson} />
+          </Suspense>
         ) : isRunning ? (
           <div className="flex min-h-[28rem] items-center justify-center">
             <LoaderCircle className="size-6 animate-spin text-signal" />
