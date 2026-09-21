@@ -130,7 +130,7 @@ export function PlaygroundPreview({
   const rawPayload = { normalized: result, exchanges: rawExchanges };
 
   return (
-    <section className="flex min-h-[34rem] flex-1 flex-col bg-background">
+    <section className="flex min-h-[34rem] flex-1 flex-col bg-background lg:min-h-0">
       <div className="flex min-h-14 items-center justify-between gap-3 border-b border-border px-4 py-2">
         <div className="flex items-center gap-4 font-mono text-[11px] text-muted-foreground">
           {latencyMs !== null ? <span>{t("preview.latency", { value: latencyMs })}</span> : null}
