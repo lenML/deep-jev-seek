@@ -167,7 +167,7 @@ export function App() {
         onWorkspaceChange={setWorkspace}
         onToggleSettings={() => setSettingsOpen((open) => !open)}
       />
-      {settingsOpen ? <ConnectionSettings /> : null}
+      {settingsOpen ? <ConnectionSettings onClose={() => setSettingsOpen(false)} /> : null}
 
       {workspace === "benchmark" ? (
         <BenchmarkPanel />
