@@ -30,6 +30,8 @@ export type QuestionSet = Record<string, JevQuestion>;
 export interface PromptTemplateContext {
   state: string;
   question: string;
+  instructions: string;
+  options: string;
   questionType: JevQuestionType;
   codes: readonly string[];
   codeList: string;

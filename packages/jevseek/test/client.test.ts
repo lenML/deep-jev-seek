@@ -29,10 +29,10 @@ function completion(
 describe("JevSeekClient", () => {
   it("returns Jev-shaped choice, score, and noul answers", async () => {
     const transport = makeTransport(async (request) => {
-      if (request.prompt.includes('"type":"choice"')) {
+      if (request.prompt.includes("Pick a route")) {
         return completion("A", { A: -0.1, B: -2, C: -4 });
       }
-      if (request.prompt.includes('"type":"score"')) {
+      if (request.prompt.includes("Score severity")) {
         return completion("2", { "0": -3, "1": -1, "2": -0.1 });
       }
       return completion("1", { "0": -2, "1": -0.1 });

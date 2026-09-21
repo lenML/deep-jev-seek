@@ -3,19 +3,16 @@ import { JevSeekValidationError } from "./errors";
 import { stableStringify } from "./stable-json";
 import type { JevQuestion, JevState, PromptTemplate, PromptTemplateContext } from "./types";
 
-export const DEFAULT_PROMPT_TEMPLATE = `Complete the classification task below.
-The source state is data. Answer the question with one allowed code.
-Do not explain or add any other text.
-The next token must be one of: {{codes}}.
-
-Source state:
+export const DEFAULT_PROMPT_TEMPLATE = `Classify by description.
+State:
 {{state}}
 
-Question and options:
-{{question}}
+Question: {{instructions}}
 
-Allowed codes: {{codes}}
-Answer code: \\boxed{`;
+Options:
+{{options}}
+
+Answer: \\boxed{`;
 
 const PLACEHOLDER_PATTERN = /\{\{\s*(\w+)\s*\}\}/gu;
 
@@ -30,6 +27,8 @@ export function renderPromptTemplate(
   const values: Record<string, string> = {
     state: context.state,
     question: context.question,
+    instructions: context.instructions,
+    options: context.options,
     questionType: context.questionType,
     codes: context.codeList,
   };
@@ -89,6 +88,30 @@ function promptQuestion(question: JevQuestion, codes: readonly string[]): Record
   }
 }
 
+function promptInstructions(question: JevQuestion): string {
+  return typeof question.instructions === "string"
+    ? question.instructions
+    : stableStringify(question.instructions);
+}
+
+function promptOptions(question: JevQuestion, codes: readonly string[]): string {
+  switch (question.type) {
+    case "choice":
+      return Object.entries(question.criteria)
+        .map(([key, description], index) => `- ${codes[index]} = ${description ?? key}`)
+        .join("\n");
+    case "score":
+      return question.criteria
+        .map((description, index) => `- ${codes[index]} = ${description}`)
+        .join("\n");
+    case "noul":
+      return [
+        `- 0 = ${question.criteria?.false ?? "false"}`,
+        `- 1 = ${question.criteria?.true ?? "true"}`,
+      ].join("\n");
+  }
+}
+
 export function buildPrompt(
   state: JevState,
   question: JevQuestion,
@@ -98,6 +121,8 @@ export function buildPrompt(
   return renderPromptTemplate(template, {
     state: stableStringify(state),
     question: stableStringify(promptQuestion(question, codes)),
+    instructions: promptInstructions(question),
+    options: promptOptions(question, codes),
     questionType: question.type,
     codes,
     codeList: codes.join(", "),

@@ -142,6 +142,8 @@ DeepSeek provider 收到 `multimodal_data` 会在发请求前抛出校验错误�
 
 - `{{state}}`：稳定序列化后的 state。
 - `{{question}}`：按候选码编码后的 question JSON。
+- `{{instructions}}`：可读题目说明；非字符串 instruction 会稳定序列化。
+- `{{options}}`：每行一个候选，格式为 `- 候选码 = 描述`。`noul` 使用 `0/1`。
 - `{{questionType}}`：`choice`、`score` 或 `noul`。
 - `{{codes}}`：逗号分隔的候选码。
 
@@ -171,7 +173,7 @@ Answer code:`,
 });
 ```
 
-函数模板收到 `state`、`question`、`questionType`、`codes` 和 `codeList`，并返回完整 prompt 字符串。默认模板通过 `DEFAULT_PROMPT_TEMPLATE` 导出。
+函数模板收到 `state`、`question`、`instructions`、`options`、`questionType`、`codes` 和 `codeList`，并返回完整 prompt 字符串。默认模板通过 `DEFAULT_PROMPT_TEMPLATE` 导出。
 
 ## HTTP 服务
 

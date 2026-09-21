@@ -79,8 +79,8 @@ llama.cpp mode sends `POST /completion` with `n_probs`. A `/v1` base URL suffix 
 
 The default llama.cpp base URL is `http://127.0.0.1:8080/v1`.
 
-Set `promptTemplate` in `createJevSeek()` for a client-level override, or in `systemOne()` for one request. String templates support `{{state}}`, `{{question}}`, `{{questionType}}`, and `{{codes}}`; function templates receive the structured rendering context.
+Set `promptTemplate` in `createJevSeek()` for a client-level override, or in `systemOne()` for one request. String templates support `{{state}}`, `{{question}}`, `{{instructions}}`, `{{options}}`, `{{questionType}}`, and `{{codes}}`; function templates receive the structured rendering context.
 
-The default template uses completion-style instructions and ends with `Answer code: \boxed{`. Reproduce the repository prompt score against JevBench Easy with `pnpm prompt:benchmark`.
+The default template uses readable option lines and ends with `Answer: \boxed{`. Reproduce the repository prompt score against JevBench Easy with `pnpm prompt:benchmark`.
 
 See the repository documentation for the full HTTP and browser API.

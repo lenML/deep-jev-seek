@@ -100,7 +100,7 @@ prompt 必须包含与每个数组项对应的服务器媒体标记。模型需�
 
 ### Prompt 模板
 
-默认模板按 completion 语义编写，结尾为 `Answer code: \boxed{`。开发者可在客户端创建时覆盖，也可在单次 `systemOne` 请求中覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
+默认模板用可读选项行和 `Answer: \boxed{` 结尾。开发者可在客户端创建时覆盖，也可在单次 `systemOne` 请求中覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
 
 本地 llama.cpp 可用 JevBench Easy 公开集复跑模板：
 

@@ -22,14 +22,16 @@ describe("stableStringify", () => {
 });
 
 describe("buildPrompt", () => {
-  it("uses a completion-style default ending with a boxed answer", () => {
+  it("uses a concise default with readable options and a boxed answer", () => {
     const prompt = buildPrompt("state", {
       type: "noul",
       instructions: "Is it true?",
     });
 
-    expect(prompt.startsWith("Complete the classification task below.")).toBe(true);
-    expect(prompt.endsWith("Answer code: \\boxed{")).toBe(true);
+    expect(prompt.startsWith("Classify by description.")).toBe(true);
+    expect(prompt).toContain("Question: Is it true?");
+    expect(prompt).toContain("- 0 = false\n- 1 = true");
+    expect(prompt.endsWith("Answer: \\boxed{")).toBe(true);
     expect(prompt).not.toContain("You are");
   });
 
@@ -43,10 +45,9 @@ describe("buildPrompt", () => {
       },
     );
 
-    expect(prompt).toContain('Source state:\n{"a":1,"b":2}');
-    expect(prompt).toContain('"A":{"description":"Second option","id":"second"}');
-    expect(prompt).toContain('"B":{"description":"First option","id":"first"}');
-    expect(prompt).toContain("Allowed codes: A, B");
+    expect(prompt).toContain('State:\n{"a":1,"b":2}');
+    expect(prompt).toContain('Question: {"order":["a","b"],"task":"Classify"}');
+    expect(prompt).toContain("- A = Second option\n- B = First option");
   });
 
   it("supports array state and score criteria", () => {
@@ -56,11 +57,9 @@ describe("buildPrompt", () => {
       criteria: ["low", "middle", "high"],
     });
 
-    expect(prompt).toContain('Source state:\n["one","two"]');
-    expect(prompt).toContain(
-      '"criteria":[{"code":"0","description":"low"},{"code":"1","description":"middle"},{"code":"2","description":"high"}]',
-    );
-    expect(prompt).toContain("Allowed codes: 0, 1, 2");
+    expect(prompt).toContain('State:\n["one","two"]');
+    expect(prompt).toContain('Question: ["Score it"]');
+    expect(prompt).toContain("- 0 = low\n- 1 = middle\n- 2 = high");
   });
 
   it("encodes noul as false and true", () => {
@@ -70,9 +69,23 @@ describe("buildPrompt", () => {
       criteria: { false: "No urgency", true: "Urgent" },
     });
 
-    expect(prompt).toContain('"0":{"description":"No urgency","value":false}');
-    expect(prompt).toContain('"1":{"description":"Urgent","value":true}');
-    expect(prompt).toContain("Allowed codes: 0, 1");
+    expect(prompt).toContain("Question: Is it urgent?");
+    expect(prompt).toContain("- 0 = No urgency\n- 1 = Urgent");
+  });
+
+  it("renders readable placeholders in custom templates", () => {
+    const prompt = buildPrompt(
+      "state",
+      {
+        type: "choice",
+        instructions: "Pick one",
+        criteria: { first: "First", second: "Second" },
+      },
+      undefined,
+      "i={{instructions}}\no={{options}}",
+    );
+
+    expect(prompt).toBe("i=Pick one\no=- A = First\n- B = Second");
   });
 
   it("renders custom string templates", () => {
@@ -111,6 +124,8 @@ describe("buildPrompt", () => {
       renderPromptTemplate(() => "  ", {
         state: "state",
         question: "question",
+        instructions: "instructions",
+        options: "options",
         questionType: "noul",
         codes: ["0", "1"],
         codeList: "0, 1",
