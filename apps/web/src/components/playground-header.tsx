@@ -116,7 +116,7 @@ export function PlaygroundHeader({
             <div
               id="language-menu"
               role="menu"
-              className="bg-popover absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-md border border-border p-1 shadow-2xl"
+              className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-2xl"
             >
               {SUPPORTED_LANGUAGES.map((locale) => (
                 <button
@@ -128,7 +128,7 @@ export function PlaygroundHeader({
                   className={`flex w-full items-center gap-3 rounded px-2.5 py-2 text-left text-xs transition-colors ${
                     language === locale
                       ? "bg-secondary text-foreground"
-                      : "hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                   }`}
                 >
                   <Check

@@ -11,6 +11,10 @@ export default {
         ring: "var(--ring)",
         background: "var(--background)",
         foreground: "var(--foreground)",
+        popover: {
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
+        },
         primary: {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
