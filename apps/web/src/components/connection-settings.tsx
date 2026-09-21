@@ -47,14 +47,14 @@ export function ConnectionSettings({ onClose }: ConnectionSettingsProps) {
         aria-hidden="true"
         tabIndex={-1}
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[1px]"
+        className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[1px] duration-200 animate-in fade-in-0"
       />
 
       <aside
         role="dialog"
         aria-modal="true"
         aria-labelledby="connection-title"
-        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l border-border bg-background shadow-2xl"
+        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l border-border bg-background shadow-2xl duration-300 animate-in slide-in-from-right"
       >
         <div className="flex items-start justify-between gap-4 border-b border-border px-4 py-4 sm:px-5">
           <div>

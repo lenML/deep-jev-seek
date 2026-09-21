@@ -116,7 +116,7 @@ export function PlaygroundHeader({
             <div
               id="language-menu"
               role="menu"
-              className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-2xl"
+              className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-2xl duration-150 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
             >
               {SUPPORTED_LANGUAGES.map((locale) => (
                 <button

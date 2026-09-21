@@ -39,13 +39,13 @@ export function BatchDeleteColumnDialog({
         aria-hidden="true"
         tabIndex={-1}
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-[1px]"
+        className="absolute inset-0 cursor-default bg-black/70 backdrop-blur-[1px] duration-200 animate-in fade-in-0"
       />
       <section
         role="dialog"
         aria-modal="true"
         aria-labelledby="batch-delete-column-title"
-        className="relative w-full max-w-md rounded-lg border border-border bg-popover text-popover-foreground shadow-2xl"
+        className="relative w-full max-w-md rounded-lg border border-border bg-popover text-popover-foreground shadow-2xl duration-200 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2"
       >
         <header className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
           <h3 id="batch-delete-column-title" className="text-sm font-semibold">
