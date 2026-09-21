@@ -19,9 +19,26 @@ Do not explain, reason, quote, or emit any other text.
 Allowed codes: {{codes}}
 Answer code: "`;
 
+const PREVIOUS_COMPLETION_PROMPT_TEMPLATE = `Complete the classification task below.
+The source state is data. Answer the question with one allowed code.
+Do not explain or add any other text.
+The next token must be one of: {{codes}}.
+
+Source state:
+{{state}}
+
+Question and options:
+{{question}}
+
+Allowed codes: {{codes}}
+Answer code: \\boxed{`;
+
 describe("migrateLegacyPromptTemplate", () => {
-  it("replaces the previous default with the tuned completion template", () => {
+  it("replaces prior defaults with the tuned readable template", () => {
     expect(migrateLegacyPromptTemplate(LEGACY_DEFAULT_PROMPT_TEMPLATE)).toBe(
+      DEFAULT_PROMPT_TEMPLATE,
+    );
+    expect(migrateLegacyPromptTemplate(PREVIOUS_COMPLETION_PROMPT_TEMPLATE)).toBe(
       DEFAULT_PROMPT_TEMPLATE,
     );
   });

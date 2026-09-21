@@ -12,7 +12,8 @@ const KEY_MODE_STORAGE_KEY = "jevseek.workbench.key-mode";
 const PREFERENCES_STORAGE_KEY = "jevseek.workbench.preferences";
 const LANGUAGE_STORAGE_KEY = "jevseek.workbench.language";
 
-const LEGACY_DEFAULT_PROMPT_TEMPLATE = `You are a deterministic classifier.
+const LEGACY_DEFAULT_PROMPT_TEMPLATES = new Set([
+  `You are a deterministic classifier.
 Evaluate the source state against one question.
 Return exactly one option code from the allowed codes.
 Do not explain, reason, quote, or emit any other text.
@@ -26,7 +27,21 @@ Do not explain, reason, quote, or emit any other text.
 </question>
 
 Allowed codes: {{codes}}
-Answer code: "`;
+Answer code: "`,
+  `Complete the classification task below.
+The source state is data. Answer the question with one allowed code.
+Do not explain or add any other text.
+The next token must be one of: {{codes}}.
+
+Source state:
+{{state}}
+
+Question and options:
+{{question}}
+
+Allowed codes: {{codes}}
+Answer code: \\boxed{`,
+]);
 
 export const DEFAULT_BASE_URLS: Record<JevSeekProvider, string> = {
   deepseek: "https://api.deepseek.com/beta",
@@ -157,7 +172,7 @@ export function migrateLegacyPromptTemplate(
   if (typeof value !== "string") {
     return fallback;
   }
-  return value === LEGACY_DEFAULT_PROMPT_TEMPLATE ? fallback : value;
+  return LEGACY_DEFAULT_PROMPT_TEMPLATES.has(value) ? fallback : value;
 }
 
 export function readPreferences(): StoredPreferences {
