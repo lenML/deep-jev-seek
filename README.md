@@ -2,6 +2,9 @@
 
 [![CI](https://github.com/lenML/deep-jev-seek/actions/workflows/ci.yml/badge.svg)](https://github.com/lenML/deep-jev-seek/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@lenml/jevseek.svg)](https://www.npmjs.com/package/@lenml/jevseek)
+[![npm downloads](https://img.shields.io/npm/dm/@lenml/jevseek.svg)](https://www.npmjs.com/package/@lenml/jevseek)
+[![Docker](https://github.com/lenML/deep-jev-seek/actions/workflows/docker.yml/badge.svg)](https://github.com/lenML/deep-jev-seek/actions/workflows/docker.yml)
+[![license](https://img.shields.io/npm/l/@lenml/jevseek.svg)](https://github.com/lenML/deep-jev-seek/blob/main/LICENSE)
 
 ![JevSeek WebUI](docs/assets/readme-banner.webp)
 

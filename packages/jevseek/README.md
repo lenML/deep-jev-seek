@@ -1,5 +1,10 @@
 # @lenml/jevseek
 
+[![npm version](https://img.shields.io/npm/v/@lenml/jevseek.svg)](https://www.npmjs.com/package/@lenml/jevseek)
+[![npm downloads](https://img.shields.io/npm/dm/@lenml/jevseek.svg)](https://www.npmjs.com/package/@lenml/jevseek)
+[![CI](https://github.com/lenML/deep-jev-seek/actions/workflows/ci.yml/badge.svg)](https://github.com/lenML/deep-jev-seek/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/@lenml/jevseek.svg)](https://github.com/lenML/deep-jev-seek/blob/main/LICENSE)
+
 DeepSeek FIM and llama.cpp completion adapter for Jev-style SystemOne decisions.
 
 ```bash
