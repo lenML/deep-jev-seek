@@ -1,3 +1,4 @@
+import Papa from "papaparse";
 import { normalizeBenchmarkRecord } from "./normalize";
 import type { BenchmarkDataset, BenchmarkSource } from "./types";
 
@@ -28,49 +29,30 @@ function unwrapRecords(value: unknown): unknown[] {
   return [value];
 }
 
-function parseDelimited(text: string, delimiter: string): unknown[] {
-  const rows: string[][] = [];
-  let row: string[] = [];
-  let cell = "";
-  let quoted = false;
-
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index] as string;
-    if (character === '"') {
-      if (quoted && text[index + 1] === '"') {
-        cell += '"';
-        index += 1;
-      } else {
-        quoted = !quoted;
-      }
-    } else if (character === delimiter && !quoted) {
-      row.push(cell);
-      cell = "";
-    } else if ((character === "\n" || character === "\r") && !quoted) {
-      if (character === "\r" && text[index + 1] === "\n") {
-        index += 1;
-      }
-      row.push(cell);
-      if (row.some((value) => value.trim())) {
-        rows.push(row);
-      }
-      row = [];
-      cell = "";
-    } else {
-      cell += character;
-    }
+function parseDelimited(text: string): unknown[] {
+  const result = Papa.parse<string[]>(text, {
+    delimiter: "",
+    skipEmptyLines: "greedy",
+    dynamicTyping: false,
+  });
+  const quoteError = result.errors.find((error) => error.type === "Quotes");
+  if (quoteError) {
+    throw new Error(
+      `Invalid delimited data at row ${(quoteError.row ?? 0) + 1}: ${quoteError.message}`,
+    );
   }
-
-  row.push(cell);
-  if (row.some((value) => value.trim())) {
-    rows.push(row);
-  }
-  if (rows.length < 2) {
+  if (result.data.length < 2) {
     return [];
   }
 
-  const headers = (rows[0] as string[]).map((header) => header.trim());
-  return rows
+  const usedHeaders = new Map<string, number>();
+  const headers = result.data[0]!.map((header, index) => {
+    const base = header.trim() || `column_${index + 1}`;
+    const count = (usedHeaders.get(base) ?? 0) + 1;
+    usedHeaders.set(base, count);
+    return count === 1 ? base : `${base}_${count}`;
+  });
+  return result.data
     .slice(1)
     .map((values) =>
       Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ""])),
@@ -113,9 +95,7 @@ export function parseDataRecords(text: string): unknown[] {
     return jsonLines;
   }
 
-  const firstLine = trimmed.split(/\r?\n/u, 1)[0] ?? "";
-  const delimiter = firstLine.includes("\t") ? "\t" : ",";
-  return parseDelimited(trimmed, delimiter);
+  return parseDelimited(trimmed);
 }
 
 export function parseBenchmarkDataset(text: string, source: BenchmarkSource): BenchmarkDataset {

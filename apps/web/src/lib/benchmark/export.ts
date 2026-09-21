@@ -1,3 +1,5 @@
+import Papa from "papaparse";
+
 import type { BenchmarkResult, BenchmarkRow } from "./types";
 
 interface BenchmarkExportInput {
@@ -47,9 +49,9 @@ function downloadFile(filename: string, content: string, type: string) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }
 
-function escapeCsv(value: unknown): string {
+function spreadsheetSafe(value: unknown): string {
   const text = value === undefined || value === null ? "" : String(value);
-  return /[",\r\n]/u.test(text) ? `"${text.replace(/"/gu, '""')}"` : text;
+  return /^[=+\-@\t\r]/u.test(text) ? `'${text}` : text;
 }
 
 function probabilityValue(value: number | undefined): string {
@@ -127,7 +129,9 @@ export function downloadBenchmarkCsv(input: BenchmarkExportInput) {
       probabilityValue(result.probabilities[String.fromCharCode(65 + index)]),
     ),
   ]);
-  const csv = [header, ...rows].map((row) => row.map(escapeCsv).join(",")).join("\r\n");
+  const csv = Papa.unparse([header, ...rows.map((row) => row.map(spreadsheetSafe))], {
+    newline: "\r\n",
+  });
 
   downloadFile(exportFilename(input, "csv"), `\uFEFF${csv}`, "text/csv;charset=utf-8");
 }
