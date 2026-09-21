@@ -66,48 +66,66 @@ export function BenchmarkQuestion({ index, result, row }: BenchmarkQuestionProps
           const code = String.fromCharCode(65 + optionIndex);
           const isExpected = code === row.answer;
           const isPredicted = code === result?.predicted;
+          const isCorrectPick = Boolean(result?.correct && isPredicted && isExpected);
           const probability = result?.probabilities[code];
           const width =
             probability === undefined ? 0 : Math.min(100, Math.max(0, probability * 100));
+          const borderClass = isCorrectPick
+            ? "border-signal ring-1 ring-inset ring-signal/40"
+            : isPredicted
+              ? "border-destructive/70"
+              : isExpected && result
+                ? "border-signal/55"
+                : "border-border";
+          const indicatorClass = isCorrectPick
+            ? "text-signal"
+            : isPredicted
+              ? "text-destructive"
+              : isExpected && result
+                ? "text-signal"
+                : "text-muted-foreground";
+          const fillClass = isCorrectPick
+            ? "bg-signal/35"
+            : isPredicted
+              ? "bg-destructive/20"
+              : isExpected && result
+                ? "bg-signal/20"
+                : "bg-foreground/10";
 
           return (
             <div
               key={`${code}-${option}`}
-              className={`relative overflow-hidden rounded-md border ${
-                isPredicted
-                  ? "border-signal/70"
-                  : isExpected && result
-                    ? "border-destructive/50"
-                    : "border-border"
-              }`}
+              className={`bg-background/60 relative overflow-hidden rounded-md border ${borderClass}`}
+              role="progressbar"
+              aria-label={`${code}: ${formatPercent(probability ?? 0)}`}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(width)}
             >
               <div
                 aria-hidden="true"
-                className="bg-signal/20 absolute inset-y-0 left-0 transition-[width] duration-500"
+                className={`absolute inset-y-0 left-0 transition-[width] duration-500 ${fillClass}`}
                 style={{ width: `${width}%` }}
               />
-              <div className="relative flex min-w-0 items-center justify-between gap-3 px-3 py-2">
+              <div className="relative flex min-w-0 items-center justify-between gap-3 px-3 py-2.5">
                 <div className="flex min-w-0 items-center gap-2">
-                  <span
-                    className={`shrink-0 font-mono text-[11px] ${
-                      isPredicted ? "text-signal" : "text-muted-foreground"
-                    }`}
-                  >
-                    {code}
-                  </span>
+                  <span className={`shrink-0 font-mono text-[11px] ${indicatorClass}`}>{code}</span>
                   <span
                     className={`min-w-0 text-xs leading-5 ${
                       expanded ? "" : "block truncate"
-                    } ${isPredicted ? "text-foreground" : "text-muted-foreground"}`}
+                    } ${isPredicted || (isExpected && result) ? "text-foreground" : "text-muted-foreground"}`}
                   >
                     {option}
                   </span>
-                  {isPredicted ? <CheckCircle2 className="size-3 shrink-0 text-signal" /> : null}
+                  {isCorrectPick || (isExpected && !isPredicted) ? (
+                    <CheckCircle2 className={`size-3 shrink-0 ${indicatorClass}`} />
+                  ) : null}
+                  {isPredicted && !isExpected ? (
+                    <CircleX className="size-3 shrink-0 text-destructive" />
+                  ) : null}
                 </div>
                 <span
-                  className={`w-14 shrink-0 text-right font-mono text-[11px] ${
-                    isPredicted ? "text-signal" : "text-muted-foreground"
-                  }`}
+                  className={`w-14 shrink-0 text-right font-mono text-[11px] ${indicatorClass}`}
                 >
                   {probability === undefined ? "—" : formatPercent(probability)}
                 </span>
