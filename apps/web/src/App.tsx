@@ -1,8 +1,6 @@
 import type { QuestionSet } from "@lenml/jevseek";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
-import { BatchPanel } from "@/components/batch-panel";
-import { BenchmarkPanel } from "@/components/benchmark-panel";
 import { ConnectionSettings } from "@/components/connection-settings";
 import { PlaygroundHeader } from "@/components/playground-header";
 import { PlaygroundInput, type InputMode } from "@/components/playground-input";
@@ -21,6 +19,13 @@ import {
 } from "@/lib/presets";
 import { runJevSeek } from "@/lib/run";
 import { useWorkbenchStore } from "@/store/workbench";
+
+const BatchPanel = lazy(() =>
+  import("@/components/batch-panel").then((module) => ({ default: module.BatchPanel })),
+);
+const BenchmarkPanel = lazy(() =>
+  import("@/components/benchmark-panel").then((module) => ({ default: module.BenchmarkPanel })),
+);
 
 function jsonError(value: string) {
   try {
@@ -170,11 +175,14 @@ export function App() {
         onToggleSettings={() => setSettingsOpen((open) => !open)}
       />
       <ConnectionSettings open={settingsOpen} onOpenChange={setSettingsOpen} />
-
       {workspace === "benchmark" ? (
-        <BenchmarkPanel />
+        <Suspense fallback={<WorkspaceFallback />}>
+          <BenchmarkPanel />
+        </Suspense>
       ) : workspace === "batch" ? (
-        <BatchPanel />
+        <Suspense fallback={<WorkspaceFallback />}>
+          <BatchPanel />
+        </Suspense>
       ) : (
         <main className="grid min-h-0 min-w-0 flex-1 grid-cols-1 lg:grid-cols-[390px_minmax(0,1fr)]">
           <PlaygroundInput
@@ -213,7 +221,11 @@ export function App() {
             onModeChange={setPreviewMode}
           />{" "}
         </main>
-      )}
+      )}{" "}
     </div>
   );
+}
+
+function WorkspaceFallback() {
+  return <div className="min-h-64 flex-1 animate-pulse bg-background" />;
 }
