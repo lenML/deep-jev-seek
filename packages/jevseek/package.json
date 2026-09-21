@@ -29,7 +29,8 @@
     "url": "https://github.com/lenML/deep-jev-seek/issues"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
