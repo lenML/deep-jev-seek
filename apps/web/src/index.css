@@ -39,11 +39,13 @@
   html {
     min-width: 320px;
     background: var(--background);
+    overflow: hidden;
   }
 
   body {
     @apply min-h-screen bg-background font-sans text-foreground antialiased;
     letter-spacing: 0;
+    overflow: hidden;
   }
 
   ::selection {
