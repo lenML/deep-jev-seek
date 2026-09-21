@@ -10,6 +10,7 @@
     "format:check": "prettier --check .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "prompt:benchmark": "pnpm --filter @lenml/jevseek build && node scripts/prompt-benchmark.mjs",
     "stats": "node scripts/code-stats.mjs",
     "stats:check": "node scripts/code-stats.mjs --fail-over",
     "test": "pnpm -r --if-present test",

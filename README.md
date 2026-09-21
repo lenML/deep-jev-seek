@@ -100,24 +100,30 @@ prompt 必须包含与每个数组项对应的服务器媒体标记。模型需�
 
 ### Prompt 模板
 
-默认模板只是起点。开发者可在客户端创建时覆盖，也可在单次 `systemOne` 请求中覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
+默认模板按 completion 语义编写，结尾为 `Answer code: \boxed{`。开发者可在客户端创建时覆盖，也可在单次 `systemOne` 请求中覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
+
+本地 llama.cpp 可用 JevBench Easy 公开集复跑模板：
+
+````bash
+pnpm prompt:benchmark
+
 
 ```ts
 const result = await client.systemOne({
-  state: { message: "I was charged twice." },
-  questions: {
-    refundRequested: {
-      type: "noul",
-      instructions: "Is a refund explicitly requested?",
-    },
-  },
-  promptTemplate: ({ state, question, codeList }) => `Classify this state.
+ state: { message: "I was charged twice." },
+ questions: {
+   refundRequested: {
+     type: "noul",
+     instructions: "Is a refund explicitly requested?",
+   },
+ },
+ promptTemplate: ({ state, question, codeList }) => `Classify this state.
 State: ${state}
 Question: ${question}
 Allowed codes: ${codeList}
 Answer code:`,
 });
-```
+````
 
 类型和 HTTP 契约见 [docs/api.md](docs/api.md)。
 
