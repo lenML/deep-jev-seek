@@ -231,14 +231,13 @@ export function BatchPanel() {
         </section>
       </div>
 
-      {importOpen ? (
-        <BatchImportDialog
-          disabled={isRunning}
-          hasExistingData={hasExistingData}
-          onClose={() => setImportOpen(false)}
-          onImport={handleImport}
-        />
-      ) : null}
+      <BatchImportDialog
+        disabled={isRunning}
+        hasExistingData={hasExistingData}
+        open={importOpen}
+        onImport={handleImport}
+        onOpenChange={setImportOpen}
+      />
     </main>
   );
 }

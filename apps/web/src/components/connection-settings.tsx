@@ -1,17 +1,25 @@
 import { Eye, EyeOff, Trash2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { PromptTemplateEditor } from "@/components/prompt-template-editor";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n/use-i18n";
 import { useWorkbenchStore } from "@/store/workbench";
 
 interface ConnectionSettingsProps {
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function ConnectionSettings({ onClose }: ConnectionSettingsProps) {
+export function ConnectionSettings({ open, onOpenChange }: ConnectionSettingsProps) {
   const { t } = useI18n();
   const connection = useWorkbenchStore((state) => state.connection);
   const provider = useWorkbenchStore((state) => state.connection.provider);
@@ -24,59 +32,34 @@ export function ConnectionSettings({ onClose }: ConnectionSettingsProps) {
   const clearApiKey = useWorkbenchStore((state) => state.clearApiKey);
   const [showKey, setShowKey] = useState(false);
 
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [onClose]);
-
   return (
-    <div className="fixed inset-0 z-50">
-      <button
-        type="button"
-        aria-hidden="true"
-        tabIndex={-1}
-        onClick={onClose}
-        className="absolute inset-0 cursor-default bg-black/60 backdrop-blur-[1px] duration-200 animate-in fade-in-0"
-      />
-
-      <aside
-        role="dialog"
-        aria-modal="true"
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
         aria-labelledby="connection-title"
-        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col border-l border-border bg-background shadow-2xl duration-300 animate-in slide-in-from-right"
+        aria-describedby="connection-description"
+        className="left-auto top-0 flex h-dvh max-h-dvh w-full max-w-3xl translate-x-0 translate-y-0 flex-col rounded-none border-y-0 border-r-0 bg-background duration-300 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right"
       >
         <div className="flex items-start justify-between gap-4 border-b border-border px-4 py-4 sm:px-5">
           <div>
-            <p
+            <DialogTitle
               id="connection-title"
               className="font-mono text-[10px] uppercase tracking-[0.14em] text-signal"
             >
               {t("connection.title")}
-            </p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            </DialogTitle>
+            <DialogDescription id="connection-description" className="mt-1">
               {t("connection.drawerHint")}
-            </p>
+            </DialogDescription>
           </div>
-          <button
-            type="button"
-            autoFocus
-            onClick={onClose}
-            aria-label={t("connection.close")}
-            className="rounded-md border border-border p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
-          >
-            <X className="size-4" />
-          </button>
+          <DialogClose asChild>
+            <button
+              type="button"
+              aria-label={t("connection.close")}
+              className="rounded-md border border-border p-2 text-muted-foreground hover:bg-secondary hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
+          </DialogClose>
         </div>
 
         <div className="grid gap-4 overflow-y-auto p-4 sm:grid-cols-2 sm:p-5">
@@ -186,7 +169,7 @@ export function ConnectionSettings({ onClose }: ConnectionSettingsProps) {
             {t("connection.security")}
           </p>
         </div>
-      </aside>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

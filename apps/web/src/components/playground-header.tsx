@@ -1,6 +1,13 @@
 import { Check, ChevronDown, Github, Languages, Package, Settings2, Sparkles } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItemIndicator,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useI18n } from "@/i18n/use-i18n";
 import { WORKSPACES, type Workspace } from "@/lib/hash-workspace";
 import { SUPPORTED_LANGUAGES, type Language } from "@/lib/types";
@@ -29,37 +36,6 @@ export function PlaygroundHeader({
   onToggleSettings,
 }: PlaygroundHeaderProps) {
   const { language, setLanguage, t } = useI18n();
-  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
-  const languageMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!languageMenuOpen) {
-      return;
-    }
-
-    const handlePointerDown = (event: PointerEvent) => {
-      if (!languageMenuRef.current?.contains(event.target as Node)) {
-        setLanguageMenuOpen(false);
-      }
-    };
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setLanguageMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [languageMenuOpen]);
-
-  function selectLanguage(nextLanguage: Language) {
-    setLanguage(nextLanguage);
-    setLanguageMenuOpen(false);
-  }
 
   return (
     <header className="flex min-h-14 flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2 sm:px-4">
@@ -93,54 +69,37 @@ export function PlaygroundHeader({
       </nav>
 
       <div className="ml-auto flex items-center gap-1.5">
-        <div ref={languageMenuRef} className="relative">
-          <button
-            type="button"
-            aria-label={t("header.language")}
-            aria-haspopup="menu"
-            aria-expanded={languageMenuOpen}
-            aria-controls="language-menu"
-            onClick={() => setLanguageMenuOpen((open) => !open)}
-            className="flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-2 text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <Languages className="size-4" />
-            <span className="hidden font-mono text-[10px] font-semibold sm:inline">
-              {LANGUAGE_LABELS[language].code}
-            </span>
-            <ChevronDown
-              className={`size-3 transition-transform ${languageMenuOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-
-          {languageMenuOpen ? (
-            <div
-              id="language-menu"
-              role="menu"
-              className="absolute right-0 top-full z-50 mt-2 w-44 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-2xl duration-150 animate-in fade-in-0 zoom-in-95 slide-in-from-top-2"
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label={t("header.language")}
+              className="group flex h-9 items-center gap-1.5 rounded-md border border-border bg-card px-2 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Languages className="size-4" />
+              <span className="hidden font-mono text-[10px] font-semibold sm:inline">
+                {LANGUAGE_LABELS[language].code}
+              </span>
+              <ChevronDown className="size-3 transition-transform group-data-[state=open]:rotate-180" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuRadioGroup
+              value={language}
+              onValueChange={(value) => setLanguage(value as Language)}
             >
               {SUPPORTED_LANGUAGES.map((locale) => (
-                <button
-                  key={locale}
-                  type="button"
-                  role="menuitemradio"
-                  aria-checked={language === locale}
-                  onClick={() => selectLanguage(locale)}
-                  className={`flex w-full items-center gap-3 rounded px-2.5 py-2 text-left text-xs transition-colors ${
-                    language === locale
-                      ? "bg-secondary text-foreground"
-                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
-                  }`}
-                >
-                  <Check
-                    className={`size-3.5 ${language === locale ? "opacity-100" : "opacity-0"}`}
-                  />
+                <DropdownMenuRadioItem key={locale} value={locale}>
+                  <DropdownMenuItemIndicator className="absolute left-2.5 flex size-3.5 items-center justify-center">
+                    <Check className="size-3.5" />
+                  </DropdownMenuItemIndicator>
                   <span className="flex-1">{LANGUAGE_LABELS[locale].name}</span>
                   <span className="font-mono text-[10px]">{LANGUAGE_LABELS[locale].code}</span>
-                </button>
+                </DropdownMenuRadioItem>
               ))}
-            </div>
-          ) : null}
-        </div>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <a
           href={NPM_URL}

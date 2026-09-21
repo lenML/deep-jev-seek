@@ -142,13 +142,16 @@ export function BatchTable({
         </button>
       </div>
 
-      {columnToDelete ? (
-        <BatchDeleteColumnDialog
-          columnName={columnToDelete.text}
-          onClose={() => setColumnToDelete(null)}
-          onConfirm={confirmDeleteColumn}
-        />
-      ) : null}
+      <BatchDeleteColumnDialog
+        columnName={columnToDelete?.text ?? ""}
+        open={columnToDelete !== null}
+        onConfirm={confirmDeleteColumn}
+        onOpenChange={(open) => {
+          if (!open) {
+            setColumnToDelete(null);
+          }
+        }}
+      />
     </>
   );
 }
