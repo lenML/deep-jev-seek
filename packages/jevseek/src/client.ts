@@ -1,25 +1,21 @@
-import { encodeAnswer } from "./answers";
-import { getQuestionCodes } from "./codes";
 import { mapWithConcurrency } from "./concurrency";
 import { createTransport } from "./client-transport";
-import { JevSeekAbortError, JevSeekTimeoutError, JevSeekValidationError } from "./errors";
+import { JevSeekValidationError } from "./errors";
 import {
   DEFAULT_CONCURRENCY,
   DEFAULT_LLAMACPP_MODEL,
   DEFAULT_MODEL,
   DEFAULT_TIMEOUT_MS,
+  validateMissingLogprobPolicy,
   validateMultimodalData,
   validatePositiveInteger,
   validateProvider,
   validateTimeout,
 } from "./client-validation";
-import { normalizeCandidateLogprobs } from "./logprobs";
-import { buildPrompt, DEFAULT_PROMPT_TEMPLATE } from "./prompt";
-import { resolveRetryOptions, withRetry } from "./retry";
+import { DEFAULT_PROMPT_TEMPLATE } from "./prompt";
+import { completeQuestion } from "./question-completion";
+import { resolveRetryOptions } from "./retry";
 import type {
-  CompletionTransportRequest,
-  DeepSeekFimCompletion,
-  DeepSeekUsage,
   FimTransport,
   JevAnswer,
   JevSeekOptions,
@@ -27,20 +23,12 @@ import type {
   JevSeekQuestionDiagnostic,
   JevSeekResponse,
   JevUsage,
+  MissingLogprobPolicy,
   PromptTemplate,
-  QuestionSet,
   RetryOptions,
   SystemOneRequest,
 } from "./types";
 import { validateQuestions, validateState } from "./validation";
-
-interface CompletedQuestion {
-  questionId: string;
-  answer: JevAnswer;
-  usage: DeepSeekUsage;
-  model?: string;
-  diagnostic: JevSeekQuestionDiagnostic;
-}
 
 export class JevSeekClient {
   readonly model: string;
@@ -50,6 +38,7 @@ export class JevSeekClient {
   readonly retry: RetryOptions;
   readonly diagnosticsEnabledByDefault: boolean;
   readonly promptTemplate: PromptTemplate;
+  readonly missingLogprobPolicy: MissingLogprobPolicy;
 
   private readonly transport: FimTransport;
   private readonly providerOptions: JevSeekOptions["providerOptions"];
@@ -76,6 +65,7 @@ export class JevSeekClient {
     this.diagnosticsEnabledByDefault = false;
     this.providerOptions = options.providerOptions as Record<string, unknown> | undefined;
     this.promptTemplate = options.promptTemplate ?? DEFAULT_PROMPT_TEMPLATE;
+    this.missingLogprobPolicy = validateMissingLogprobPolicy(options.missingLogprobPolicy);
 
     this.transport = createTransport(options, provider);
   }
@@ -91,20 +81,26 @@ export class JevSeekClient {
     const entries = Object.entries(input.questions);
     const requestedModel = input.model ?? this.model;
     const promptTemplate = input.promptTemplate ?? this.promptTemplate;
+    const missingLogprobPolicy = input.missingLogprobPolicy ?? this.missingLogprobPolicy;
 
     const completed = await mapWithConcurrency(
       entries,
       this.concurrency,
       async ([questionId, question]) => {
-        return this.completeQuestion(
-          input.state,
+        return completeQuestion({
+          transport: this.transport,
+          state: input.state,
           questionId,
           question,
-          requestedModel,
+          model: requestedModel,
           promptTemplate,
-          input.multimodal_data,
-          input.signal,
-        );
+          missingLogprobPolicy,
+          retry: this.retry,
+          timeoutMs: this.timeoutMs,
+          ...(this.providerOptions === undefined ? {} : { providerOptions: this.providerOptions }),
+          ...(input.multimodal_data === undefined ? {} : { multimodalData: input.multimodal_data }),
+          ...(input.signal === undefined ? {} : { signal: input.signal }),
+        });
       },
     );
 
@@ -128,101 +124,6 @@ export class JevSeekClient {
       response.diagnostics = { questions: diagnosticQuestions };
     }
     return response;
-  }
-
-  private async completeQuestion(
-    state: SystemOneRequest["state"],
-    questionId: string,
-    question: QuestionSet[string],
-    model: string,
-    promptTemplate: PromptTemplate,
-    multimodalData?: string[],
-    signal?: AbortSignal,
-  ): Promise<CompletedQuestion> {
-    const codes = getQuestionCodes(question);
-    const prompt = buildPrompt(state, question, codes, promptTemplate);
-    const request: CompletionTransportRequest = {
-      maxTokens: 1,
-      temperature: 0,
-      topP: 1,
-      topLogprobs: 20,
-      model,
-      prompt,
-      ...(multimodalData === undefined ? {} : { multimodal_data: multimodalData }),
-      ...(this.providerOptions === undefined ? {} : { providerOptions: this.providerOptions }),
-    };
-    const startedAt = Date.now();
-    const call = await withRetry(
-      async () => {
-        return this.withTimeout(
-          (attemptSignal) => this.transport.complete(request, { signal: attemptSignal }),
-          signal,
-        );
-      },
-      this.retry,
-      signal,
-    );
-
-    const completion: DeepSeekFimCompletion = call.value;
-    const probabilities = normalizeCandidateLogprobs(codes, completion.logprobs, completion.text);
-    const answer = encodeAnswer(question, probabilities, codes);
-    const diagnostic: JevSeekQuestionDiagnostic = {
-      prompt,
-      request,
-      probabilities,
-      sampledText: completion.text,
-      topLogprobs: completion.logprobs?.top_logprobs ?? [],
-      usage: completion.usage,
-      attempts: call.attempts,
-      durationMs: Date.now() - startedAt,
-    };
-    if (completion.requestId !== undefined) {
-      diagnostic.requestId = completion.requestId;
-    }
-
-    return {
-      questionId,
-      answer,
-      usage: completion.usage,
-      model: completion.model,
-      diagnostic,
-    };
-  }
-
-  private async withTimeout<T>(
-    operation: (signal: AbortSignal) => Promise<T>,
-    parentSignal?: AbortSignal,
-  ): Promise<T> {
-    if (parentSignal?.aborted) {
-      throw new JevSeekAbortError(undefined, parentSignal.reason);
-    }
-
-    const controller = new AbortController();
-    let timedOut = false;
-    const onAbort = (): void => {
-      controller.abort(parentSignal?.reason);
-    };
-    parentSignal?.addEventListener("abort", onAbort, { once: true });
-
-    const timer = setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-    }, this.timeoutMs);
-
-    try {
-      return await operation(controller.signal);
-    } catch (error) {
-      if (timedOut) {
-        throw new JevSeekTimeoutError(undefined, error);
-      }
-      if (parentSignal?.aborted) {
-        throw new JevSeekAbortError(undefined, parentSignal.reason);
-      }
-      throw error;
-    } finally {
-      clearTimeout(timer);
-      parentSignal?.removeEventListener("abort", onAbort);
-    }
   }
 }
 

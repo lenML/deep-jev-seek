@@ -1,10 +1,11 @@
 import { JevSeekValidationError } from "./errors";
-import type { JevSeekProvider } from "./types";
+import type { JevSeekProvider, MissingLogprobPolicy } from "./types";
 
 export const DEFAULT_MODEL = "deepseek-flash";
 export const DEFAULT_LLAMACPP_MODEL = "llamacpp";
 export const DEFAULT_CONCURRENCY = 4;
 export const DEFAULT_TIMEOUT_MS = 90_000;
+export const DEFAULT_MISSING_LOGPROB_POLICY: MissingLogprobPolicy = "zero";
 
 export function validatePositiveInteger(value: number, label: string): void {
   if (!Number.isInteger(value) || value < 1) {
@@ -26,6 +27,18 @@ export function validateProvider(value: string | undefined): JevSeekProvider {
     return value;
   }
   throw new JevSeekValidationError('provider must be "deepseek" or "llamacpp"');
+}
+
+export function validateMissingLogprobPolicy(
+  value: MissingLogprobPolicy | undefined,
+): MissingLogprobPolicy {
+  if (value === undefined) {
+    return DEFAULT_MISSING_LOGPROB_POLICY;
+  }
+  if (value === "error" || value === "zero") {
+    return value;
+  }
+  throw new JevSeekValidationError('missingLogprobPolicy must be "error" or "zero"');
 }
 
 export function validateMultimodalData(

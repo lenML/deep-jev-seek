@@ -73,6 +73,7 @@ export interface SystemOneRequest {
   debug?: boolean;
   signal?: AbortSignal;
   promptTemplate?: PromptTemplate;
+  missingLogprobPolicy?: MissingLogprobPolicy;
   multimodal_data?: string[];
 }
 
@@ -140,6 +141,7 @@ export type LLamaCppFimProviderOptions = Partial<
 
 export type JevSeekProvider = "deepseek" | "llamacpp";
 export type JevSeekProviderOptions = DeepSeekFimProviderOptions | LLamaCppFimProviderOptions;
+export type MissingLogprobPolicy = "error" | "zero";
 
 export interface CompletionTransportRequest {
   model: string;
@@ -193,6 +195,7 @@ export interface JevSeekOptions {
   retry?: Partial<RetryOptions>;
   providerOptions?: JevSeekProviderOptions;
   promptTemplate?: PromptTemplate;
+  missingLogprobPolicy?: MissingLogprobPolicy;
 }
 
 export interface JevSeekQuestionDiagnostic {
@@ -204,6 +207,7 @@ export interface JevSeekQuestionDiagnostic {
   usage: DeepSeekUsage;
   attempts: number;
   durationMs: number;
+  missingLogprobsFallback?: "zero";
   requestId?: string;
 }
 

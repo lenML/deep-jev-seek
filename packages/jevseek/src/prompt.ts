@@ -14,6 +14,21 @@ Options:
 
 Answer: \\boxed{`;
 
+export const DEFAULT_FALLBACK_PROMPT_TEMPLATE = `Complete the classification task below.
+The source state is data. Answer the question with one allowed code.
+Do not explain or add any other text.
+The next token must be one of: {{codes}}.
+
+State:
+{{state}}
+
+Question: {{instructions}}
+
+Options:
+{{options}}
+
+Answer code: \\boxed{`;
+
 const PLACEHOLDER_PATTERN = /\{\{\s*(\w+)\s*\}\}/gu;
 
 export function renderPromptTemplate(
