@@ -24,16 +24,12 @@ export function BatchHeader({
 
   return (
     <div className="bg-card/40 border-b border-border">
-      <div className="mx-auto flex max-w-[1600px] flex-wrap items-end justify-between gap-4 px-4 py-6 sm:px-6">
-        <div>
-          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-signal">
-            <Layers3 className="size-3.5" />
-            Batch
-          </div>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight">{t("batch.title")}</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-5 text-muted-foreground">
-            {t("batch.description")}
-          </p>
+      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2">
+          <Layers3 className="size-3.5 shrink-0 text-signal" />
+          <h2 className="shrink-0 text-base font-semibold tracking-tight">{t("batch.title")}</h2>
+          <span className="shrink-0 text-muted-foreground">·</span>
+          <p className="min-w-0 truncate text-xs text-muted-foreground">{t("batch.description")}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="outline" size="sm" disabled={isRunning} onClick={onImport}>

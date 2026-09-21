@@ -21,14 +21,18 @@ export function BenchmarkHeader({
 
   return (
     <div className="bg-card/40 border-b border-border">
-      <div className="mx-auto grid max-w-[1600px] gap-4 px-4 py-6 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_repeat(4,9rem)]">
-        <div className="sm:col-span-2 lg:col-span-1">
-          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-signal">
-            <Database className="size-3.5" />
+      <div className="mx-auto grid max-w-[1600px] items-center gap-3 px-4 py-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_repeat(4,9rem)]">
+        <div className="flex min-w-0 items-center gap-2 sm:col-span-2 lg:col-span-1">
+          <Database className="size-3.5 shrink-0 text-signal" />
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-signal">
             {sourceName}
-          </div>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight">{t("benchmark.title")}</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-5 text-muted-foreground">
+          </span>
+          <span className="shrink-0 text-muted-foreground">·</span>
+          <h2 className="shrink-0 text-base font-semibold tracking-tight">
+            {t("benchmark.title")}
+          </h2>
+          <span className="shrink-0 text-muted-foreground">·</span>
+          <p className="min-w-0 truncate text-xs text-muted-foreground">
             {t("benchmark.description")}
           </p>
         </div>
@@ -62,9 +66,11 @@ function BenchmarkMetric({
   signal?: boolean;
 }) {
   return (
-    <div className="rounded-md border border-border bg-background p-3">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-      <p className={`mt-2 font-mono text-xl ${signal ? "text-signal" : ""}`}>{value}</p>
+    <div className="flex min-w-0 items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2">
+      <p className="truncate text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+        {label}
+      </p>
+      <p className={`shrink-0 font-mono text-base ${signal ? "text-signal" : ""}`}>{value}</p>
     </div>
   );
 }

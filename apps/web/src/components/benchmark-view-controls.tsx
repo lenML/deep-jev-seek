@@ -21,9 +21,9 @@ export function BenchmarkViewControls({
   const { t } = useI18n();
 
   return (
-    <div className="flex flex-wrap items-end justify-between gap-3 rounded-lg border border-border bg-card p-3">
-      <div className="space-y-2">
-        <span className="text-xs font-medium">{t("benchmark.view")}</span>
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
+      <div className="flex items-center gap-2">
+        <span className="shrink-0 text-xs font-medium">{t("benchmark.view")}</span>
         <div className="flex rounded-md border border-border bg-background p-0.5">
           {(
             [
@@ -49,8 +49,8 @@ export function BenchmarkViewControls({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="benchmark-columns" className="block text-xs font-medium">
+      <div className="flex items-center gap-2">
+        <label htmlFor="benchmark-columns" className="shrink-0 text-xs font-medium">
           {t("benchmark.columns")}
         </label>
         <select

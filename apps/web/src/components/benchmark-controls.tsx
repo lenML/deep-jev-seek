@@ -50,9 +50,9 @@ export function BenchmarkControls({
 
   return (
     <div className="space-y-4 rounded-lg border border-border bg-card p-4">
-      <div className="grid gap-3 lg:grid-cols-[minmax(16rem,24rem)_minmax(0,1fr)]">
-        <div className="space-y-2">
-          <label htmlFor="benchmark-source" className="text-xs font-medium">
+      <div className="grid items-center gap-3 lg:grid-cols-[minmax(16rem,24rem)_minmax(0,1fr)]">
+        <div className="flex items-center gap-2">
+          <label htmlFor="benchmark-source" className="shrink-0 text-xs font-medium">
             {t("benchmark.source")}
           </label>
           <select
@@ -60,7 +60,7 @@ export function BenchmarkControls({
             value={selectedSourceId}
             disabled={isLoading || isRunning}
             onChange={(event) => onSourceChange(event.target.value)}
-            className="focus:ring-ring/20 h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2"
+            className="focus:ring-ring/20 h-9 min-w-0 flex-1 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2"
           >
             {BUILT_IN_BENCHMARKS.map((source) => (
               <option key={source.id} value={source.id}>
@@ -70,9 +70,7 @@ export function BenchmarkControls({
             <option value={CUSTOM_BENCHMARK_ID}>{t("benchmark.custom")}</option>
           </select>
         </div>
-        <p className="self-end pb-2 text-[11px] leading-4 text-muted-foreground">
-          {t("benchmark.formatHint")}
-        </p>
+        <p className="text-[11px] leading-4 text-muted-foreground">{t("benchmark.formatHint")}</p>
       </div>
 
       {customSelected ? (
@@ -99,9 +97,9 @@ export function BenchmarkControls({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="space-y-2">
-          <label htmlFor="benchmark-count" className="text-xs font-medium">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <label htmlFor="benchmark-count" className="shrink-0 text-xs font-medium">
             {t("benchmark.count")}
           </label>
           <select
