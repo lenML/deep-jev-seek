@@ -4,10 +4,10 @@
 
 `@lenml/jevseek` 提供接近 TypeSafe Jev SystemOne 的 API：接收 `state` 与 `questions`，返回 `answers` 与 `usage`。底层通过 DeepSeek FIM 或 llama.cpp Completion API 获取每个候选答案的 token logprob，再转换为 Jev 风格的 choice、score、noul 响应。
 
-同时提供：
+还包含：
 
-1. 纯前端 GitHub Pages WebUI，浏览器直接使用用户自己的 DeepSeek API Key。
-2. 极简 Bun HTTP 服务及 Docker / GHCR 镜像，把 Jev 风格 HTTP 请求转发并转换到 DeepSeek。
+1. 纯前端 GitHub Pages WebUI，浏览器直连 DeepSeek 或 llama.cpp。
+2. Bun HTTP 服务及 Docker / GHCR 镜像，接收 Jev 风格请求并转换到 DeepSeek。
 
 ## 2. 来源
 
@@ -46,7 +46,7 @@ const result = await client.systemOne({
 });
 ```
 
-每个问题独立请求一次 DeepSeek。问题 key 只用于组装响应，不发送给 DeepSeek。这样与 Jev 文档中「key is not sent to the model」的语义一致，也避免 key 名影响模型判断。
+每个问题独立请求一次 DeepSeek。问题 key 只用于组装响应，不发送给 DeepSeek，与 Jev 文档中「key is not sent to the model」的语义一致，也避免 key 名影响模型判断。
 
 ### 3.1 Prompt
 
@@ -85,7 +85,7 @@ JevBench Easy 公开集在本地 llama.cpp completion 端点复测：原序 48/4
 - `score`：按 criteria 层级顺序生成 `0`、`1`、`2` 等代码。
 - `noul`：`0` 表示 false，`1` 表示 true。
 
-首版限制每个问题单次最多 20 个可见候选。Jev 的 choice 文档允许 255 个候选，但 DeepSeek 单次最多返回 20 个 logprob 候选，超过该数量无法得到可靠的统一概率分布。
+当前每个问题单次最多使用 20 个可见候选。Jev 的 choice 文档允许 255 个候选，但 DeepSeek 单次最多返回 20 个 logprob 候选，超过该数量无法得到可靠的统一概率分布。
 
 若要完整支持 255 个 choice，需要增加分组分类和校准方案；超过 20 个候选不能静默截断。
 
@@ -246,12 +246,13 @@ API Key 优先读取请求 `Authorization: Bearer ...`，其次读取 `DEEPSEEK_
 
 核心能力：
 
-- 填写 DeepSeek API Key、Base URL、模型。
-- 编辑 state 与 questions JSON。
-- 调用 JevSeek `systemOne` 能力。
-- 展示 answers、usage、原始响应与错误。
+- 配置 DeepSeek 或 llama.cpp provider、Base URL、模型与 API Key。
+- Playground 提供 noul、choice、score 表单预设和 JSON 编辑，展示 answers、usage、概率、原始请求与响应。
+- Benchmark 支持内置数据集、外部 URL、内存缓存、概率视图、耗时统计和 JSON/CSV 导出。
+- Batch 支持 CSV、JSONL、JSON 数组导入，公共 Prompt、可编辑行列和批量概率评估。
 - Key 可保存到 `sessionStorage` 或 `localStorage`，并在界面中明确选择。
-- 编辑、重置并持久化 prompt 模板。
+- prompt 模板可编辑、重置并持久化。
+- 界面支持 English、简体中文、日本語、한국어。
 - 请求完全在浏览器内发起，不经过项目服务器。
 
 ## 7. Docker / CI
@@ -287,8 +288,8 @@ ghcr.io/<owner>/<repo>:<sha>
 - DeepSeek FIM logprobs 只提供 top N，单次最多 20。
 - 每个问题一次请求，问题多时成本线性增长。
 - 浏览器直连 DeepSeek 依赖上游 CORS 与浏览器网络环境。
-- 首版不支持 stream、batch 或 255 choice 的完整概率恢复。
-- WebUI 的 Key 由调用方自带，留在浏览器。
+- 服务端 API 不支持流式输出或 255 choice 的完整概率恢复。
+- WebUI 的 Key 由调用方自带，只保存在浏览器。
 
 ## 10. 验收标准
 

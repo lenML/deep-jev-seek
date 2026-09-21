@@ -7,13 +7,13 @@
 
 用 DeepSeek FIM 或 llama.cpp Completion API 提供 Jev / TypeSafe SystemOne 风格的离散决策接口。
 
-项目有三个交付物：
+项目包含三个部分：
 
 - `@lenml/jevseek`：TypeScript npm 核心包。
 - React WebUI：纯浏览器工作台，可连接 DeepSeek 或 llama.cpp。
 - Bun Docker 镜像：接收 Jev 风格 HTTP 请求，返回 Jev 风格结果。
 
-## 工作方式
+## 请求流程
 
 每个 choice、score 或 noul 问题都会生成一次 completion 请求。模型只输出候选码，JevSeek 读取候选 token 概率，归一化后生成 choice、score 或 noul 答案。
 
@@ -28,7 +28,7 @@
 pnpm add @lenml/jevseek
 ```
 
-支持 Node.js 18+、Bun、Workers 与浏览器。客户端支持超时、`AbortSignal`、指数退避、`Retry-After`、请求并发限制、可注入 `fetch` / transport，以及包含 prompt、概率、usage 和 request ID 的 debug 诊断。
+支持 Node.js 18+、Bun、Workers 与浏览器。客户端提供超时、`AbortSignal`、指数退避、`Retry-After`、并发限制、可注入 `fetch` 或 transport，以及含 prompt、概率、usage 和 request ID 的 debug 诊断。
 
 ```ts
 import { createJevSeek } from "@lenml/jevseek";
@@ -109,7 +109,7 @@ prompt 必须包含与每个数组项对应的服务器媒体标记。模型需�
 
 响应缺少候选 logprob 时，客户端自动使用严格候选码模板 `DEFAULT_FALLBACK_PROMPT_TEMPLATE` 重试。严格重试仍失败时，默认 `missingLogprobPolicy: "zero"` 返回全 0 概率和 0 置信度；设为 `"error"` 可保留报错。该配置可在客户端创建时设置，也可在单次 `systemOne` 请求中覆盖。
 
-单次请求覆盖示例：
+请求级覆盖：
 
 ```ts
 const result = await client.systemOne({
@@ -128,7 +128,7 @@ Answer code:`,
 });
 ```
 
-本地 llama.cpp 可用 JevBench Easy 公开集复跑模板：
+在本地 llama.cpp 上，可用 JevBench Easy 公开集复测模板：
 
 ```bash
 pnpm prompt:benchmark
@@ -144,7 +144,7 @@ pnpm prompt:benchmark
 https://lenml.github.io/deep-jev-seek/
 ```
 
-浏览器可直接连接 DeepSeek 或 llama.cpp。DeepSeek API Key 默认保存在当前标签页的 `sessionStorage`；选择「当前浏览器」后改用 `localStorage`。项目不代理、不托管 Key。
+浏览器可直接连接 DeepSeek 或 llama.cpp。DeepSeek API Key 默认保存在当前标签页的 `sessionStorage`；选择「当前浏览器」后改用 `localStorage`。请求直接从浏览器发往配置的 provider，项目服务端不代理请求，也不保存 Key。
 
 - `Playground`：按 `noul`、`choice`、`score` 三类预设填写表单，也可直接编辑 JSON；支持修改 prompt 模板、预览 prompt、查看原始请求与响应。
 - `Benchmark`：内置 MMLU-Pro validation、JevBench Easy / Hard / Original，也支持外部 URL 与常见 JSON、JSONL、CSV、TSV、Hugging Face rows 格式。数据集缓存在内存中，结果支持概率进度条、题目耗时、卡片/表格视图、动态列数与 JSON/CSV 导出。
@@ -238,7 +238,7 @@ pnpm stats
 pnpm stats:check
 ```
 
-`pnpm stats` 按单文件行数或字符数输出代码规模，`pnpm stats --sort chars` 按字符数排序。默认将 250 行以上文件标记为 `OVER`；CI 使用 `pnpm stats:check` 阻止超长文件进入主分支。
+`pnpm stats` 按单文件行数或字符数输出代码规模，`pnpm stats --sort chars` 按字符数排序。默认将 250 行以上的文件标记为 `OVER`；CI 用 `pnpm stats:check` 检查超长文件。
 
 目录结构：
 

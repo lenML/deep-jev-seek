@@ -91,7 +91,7 @@ console.log(result.usage);
 
 ## Provider 模式
 
-默认 provider 是 `deepseek`，请求 `POST /beta/completions`。切换 `provider: "llamacpp"` 后，客户端请求 llama.cpp 原生 `POST /completion`，并把 `n_probs` 作为候选概率来源。
+默认 provider 是 `deepseek`，请求 `POST /beta/completions`。`provider` 改为 `"llamacpp"` 后，客户端请求 llama.cpp 原生 `POST /completion`，并用 `n_probs` 获取候选概率。
 
 ```ts
 const local = createJevSeek({
@@ -111,7 +111,7 @@ const result = await local.systemOne({
 });
 ```
 
-`baseUrl` 可以带 `/v1`；transport 会移除该后缀，再请求 `/completion`。也可以直接填 `http://127.0.0.1:8080`。
+`baseUrl` 支持带 `/v1`；transport 会移除该后缀，再请求 `/completion`。也可直接填 `http://127.0.0.1:8080`。
 
 ### multimodal_data
 
@@ -177,7 +177,7 @@ Answer code:`,
 
 响应没有候选 logprob 时，客户端会使用 `DEFAULT_FALLBACK_PROMPT_TEMPLATE` 再请求一次。严格重试仍没有候选时，`missingLogprobPolicy` 决定结果：
 
-- `"zero"`：默认。返回全 0 概率、`confidence: 0`，用于 benchmark 和批量任务保持整批完成。
+- `"zero"`：默认。返回全 0 概率和 `confidence: 0`，避免 benchmark 与批量任务中断。
 - `"error"`：抛出 `PARSE_ERROR`。
 
 ## HTTP 服务
@@ -208,7 +208,7 @@ docker run --rm -p 8787:8787 \
   ghcr.io/lenml/deep-jev-seek:latest
 ```
 
-Linux 下若要访问宿主机模型服务，按 Docker 网络配置替换 `LLAMACPP_BASE_URL`。llama.cpp 模式的 `LLAMACPP_API_KEY` 可省略。
+Linux 下访问宿主机模型服务时，按 Docker 网络配置替换 `LLAMACPP_BASE_URL`。llama.cpp 模式的 `LLAMACPP_API_KEY` 可省略。
 
 模型映射：
 
@@ -223,4 +223,4 @@ Linux 下若要访问宿主机模型服务，按 Docker 网络配置替换 `LLAM
 
 ## 浏览器
 
-WebUI 可切换 DeepSeek 与 llama.cpp。DeepSeek API Key 只保存在浏览器中。生产页面由 GitHub Pages 托管，不代理请求，也不托管 Key。
+WebUI 可切换 DeepSeek 与 llama.cpp。DeepSeek API Key 只保存在浏览器中。生产页面由 GitHub Pages 托管，请求直接从浏览器发往配置的 provider，服务端不代理请求，也不保存 Key。

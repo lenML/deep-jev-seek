@@ -12,7 +12,7 @@ pnpm build
 pnpm --filter @lenml/jevseek publish --access public
 ```
 
-发布前确认：
+发布前检查：
 
 - `packages/jevseek/package.json` 版本已递增。
 - 工作树干净。
