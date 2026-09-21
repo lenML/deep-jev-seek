@@ -175,6 +175,11 @@ Answer code:`,
 
 函数模板收到 `state`、`question`、`instructions`、`options`、`questionType`、`codes` 和 `codeList`，并返回完整 prompt 字符串。默认模板通过 `DEFAULT_PROMPT_TEMPLATE` 导出。
 
+响应没有候选 logprob 时，客户端会使用 `DEFAULT_FALLBACK_PROMPT_TEMPLATE` 再请求一次。严格重试仍没有候选时，`missingLogprobPolicy` 决定结果：
+
+- `"zero"`：默认。返回全 0 概率、`confidence: 0`，用于 benchmark 和批量任务保持整批完成。
+- `"error"`：抛出 `PARSE_ERROR`。
+
 ## HTTP 服务
 
 ```bash

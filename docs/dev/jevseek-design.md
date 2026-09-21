@@ -71,6 +71,8 @@ Answer: \boxed{
 
 JevBench Easy 公开集在本地 llama.cpp completion 端点复测：原序 48/48；choice 原序、逆序、轮转各三轮共 360/360，每题三种顺序全部稳定。该结果用于模板回归，不代表其他模型的绝对准确率。
 
+候选 logprob 缺失时，客户端会使用严格候选码模板重试。严格重试仍失败时，默认返回全 0 概率并保留诊断；`missingLogprobPolicy: "error"` 可恢复抛错。
+
 状态序列化保持稳定：对象 key 排序，避免等价状态因 JS 属性顺序变化导致缓存与结果不稳定。
 
 模板可通过 `createJevSeek({ promptTemplate })` 或 `systemOne({ promptTemplate })` 覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。请求级设置优先于客户端级设置。

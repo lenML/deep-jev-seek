@@ -81,6 +81,6 @@ The default llama.cpp base URL is `http://127.0.0.1:8080/v1`.
 
 Set `promptTemplate` in `createJevSeek()` for a client-level override, or in `systemOne()` for one request. String templates support `{{state}}`, `{{question}}`, `{{instructions}}`, `{{options}}`, `{{questionType}}`, and `{{codes}}`; function templates receive the structured rendering context.
 
-The default template uses readable option lines and ends with `Answer: \boxed{`. Reproduce the repository prompt score against JevBench Easy with `pnpm prompt:benchmark`.
+The default template uses readable option lines and ends with `Answer: \boxed{`. If the response contains no candidate logprob, the client retries with `DEFAULT_FALLBACK_PROMPT_TEMPLATE`. If that still fails, the default `missingLogprobPolicy: "zero"` returns zero probabilities with confidence `0`; set it to `"error"` to retain the parse error. Reproduce the repository prompt score against JevBench Easy with `pnpm prompt:benchmark`.
 
 See the repository documentation for the full HTTP and browser API.

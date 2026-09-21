@@ -102,6 +102,8 @@ prompt 必须包含与每个数组项对应的服务器媒体标记。模型需�
 
 默认模板用可读选项行和 `Answer: \boxed{` 结尾。开发者可在客户端创建时覆盖，也可在单次 `systemOne` 请求中覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
 
+响应缺少候选 logprob 时，客户端自动使用严格候选码模板重试。严格重试仍失败时，默认 `missingLogprobPolicy: "zero"` 返回全 0 概率和 0 置信度；设为 `"error"` 可保留报错。
+
 本地 llama.cpp 可用 JevBench Easy 公开集复跑模板：
 
 ````bash
