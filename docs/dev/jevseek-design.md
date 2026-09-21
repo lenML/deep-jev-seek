@@ -69,7 +69,7 @@ Answer: \boxed{
 
 默认模板按 completion 语义编写，不使用聊天式角色口吻。选项使用 `候选码 = 描述`，结尾让下一个 token 直接落在候选码位置。内置 `{{instructions}}` 和 `{{options}}` 便于自定义模板直接使用可读字段；`{{question}}` 继续提供 code-mapped JSON。
 
-JevBench Easy 公开集在本地 llama.cpp completion 端点复测：原序 48/48；choice 原序、逆序、轮转各三轮共 324/324，每题三种顺序全部稳定。该结果用于模板回归，不代表其他模型的绝对准确率。
+JevBench Easy 公开集在本地 llama.cpp completion 端点复测：原序 48/48；choice 原序、逆序、轮转各三轮共 360/360，每题三种顺序全部稳定。该结果用于模板回归，不代表其他模型的绝对准确率。
 
 状态序列化保持稳定：对象 key 排序，避免等价状态因 JS 属性顺序变化导致缓存与结果不稳定。
 
