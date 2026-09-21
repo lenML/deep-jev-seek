@@ -12,6 +12,22 @@ const KEY_MODE_STORAGE_KEY = "jevseek.workbench.key-mode";
 const PREFERENCES_STORAGE_KEY = "jevseek.workbench.preferences";
 const LANGUAGE_STORAGE_KEY = "jevseek.workbench.language";
 
+const LEGACY_DEFAULT_PROMPT_TEMPLATE = `You are a deterministic classifier.
+Evaluate the source state against one question.
+Return exactly one option code from the allowed codes.
+Do not explain, reason, quote, or emit any other text.
+
+<state>
+{{state}}
+</state>
+
+<question>
+{{question}}
+</question>
+
+Allowed codes: {{codes}}
+Answer code: "`;
+
 export const DEFAULT_BASE_URLS: Record<JevSeekProvider, string> = {
   deepseek: "https://api.deepseek.com/beta",
   llamacpp: "http://127.0.0.1:8080/v1",
@@ -134,6 +150,16 @@ export function persistLanguage(language: Language) {
   window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
+export function migrateLegacyPromptTemplate(
+  value: unknown,
+  fallback = DEFAULT_PROMPT_TEMPLATE,
+): string {
+  if (typeof value !== "string") {
+    return fallback;
+  }
+  return value === LEGACY_DEFAULT_PROMPT_TEMPLATE ? fallback : value;
+}
+
 export function readPreferences(): StoredPreferences {
   const fallback = {
     baseUrl: DEFAULT_BASE_URLS.deepseek,
@@ -153,8 +179,7 @@ export function readPreferences(): StoredPreferences {
       baseUrl: stored.baseUrl || fallback.baseUrl,
       model: stored.model || fallback.model,
       provider: stored.provider === "llamacpp" ? "llamacpp" : fallback.provider,
-      promptTemplate:
-        typeof stored.promptTemplate === "string" ? stored.promptTemplate : fallback.promptTemplate,
+      promptTemplate: migrateLegacyPromptTemplate(stored.promptTemplate, fallback.promptTemplate),
     };
   } catch {
     return fallback;
