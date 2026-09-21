@@ -1,5 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { BenchmarkControls } from "@/components/benchmark-controls";
 import { BenchmarkHeader } from "@/components/benchmark-header";
@@ -22,7 +23,6 @@ import {
   loadBenchmarkDataset,
   runBenchmarkRows,
   type BenchmarkResult,
-  type BenchmarkRow,
   type BenchmarkSource,
 } from "@/lib/benchmark";
 import { useWorkbenchStore } from "@/store/workbench";
@@ -60,76 +60,41 @@ export function BenchmarkPanel() {
   const [customUrlInput, setCustomUrlInput] = useState("");
   const [customUrl, setCustomUrl] = useState("");
   const [reloadVersion, setReloadVersion] = useState(0);
-  const [rows, setRows] = useState<BenchmarkRow[]>([]);
-  const [total, setTotal] = useState(0);
-  const [runCount, setRunCount] = useState(5);
+  const [runCount, setRunCount] = useState<number | null>(null);
   const [results, setResults] = useState<Record<string, BenchmarkResult>>({});
   const [lastRunLatencyMs, setLastRunLatencyMs] = useState<number | null>(null);
-  const [isLoading, setLoading] = useState(true);
   const [isRunning, setRunning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<BenchmarkViewMode>("cards");
   const [columnCount, setColumnCount] = useState<BenchmarkColumnCount>(0);
-  const sourceName = sourceForSelection(selectedSourceId, customUrl)?.name ?? t("benchmark.custom");
-
-  useEffect(() => {
-    const nextSource = sourceForSelection(selectedSourceId, customUrl);
-    let active = true;
-
-    if (!nextSource) {
-      return () => {
-        active = false;
-      };
-    }
-
-    loadBenchmarkDataset(nextSource)
-      .then((dataset) => {
-        if (!active) {
-          return;
-        }
-        setRows(dataset.rows);
-        setTotal(dataset.total);
-        setRunCount(Math.min(5, dataset.rows.length));
-      })
-      .catch((loadError: unknown) => {
-        if (active) {
-          setError(errorMessage(loadError));
-        }
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [selectedSourceId, customUrl, reloadVersion]);
+  const activeSource = sourceForSelection(selectedSourceId, customUrl);
+  const sourceName = activeSource?.name ?? t("benchmark.custom");
+  const datasetQuery = useQuery({
+    enabled: activeSource !== null,
+    queryKey: ["benchmark-dataset", activeSource?.id ?? "none", reloadVersion],
+    queryFn: ({ signal }) => loadBenchmarkDataset(activeSource!, { signal }),
+  });
+  const rows = datasetQuery.data?.rows ?? [];
+  const total = datasetQuery.data?.total ?? 0;
+  const isLoading = activeSource !== null && datasetQuery.isPending;
+  const error = runError ?? (datasetQuery.error ? errorMessage(datasetQuery.error) : null);
+  const effectiveRunCount =
+    runCount === null ? Math.min(5, rows.length) : Math.min(runCount, rows.length);
 
   const completed = Object.values(results).length;
   const correct = Object.values(results).filter((result) => result.correct).length;
   const accuracy = completed === 0 ? null : (correct / completed) * 100;
 
-  function resetDatasetState(loading: boolean) {
-    setRows([]);
-    setTotal(0);
-    setResults({});
-    setLastRunLatencyMs(null);
-    setError(null);
-    setLoading(loading);
-  }
-
   async function handleRun() {
     setRunning(true);
-    setError(null);
+    setRunError(null);
     try {
-      const selectedRows = rows.slice(0, runCount);
+      const selectedRows = rows.slice(0, effectiveRunCount);
       const output = await runBenchmarkRows({ connection, rows: selectedRows });
       setResults((current) => ({ ...current, ...output.results }));
       setLastRunLatencyMs(output.latencyMs);
     } catch (runError) {
-      setError(errorMessage(runError));
+      setRunError(errorMessage(runError));
     } finally {
       setRunning(false);
     }
@@ -138,17 +103,24 @@ export function BenchmarkPanel() {
   function handleLoadCustom() {
     const nextSource = createCustomBenchmarkSource(customUrlInput);
     if (!nextSource) {
-      setError(t("benchmark.invalidUrl"));
+      setRunError(t("benchmark.invalidUrl"));
       return;
     }
-    resetDatasetState(true);
+    resetDatasetState();
     setCustomUrl(nextSource.url);
     setReloadVersion((current) => current + 1);
   }
 
   function handleSourceChange(sourceId: string) {
     setSelectedSourceId(sourceId);
-    resetDatasetState(sourceId !== CUSTOM_BENCHMARK_ID || Boolean(customUrl));
+    resetDatasetState();
+  }
+
+  function resetDatasetState() {
+    setResults({});
+    setLastRunLatencyMs(null);
+    setRunCount(null);
+    setRunError(null);
   }
 
   function handleClear() {
@@ -186,7 +158,7 @@ export function BenchmarkPanel() {
           isLoading={isLoading}
           isRunning={isRunning}
           rowCount={rows.length}
-          runCount={runCount}
+          runCount={effectiveRunCount}
           selectedSourceId={selectedSourceId}
           hasResults={completed > 0}
           onClear={handleClear}
