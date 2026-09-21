@@ -17,9 +17,16 @@ export const en = {
   "header.benchmark": "Benchmark",
   "input.title": "Input",
   "preview.title": "Preview",
-  "benchmark.title": "MMLU-Pro benchmark",
+  "benchmark.title": "Benchmark",
   "benchmark.description":
-    "Run MMLU-Pro validation questions through the current connection and compare model choices with the dataset labels.",
+    "Run public or custom datasets through the current connection and compare model choices with dataset labels.",
+  "benchmark.source": "Dataset",
+  "benchmark.custom": "Custom URL",
+  "benchmark.url": "Dataset URL",
+  "benchmark.load": "Load",
+  "benchmark.formatHint":
+    "Auto-detects JevBench JSONL, JSON arrays, Hugging Face rows, MMLU-style records, and CSV/TSV.",
+  "benchmark.invalidUrl": "Enter a valid HTTP or HTTPS dataset URL.",
   "benchmark.total": "Loaded",
   "benchmark.completed": "Completed",
   "benchmark.accuracy": "Accuracy",

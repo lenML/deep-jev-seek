@@ -19,9 +19,16 @@ export const ko: Record<keyof typeof enMessages, string> = {
   "header.benchmark": "Benchmark",
   "input.title": "입력",
   "preview.title": "미리보기",
-  "benchmark.title": "MMLU-Pro 벤치마크",
+  "benchmark.title": "벤치마크",
   "benchmark.description":
-    "현재 연결로 MMLU-Pro validation 문제를 실행하고 모델의 선택을 데이터셋 정답과 비교합니다.",
+    "현재 연결로 공개 또는 사용자 지정 데이터셋을 실행하고 모델의 선택을 정답과 비교합니다.",
+  "benchmark.source": "데이터셋",
+  "benchmark.custom": "사용자 지정 URL",
+  "benchmark.url": "데이터셋 URL",
+  "benchmark.load": "불러오기",
+  "benchmark.formatHint":
+    "JevBench JSONL, JSON 배열, Hugging Face rows, MMLU 형식, CSV/TSV를 자동 감지합니다.",
+  "benchmark.invalidUrl": "올바른 HTTP 또는 HTTPS 데이터셋 URL을 입력하세요.",
   "benchmark.total": "불러옴",
   "benchmark.completed": "완료",
   "benchmark.accuracy": "정확도",

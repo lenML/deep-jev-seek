@@ -2,12 +2,12 @@ import { CheckCircle2, ChevronDown, CircleX } from "lucide-react";
 import { useState } from "react";
 
 import { useI18n } from "@/i18n/use-i18n";
-import type { BenchmarkResult, MMLUProRow } from "@/lib/benchmark";
+import type { BenchmarkResult, BenchmarkRow } from "@/lib/benchmark";
 
 interface BenchmarkQuestionProps {
   index: number;
   result?: BenchmarkResult;
-  row: MMLUProRow;
+  row: BenchmarkRow;
 }
 
 function formatPercent(value: number): string {

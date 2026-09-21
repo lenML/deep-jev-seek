@@ -1,33 +1,43 @@
-import { Database, LoaderCircle, Play, RotateCcw } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { BenchmarkControls } from "@/components/benchmark-controls";
+import { BenchmarkHeader } from "@/components/benchmark-header";
 import { BenchmarkQuestion } from "@/components/benchmark-question";
-import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/use-i18n";
 import {
+  BUILT_IN_BENCHMARKS,
+  CUSTOM_BENCHMARK_ID,
   benchmarkQuestionKey,
-  benchmarkResultFromAnswer,
-  buildBenchmarkQuestions,
-  loadCachedMMLUProRows,
+  createCustomBenchmarkSource,
+  findBuiltInBenchmark,
+  loadBenchmarkDataset,
+  runBenchmarkRows,
   type BenchmarkResult,
-  type MMLUProRow,
+  type BenchmarkRow,
+  type BenchmarkSource,
 } from "@/lib/benchmark";
-import { runJevSeek } from "@/lib/run";
 import { useWorkbenchStore } from "@/store/workbench";
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function countOptions(total: number): number[] {
-  const options = [1, 5, 10, 20, 50, 100].filter((count) => count < total);
-  return [...options, total].filter((count, index, all) => all.indexOf(count) === index);
+function sourceForSelection(sourceId: string, customUrl: string): BenchmarkSource | null {
+  if (sourceId !== CUSTOM_BENCHMARK_ID) {
+    return findBuiltInBenchmark(sourceId) ?? BUILT_IN_BENCHMARKS[0]!;
+  }
+  return createCustomBenchmarkSource(customUrl);
 }
 
 export function BenchmarkPanel() {
   const { t } = useI18n();
   const connection = useWorkbenchStore((state) => state.connection);
-  const [rows, setRows] = useState<MMLUProRow[]>([]);
+  const [selectedSourceId, setSelectedSourceId] = useState(BUILT_IN_BENCHMARKS[0]!.id);
+  const [customUrlInput, setCustomUrlInput] = useState("");
+  const [customUrl, setCustomUrl] = useState("");
+  const [reloadVersion, setReloadVersion] = useState(0);
+  const [rows, setRows] = useState<BenchmarkRow[]>([]);
   const [total, setTotal] = useState(0);
   const [runCount, setRunCount] = useState(5);
   const [results, setResults] = useState<Record<string, BenchmarkResult>>({});
@@ -35,10 +45,19 @@ export function BenchmarkPanel() {
   const [isLoading, setLoading] = useState(true);
   const [isRunning, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const sourceName = sourceForSelection(selectedSourceId, customUrl)?.name ?? t("benchmark.custom");
 
   useEffect(() => {
+    const nextSource = sourceForSelection(selectedSourceId, customUrl);
     let active = true;
-    loadCachedMMLUProRows(fetch)
+
+    if (!nextSource) {
+      return () => {
+        active = false;
+      };
+    }
+
+    loadBenchmarkDataset(nextSource)
       .then((dataset) => {
         if (!active) {
           return;
@@ -57,44 +76,32 @@ export function BenchmarkPanel() {
           setLoading(false);
         }
       });
+
     return () => {
       active = false;
     };
-  }, []);
+  }, [selectedSourceId, customUrl, reloadVersion]);
 
   const completed = Object.values(results).length;
   const correct = Object.values(results).filter((result) => result.correct).length;
   const accuracy = completed === 0 ? null : (correct / completed) * 100;
-  const canRun =
-    !isRunning &&
-    rows.length > 0 &&
-    (connection.provider === "llamacpp" || Boolean(connection.apiKey.trim()));
+
+  function resetDatasetState(loading: boolean) {
+    setRows([]);
+    setTotal(0);
+    setResults({});
+    setLastRunLatencyMs(null);
+    setError(null);
+    setLoading(loading);
+  }
 
   async function handleRun() {
     setRunning(true);
     setError(null);
     try {
       const selectedRows = rows.slice(0, runCount);
-      const output = await runJevSeek({
-        connection,
-        state: { dataset: "TIGER-Lab/MMLU-Pro", split: "validation" },
-        questions: buildBenchmarkQuestions(selectedRows),
-      });
-      const diagnostics = output.result.diagnostics?.questions;
-      const nextResults = Object.fromEntries(
-        selectedRows.map((row) => {
-          const key = benchmarkQuestionKey(row);
-          return [
-            key,
-            benchmarkResultFromAnswer(
-              row,
-              output.result.answers[key],
-              diagnostics?.[key]?.durationMs,
-            ),
-          ];
-        }),
-      );
-      setResults((current) => ({ ...current, ...nextResults }));
+      const output = await runBenchmarkRows({ connection, rows: selectedRows });
+      setResults((current) => ({ ...current, ...output.results }));
       setLastRunLatencyMs(output.latencyMs);
     } catch (runError) {
       setError(errorMessage(runError));
@@ -103,103 +110,53 @@ export function BenchmarkPanel() {
     }
   }
 
+  function handleLoadCustom() {
+    const nextSource = createCustomBenchmarkSource(customUrlInput);
+    if (!nextSource) {
+      setError(t("benchmark.invalidUrl"));
+      return;
+    }
+    resetDatasetState(true);
+    setCustomUrl(nextSource.url);
+    setReloadVersion((current) => current + 1);
+  }
+
+  function handleSourceChange(sourceId: string) {
+    setSelectedSourceId(sourceId);
+    resetDatasetState(sourceId !== CUSTOM_BENCHMARK_ID || Boolean(customUrl));
+  }
+
+  function handleClear() {
+    setResults({});
+    setLastRunLatencyMs(null);
+  }
+
   return (
     <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-background">
-      <div className="bg-card/40 border-b border-border">
-        <div className="mx-auto grid max-w-[1600px] gap-4 px-4 py-6 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_repeat(4,9rem)]">
-          <div className="sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.14em] text-signal">
-              <Database className="size-3.5" />
-              MMLU-Pro
-            </div>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight">{t("benchmark.title")}</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-5 text-muted-foreground">
-              {t("benchmark.description")}
-            </p>
-          </div>
-          <div className="rounded-md border border-border bg-background p-3">
-            <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              {t("benchmark.total")}
-            </p>
-            <p className="mt-2 font-mono text-xl">{total || "—"}</p>
-          </div>
-          <div className="rounded-md border border-border bg-background p-3">
-            <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              {t("benchmark.completed")}
-            </p>
-            <p className="mt-2 font-mono text-xl">{completed}</p>
-          </div>
-          <div className="rounded-md border border-border bg-background p-3">
-            <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              {t("benchmark.accuracy")}
-            </p>
-            <p className="mt-2 font-mono text-xl text-signal">
-              {accuracy === null ? "—" : `${accuracy.toFixed(1)}%`}
-            </p>
-          </div>
-          <div className="rounded-md border border-border bg-background p-3">
-            <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-              {t("benchmark.lastRun")}
-            </p>
-            <p className="mt-2 font-mono text-xl">
-              {lastRunLatencyMs === null
-                ? "—"
-                : t("benchmark.questionDuration", { value: lastRunLatencyMs })}
-            </p>
-          </div>
-        </div>
-      </div>
+      <BenchmarkHeader
+        sourceName={sourceName}
+        total={total}
+        completed={completed}
+        accuracy={accuracy}
+        lastRunLatencyMs={lastRunLatencyMs}
+      />
 
       <div className="mx-auto max-w-[1600px] space-y-4 p-4 sm:p-6">
-        <div className="flex flex-wrap items-end justify-between gap-4 rounded-lg border border-border bg-card p-4">
-          <div className="space-y-2">
-            <label htmlFor="benchmark-count" className="text-xs font-medium">
-              {t("benchmark.count")}
-            </label>
-            <select
-              id="benchmark-count"
-              value={runCount}
-              disabled={isLoading || isRunning}
-              onChange={(event) => setRunCount(Number(event.target.value))}
-              className="focus:ring-ring/20 h-9 rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-ring focus:ring-2"
-            >
-              {countOptions(rows.length).map((count) => (
-                <option key={count} value={count}>
-                  {count}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              disabled={isRunning || completed === 0}
-              onClick={() => {
-                setResults({});
-                setLastRunLatencyMs(null);
-              }}
-            >
-              <RotateCcw className="size-3.5" />
-              {t("benchmark.clear")}
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              disabled={!canRun}
-              onClick={handleRun}
-              className="hover:bg-signal/90 border-signal bg-signal px-4 text-signal-foreground"
-            >
-              {isRunning ? (
-                <LoaderCircle className="size-3.5 animate-spin" />
-              ) : (
-                <Play className="size-3.5 fill-current" />
-              )}
-              {t("benchmark.run", { value: runCount })}
-            </Button>
-          </div>
-        </div>
+        <BenchmarkControls
+          customUrl={customUrlInput}
+          isLoading={isLoading}
+          isRunning={isRunning}
+          rowCount={rows.length}
+          runCount={runCount}
+          selectedSourceId={selectedSourceId}
+          hasResults={completed > 0}
+          onClear={handleClear}
+          onCustomUrlChange={setCustomUrlInput}
+          onLoadCustom={handleLoadCustom}
+          onRun={handleRun}
+          onRunCountChange={setRunCount}
+          onSourceChange={handleSourceChange}
+        />
 
         {error ? (
           <div className="border-destructive/30 bg-destructive/5 rounded-md border p-4 text-sm text-destructive">

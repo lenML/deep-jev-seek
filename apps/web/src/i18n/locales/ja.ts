@@ -19,9 +19,16 @@ export const ja: Record<keyof typeof enMessages, string> = {
   "header.benchmark": "Benchmark",
   "input.title": "入力",
   "preview.title": "プレビュー",
-  "benchmark.title": "MMLU-Pro ベンチマーク",
+  "benchmark.title": "ベンチマーク",
   "benchmark.description":
-    "現在の接続で MMLU-Pro validation の問題を実行し、モデルの選択をデータセットの正解と比較します。",
+    "現在の接続で公開データセットまたはカスタムデータセットを実行し、モデルの選択を正解と比較します。",
+  "benchmark.source": "データセット",
+  "benchmark.custom": "カスタム URL",
+  "benchmark.url": "データセット URL",
+  "benchmark.load": "読み込む",
+  "benchmark.formatHint":
+    "JevBench JSONL、JSON 配列、Hugging Face rows、MMLU 形式、CSV/TSV を自動判別します。",
+  "benchmark.invalidUrl": "有効な HTTP または HTTPS のデータセット URL を入力してください。",
   "benchmark.total": "読み込み済み",
   "benchmark.completed": "完了",
   "benchmark.accuracy": "正解率",
