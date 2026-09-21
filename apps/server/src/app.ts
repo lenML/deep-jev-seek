@@ -86,6 +86,17 @@ async function handleSystemOne(
     if (parsed.promptTemplate !== undefined && typeof parsed.promptTemplate !== "string") {
       throw new HttpError(400, "invalid_prompt_template", "promptTemplate must be a string.");
     }
+    if (
+      parsed.missingLogprobPolicy !== undefined &&
+      parsed.missingLogprobPolicy !== "error" &&
+      parsed.missingLogprobPolicy !== "zero"
+    ) {
+      throw new HttpError(
+        400,
+        "invalid_missing_logprob_policy",
+        'missingLogprobPolicy must be "error" or "zero".',
+      );
+    }
     const multimodalData = readMultimodalData(parsed.multimodal_data, provider);
     const client = clientFactory({ apiKey, model, provider, baseUrl });
     const input = {
@@ -95,6 +106,9 @@ async function handleSystemOne(
       ...(typeof parsed.debug === "boolean" ? { debug: parsed.debug } : {}),
       ...(typeof parsed.promptTemplate === "string"
         ? { promptTemplate: parsed.promptTemplate }
+        : {}),
+      ...(parsed.missingLogprobPolicy === "error" || parsed.missingLogprobPolicy === "zero"
+        ? { missingLogprobPolicy: parsed.missingLogprobPolicy }
         : {}),
       ...(multimodalData === undefined ? {} : { multimodal_data: multimodalData }),
     } as Parameters<JevSeekClient["systemOne"]>[0];

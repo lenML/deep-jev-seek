@@ -33,6 +33,7 @@ describe("createApp", () => {
           state: "state",
           questions: { q: { type: "noul", instructions: "Is it true?" } },
           multimodal_data: ["base64-image"],
+          missingLogprobPolicy: "error",
         }),
       }),
     );
@@ -48,6 +49,7 @@ describe("createApp", () => {
       expect.objectContaining({
         model: "llamacpp",
         multimodal_data: ["base64-image"],
+        missingLogprobPolicy: "error",
       }),
     );
   });
