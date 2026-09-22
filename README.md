@@ -8,7 +8,7 @@
 
 ![JevSeek WebUI](docs/assets/readme-banner.webp)
 
-用 DeepSeek FIM 或 llama.cpp Completion API 提供 Jev / TypeSafe SystemOne 风格的离散决策接口。
+把 DeepSeek FIM 或 llama.cpp Completion API 封装为 Jev / TypeSafe SystemOne 风格的离散决策接口。
 
 项目包含三个部分：
 
@@ -18,12 +18,12 @@
 
 ## 请求流程
 
-每个 choice、score 或 noul 问题都会生成一次 completion 请求。模型只输出候选码，JevSeek 读取候选 token 概率，归一化后生成 choice、score 或 noul 答案。
+每条 choice、score、noul 问题各发一次 completion 请求。模型只输出候选码，JevSeek 再从 token 概率归一化出答案。
 
 - DeepSeek 模式：请求 `/beta/completions`，读取 `top_logprobs`。
 - llama.cpp 模式：请求原生 `/completion`，读取 `n_probs`。
 
-返回的是语言模型 token 概率。这类概率与 Jev 原始权重、官方校准概率不同。JevSeek 提供兼容协议和概率归一化，结果可能与 Jev 模型存在差异。
+这里的概率来自语言模型 token logprob，与 Jev 权重下的官方校准结果不同。JevSeek 只保证协议兼容和概率归一化。
 
 ## npm 包
 
@@ -108,9 +108,9 @@ prompt 必须包含与每个数组项对应的服务器媒体标记。模型需�
 
 ### Prompt 模板
 
-默认模板用可读选项行和 `Answer: \boxed{` 结尾。开发者可在客户端创建时覆盖，也可在单次 `systemOne` 请求中覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
+默认模板每行放一个选项，末尾为 `Answer: \boxed{`。开发者可在创建客户端或调用 `systemOne` 时覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
 
-响应缺少候选 logprob 时，客户端自动使用严格候选码模板 `DEFAULT_FALLBACK_PROMPT_TEMPLATE` 重试。严格重试仍失败时，默认 `missingLogprobPolicy: "zero"` 返回全 0 概率和 0 置信度；设为 `"error"` 可保留报错。该配置可在客户端创建时设置，也可在单次 `systemOne` 请求中覆盖。
+没有候选 logprob 时，客户端先用严格候选码模板 `DEFAULT_FALLBACK_PROMPT_TEMPLATE` 重试。仍失败时，默认 `missingLogprobPolicy: "zero"` 返回全 0 概率和 `confidence: 0`；设为 `"error"` 则抛出解析错误。该设置可在创建客户端或调用 `systemOne` 时覆盖。
 
 请求级覆盖：
 
@@ -141,28 +141,28 @@ pnpm prompt:benchmark
 
 ## 成本估算
 
-以下只比较计费量级，不比较准确率。DeepSeek 价格取自 [模型与价格](https://api-docs.deepseek.com/zh-cn/quick_start/pricing)，Jev 价格取自 [API reference](https://learnjev.com/reference#limits-and-pricing)，更新时间为 2026-09-22。美元按 `1 USD = 7.2 CNY` 换算。
+表中的价格只用于比较计费量级，不比较准确率、概率校准和误差分布。DeepSeek 价格取自 [模型与价格](https://api-docs.deepseek.com/zh-cn/quick_start/pricing)，Jev 价格取自 [API reference](https://learnjev.com/reference#limits-and-pricing)，更新时间为 2026-09-22。美元按 `1 USD = 7.2 CNY` 换算。
 
-基准：1 次 SystemOne 请求包含 200 token state 和 3 个各 100 token 的问题。JevSeek 对每个问题发一次 FIM 请求，因此 DeepSeek 计费约 900 输入 token 和 3 输出 token。Jev 在同一次请求中处理 state 和 questions，计费约 500 输入 token，输出免费。下表不含重试、缓存命中和并发折扣。
+基准：1 次 SystemOne 请求包含 200 token state 和 3 个各 100 token 的问题。JevSeek 对每个问题发一次 FIM 请求，DeepSeek 计费约 900 输入 token 和 3 输出 token。Jev 在同一次请求中处理 state 和 questions，计费约 500 输入 token，输出免费。下表不含重试、缓存命中和并发折扣。
 
 ```text
 cost = input_tokens × input_price + output_tokens × output_price
 input_tokens ≈ Σ(state_tokens + question_tokens_i) + retry_tokens
 ```
 
-| 方案                | 计费输入 / 输出       | 单次请求 | 每 1,000 次 | 每 1,000,000 次 | 相对 Jev |
-| ------------------- | --------------------- | -------- | ----------- | --------------- | -------- |
-| Jev                 | 500 / 0               | ¥0.00015 | ¥0.15       | ¥151            | 1.0×     |
-| DeepSeek Flash 空闲 | 900 / 3，¥1 / ¥4      | ¥0.00091 | ¥0.91       | ¥912            | 6.0×     |
-| DeepSeek Flash 高峰 | 900 / 3，¥2 / ¥8      | ¥0.0018  | ¥1.82       | ¥1,824          | 12.1×    |
-| DeepSeek Pro 空闲   | 900 / 3，¥4.5 / ¥13.5 | ¥0.0041  | ¥4.09       | ¥4,091          | 27.1×    |
-| DeepSeek Pro 高峰   | 900 / 3，¥9 / ¥27     | ¥0.0082  | ¥8.18       | ¥8,181          | 54.1×    |
+| 方案                | 输入 / 输出 token | 单次 SystemOne | 每 1,000 次 | 每 1,000,000 次 | 相对 Jev |
+| ------------------- | ----------------- | -------------- | ----------- | --------------- | -------- |
+| Jev                 | 500 / 0           | ¥0.00015       | ¥0.15       | ¥151            | 1.0×     |
+| DeepSeek Flash 空闲 | 900 / 3           | ¥0.00091       | ¥0.91       | ¥912            | 6.0×     |
+| DeepSeek Flash 高峰 | 900 / 3           | ¥0.0018        | ¥1.82       | ¥1,824          | 12.1×    |
+| DeepSeek Pro 空闲   | 900 / 3           | ¥0.0041        | ¥4.09       | ¥4,091          | 27.1×    |
+| DeepSeek Pro 高峰   | 900 / 3           | ¥0.0082        | ¥8.18       | ¥8,181          | 54.1×    |
 
-DeepSeek 价格单位是人民币 / 百万 token。空闲时段为北京时间周一至周五 09:00 前、12:00-14:00、18:00 后，以及周末和法定节假日全天。缓存命中价低很多，重复 state 或公共前缀会显著降低成本。候选 logprob 缺失触发的严格模板重试，也会增加一次请求成本。
+DeepSeek 价格单位是人民币 / 百万 token。空闲时段为北京时间周一至周五 09:00 前、12:00-14:00、18:00 后，以及周末和法定节假日全天。重复 state 或公共前缀可提高缓存命中，明显降低输入价格。候选 logprob 缺失触发的严格模板重试会增加一次请求成本。
 
 ### 本地 llama.cpp
 
-本地推理没有统一报价，受量化、硬件、上下文长度和并发影响。下表按 `Q4_K_M`、统一整机推理功耗 350 W、电价 `¥0.7/kWh` 估算边际电费，不包含硬件折旧和待机功耗。吞吐是量级参考，不是具体硬件 benchmark。
+本地推理没有统一报价，受量化、硬件、上下文长度和并发影响。下表按 `Q4_K_M`、统一整机推理功耗 350 W、电价 `¥0.7/kWh` 估算边际电费，不含硬件折旧和待机功耗。吞吐为示例值，不作为具体硬件 benchmark。
 
 | 模型    | 权重占用   | 建议显存 / 内存 | 示例 prefill | 电费 / 百万输入 token | 电费 / 1,000 次请求 |
 | ------- | ---------- | --------------- | ------------ | --------------------- | ------------------- |
@@ -174,12 +174,12 @@ DeepSeek 价格单位是人民币 / 百万 token。空闲时段为北京时间�
 
 `30B-A3B` 是总参数约 30B、每 token 激活约 3B 的 MoE 模型，显存仍须容纳全部专家，吞吐通常高于同量级 dense 模型。
 
-本地成本主要由利用率决定。示例按硬件折旧和待机功耗固定成本 `¥600/月`：
+本地成本主要由利用率决定。示例把硬件折旧和待机功耗合计为固定成本 `¥600/月`：
 
 - `100,000` 次请求 / 月：固定成本 `¥6/千次`，加边际电费后约 `¥6.02-6.15/千次`，高于 Jev 和 DeepSeek。
 - `1,000,000` 次请求 / 月：固定成本降至 `¥0.60/千次`，加边际电费后约 `¥0.62-0.75/千次`，低于 DeepSeek Flash 空闲价，但仍约为 Jev 的 4-5 倍。
 
-结论：低调用量不适合自建；高调用量下本地推理可低于 DeepSeek API，但硬件的实际利用率、吞吐和电费必须按机器复测。Jev 是专用模型，成本最低不代表准确率、概率校准和错误分布与 JevSeek 相同。
+结论：低调用量不适合自建；高调用量下本地推理可低于 DeepSeek API，但硬件的实际利用率、吞吐和电费必须按机器复测。Jev 为专用模型，成本低不等于准确率、概率校准和误差分布与 JevSeek 相同。
 
 ## WebUI
 
@@ -189,7 +189,7 @@ DeepSeek 价格单位是人民币 / 百万 token。空闲时段为北京时间�
 https://lenml.github.io/deep-jev-seek/
 ```
 
-浏览器可直接连接 DeepSeek 或 llama.cpp。DeepSeek API Key 默认保存在当前标签页的 `sessionStorage`；选择「当前浏览器」后改用 `localStorage`。请求直接从浏览器发往配置的 provider，项目服务端不代理请求，也不保存 Key。
+浏览器可连接 DeepSeek 或 llama.cpp。DeepSeek API Key 默认保存在当前标签页的 `sessionStorage`；选择「当前浏览器」后改用 `localStorage`。请求直接发往配置的 provider，项目不代理，也不保存 Key。
 
 - `Playground`：按 `noul`、`choice`、`score` 三类预设填写表单，也可直接编辑 JSON；支持修改 prompt 模板、预览 prompt、查看原始请求与响应。
 - `Benchmark`：内置 MMLU-Pro validation、JevBench Easy / Hard / Original，也支持外部 URL 与常见 JSON、JSONL、CSV、TSV、Hugging Face rows 格式。数据集缓存在内存中，结果支持概率进度条、题目耗时、卡片/表格视图、动态列数与 JSON/CSV 导出。
