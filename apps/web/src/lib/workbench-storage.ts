@@ -1,4 +1,8 @@
-import { DEFAULT_PROMPT_TEMPLATE, type JevSeekProvider } from "@lenml/jevseek";
+import {
+  DEFAULT_PROMPT_TEMPLATE,
+  defaultPromptTemplateForProvider,
+  type JevSeekProvider,
+} from "@lenml/jevseek";
 
 import {
   isLanguage,
@@ -13,6 +17,7 @@ const PREFERENCES_STORAGE_KEY = "jevseek.workbench.preferences";
 const LANGUAGE_STORAGE_KEY = "jevseek.workbench.language";
 
 const LEGACY_DEFAULT_PROMPT_TEMPLATES = new Set([
+  DEFAULT_PROMPT_TEMPLATE,
   `You are a deterministic classifier.
 Evaluate the source state against one question.
 Return exactly one option code from the allowed codes.
@@ -167,7 +172,8 @@ export function persistLanguage(language: Language) {
 
 export function migrateLegacyPromptTemplate(
   value: unknown,
-  fallback = DEFAULT_PROMPT_TEMPLATE,
+  provider: JevSeekProvider,
+  fallback = defaultPromptTemplateForProvider(provider),
 ): string {
   if (typeof value !== "string") {
     return fallback;
@@ -176,11 +182,12 @@ export function migrateLegacyPromptTemplate(
 }
 
 export function readPreferences(): StoredPreferences {
+  const provider: JevSeekProvider = "deepseek";
   const fallback = {
     baseUrl: DEFAULT_BASE_URLS.deepseek,
     model: DEFAULT_MODELS.deepseek,
-    provider: "deepseek" as const,
-    promptTemplate: DEFAULT_PROMPT_TEMPLATE,
+    provider,
+    promptTemplate: defaultPromptTemplateForProvider(provider),
   };
   if (typeof window === "undefined") {
     return fallback;
@@ -190,11 +197,16 @@ export function readPreferences(): StoredPreferences {
     const stored = JSON.parse(
       window.localStorage.getItem(PREFERENCES_STORAGE_KEY) ?? "{}",
     ) as Partial<StoredPreferences>;
+    const storedProvider = stored.provider === "llamacpp" ? "llamacpp" : fallback.provider;
     return {
       baseUrl: stored.baseUrl || fallback.baseUrl,
       model: stored.model || fallback.model,
-      provider: stored.provider === "llamacpp" ? "llamacpp" : fallback.provider,
-      promptTemplate: migrateLegacyPromptTemplate(stored.promptTemplate, fallback.promptTemplate),
+      provider: storedProvider,
+      promptTemplate: migrateLegacyPromptTemplate(
+        stored.promptTemplate,
+        storedProvider,
+        defaultPromptTemplateForProvider(storedProvider),
+      ),
     };
   } catch {
     return fallback;

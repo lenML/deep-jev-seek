@@ -1,4 +1,8 @@
-import type { JevSeekProvider, JevSeekResponse } from "@lenml/jevseek";
+import {
+  defaultPromptTemplateForProvider,
+  type JevSeekProvider,
+  type JevSeekResponse,
+} from "@lenml/jevseek";
 import { create } from "zustand";
 
 import { DEFAULT_QUESTIONS_TEXT, DEFAULT_STATE_TEXT } from "@/lib/default-examples";
@@ -99,6 +103,10 @@ export const useWorkbenchStore = create<WorkbenchState>((set, get) => ({
         current.model === DEFAULT_MODELS[current.provider]
           ? DEFAULT_MODELS[provider]
           : current.model,
+      promptTemplate:
+        current.promptTemplate === defaultPromptTemplateForProvider(current.provider)
+          ? defaultPromptTemplateForProvider(provider)
+          : current.promptTemplate,
     };
     persistConnection(next);
     set({ connection: next });

@@ -1,4 +1,4 @@
-import { DEFAULT_PROMPT_TEMPLATE } from "@lenml/jevseek";
+import { defaultPromptTemplateForProvider } from "@lenml/jevseek";
 import { RotateCcw } from "lucide-react";
 
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ const placeholders = ["{{state}}", "{{question}}", "{{questionType}}", "{{codes}
 
 export function PromptTemplateEditor() {
   const { t } = useI18n();
+  const provider = useWorkbenchStore((state) => state.connection.provider);
   const promptTemplate = useWorkbenchStore((state) => state.connection.promptTemplate);
   const setPromptTemplate = useWorkbenchStore((state) => state.setPromptTemplate);
 
@@ -27,7 +28,7 @@ export function PromptTemplateEditor() {
         </div>
         <button
           type="button"
-          onClick={() => setPromptTemplate(DEFAULT_PROMPT_TEMPLATE)}
+          onClick={() => setPromptTemplate(defaultPromptTemplateForProvider(provider))}
           className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] text-muted-foreground hover:bg-secondary hover:text-foreground"
         >
           <RotateCcw className="size-3" />

@@ -1,4 +1,4 @@
-import { DEFAULT_PROMPT_TEMPLATE } from "@lenml/jevseek";
+import { DEFAULT_DEEPSEEK_PROMPT_TEMPLATE, DEFAULT_PROMPT_TEMPLATE } from "@lenml/jevseek";
 import { describe, expect, it } from "vitest";
 
 import { migrateLegacyPromptTemplate } from "./workbench-storage";
@@ -34,17 +34,27 @@ Allowed codes: {{codes}}
 Answer code: \\boxed{`;
 
 describe("migrateLegacyPromptTemplate", () => {
-  it("replaces prior defaults with the tuned readable template", () => {
-    expect(migrateLegacyPromptTemplate(LEGACY_DEFAULT_PROMPT_TEMPLATE)).toBe(
-      DEFAULT_PROMPT_TEMPLATE,
+  it("migrates prior DeepSeek defaults to the completion-safe template", () => {
+    expect(migrateLegacyPromptTemplate(LEGACY_DEFAULT_PROMPT_TEMPLATE, "deepseek")).toBe(
+      DEFAULT_DEEPSEEK_PROMPT_TEMPLATE,
     );
-    expect(migrateLegacyPromptTemplate(PREVIOUS_COMPLETION_PROMPT_TEMPLATE)).toBe(
-      DEFAULT_PROMPT_TEMPLATE,
+    expect(migrateLegacyPromptTemplate(PREVIOUS_COMPLETION_PROMPT_TEMPLATE, "deepseek")).toBe(
+      DEFAULT_DEEPSEEK_PROMPT_TEMPLATE,
+    );
+    expect(migrateLegacyPromptTemplate(DEFAULT_PROMPT_TEMPLATE, "deepseek")).toBe(
+      DEFAULT_DEEPSEEK_PROMPT_TEMPLATE,
     );
   });
 
-  it("preserves custom templates and supplies the current default when absent", () => {
-    expect(migrateLegacyPromptTemplate("Custom {{question}}")).toBe("Custom {{question}}");
-    expect(migrateLegacyPromptTemplate(undefined)).toBe(DEFAULT_PROMPT_TEMPLATE);
+  it("preserves llama.cpp defaults and custom templates", () => {
+    expect(migrateLegacyPromptTemplate(DEFAULT_PROMPT_TEMPLATE, "llamacpp")).toBe(
+      DEFAULT_PROMPT_TEMPLATE,
+    );
+    expect(migrateLegacyPromptTemplate("Custom {{question}}", "deepseek")).toBe(
+      "Custom {{question}}",
+    );
+    expect(migrateLegacyPromptTemplate(undefined, "deepseek")).toBe(
+      DEFAULT_DEEPSEEK_PROMPT_TEMPLATE,
+    );
   });
 });
