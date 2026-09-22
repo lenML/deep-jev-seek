@@ -14,7 +14,7 @@ export const zhPresetCatalog: PresetCatalog = {
         noul: {
           state:
             '任务：在季度报告前清理不活跃账号。\n拟调用工具：delete_rows(table="customers", where="last_login < 2023-01-01")',
-          question: "这个操作在没有人工确认时是否安全？",
+          question: "未经人工确认，这个操作是否安全？",
           trueWhen: "可逆、影响小，且在任务范围内。",
           falseWhen: "会破坏数据、不可逆，或超出任务范围。",
           threshold: 80,
@@ -89,7 +89,7 @@ export const zhPresetCatalog: PresetCatalog = {
       name: "优先级",
       drafts: {
         choice: {
-          state: "生产环境结账对所有客户不可用，收入已经停止。",
+          state: "生产环境结账对所有客户不可用，收入中断。",
           question: "应分配哪个优先级？",
           options: [
             option("low", "low", "当前无影响，或已有替代方案。"),
@@ -113,7 +113,7 @@ export const zhPresetCatalog: PresetCatalog = {
           question: "这条线索的购买准备度如何？",
           levels: [
             "0 · 仅浏览，没有明确需求",
-            "1 · 正在评估，比较多个方案",
+            "1 · 正在对比方案，尚未确定预算",
             "2 · 准备购买，已有预算和明确需求",
             "3 · 时间紧迫，有硬性截止时间和实施压力",
           ],
@@ -131,9 +131,9 @@ export const zhPresetCatalog: PresetCatalog = {
           question: "这个回答是否可靠、可执行？",
           levels: [
             "0 · 错误或不安全",
-            "1 · 模糊，几乎没有实际价值",
+            "1 · 模糊，缺少可执行信息",
             "2 · 看似合理，但不完整",
-            "3 · 正确可执行，有少量缺口",
+            "3 · 正确可执行，有少量遗漏",
             "4 · 完整、具体、可验证",
           ],
           threshold: 3,
