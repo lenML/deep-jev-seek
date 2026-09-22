@@ -59,6 +59,20 @@ Features:
 
 The default DeepSeek base URL is `https://api.deepseek.com/beta`. Runs on Node.js 18+, Bun, workers, and browsers.
 
+## Cost estimates
+
+For a 200-token state and three 100-token questions, JevSeek sends three DeepSeek FIM requests and repeats the state: about 900 input tokens and 3 output tokens. Jev processes the same state and questions in one input-only request: about 500 tokens. Prices below use the 2026-09-22 published rates and no cache, retry, or concurrency discount.
+
+| Backend             | 1,000 SystemOne requests | Relative to Jev |
+| ------------------- | ------------------------ | --------------- |
+| Jev                 | ¥0.15                    | 1.0×            |
+| DeepSeek Flash idle | ¥0.91                    | 6.0×            |
+| DeepSeek Flash peak | ¥1.82                    | 12.1×           |
+| DeepSeek Pro idle   | ¥4.09                    | 27.1×           |
+| DeepSeek Pro peak   | ¥8.18                    | 54.1×           |
+
+The comparison uses `$1 = ¥7.2` for Jev's USD price. DeepSeek prompt-cache hits, additional questions, fallback retries, and longer states change the result. See the [full cost model](https://github.com/lenML/deep-jev-seek#成本估算) for formulas and llama.cpp estimates for 2B, 4B, 9B, 28B, and 30B-A3B models.
+
 ## llama.cpp
 
 ```ts
