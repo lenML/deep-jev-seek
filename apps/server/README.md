@@ -23,7 +23,7 @@ Bun HTTP adapter for `@lenml/jevseek`.
 - `PORT`: bind port; default `8787`.
 - `MAX_BODY_BYTES`: JSON request limit; default `1048576`.
 
-`POST /v1/systemone` also accepts a string `promptTemplate` field. It supports `{{state}}`, `{{question}}`, `{{questionType}}`, and `{{codes}}`.
+`POST /v1/systemone` also accepts string `promptTemplate` and `fallbackPromptTemplate` fields. They support `{{state}}`, `{{question}}`, `{{instructions}}`, `{{options}}`, `{{questionType}}`, and `{{codes}}`.
 
 llama.cpp mode sends native `POST /completion` requests. `POST /v1/systemone` accepts `multimodal_data` only in that mode:
 

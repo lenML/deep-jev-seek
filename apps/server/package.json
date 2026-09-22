@@ -1,6 +1,6 @@
 {
   "name": "@lenml/jevseek-server",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Bun HTTP adapter for Jev-compatible DeepSeek FIM requests",
   "type": "module",

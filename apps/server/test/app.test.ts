@@ -34,6 +34,7 @@ describe("createApp", () => {
           questions: { q: { type: "noul", instructions: "Is it true?" } },
           multimodal_data: ["base64-image"],
           missingLogprobPolicy: "error",
+          fallbackPromptTemplate: "fallback {{codes}}",
         }),
       }),
     );
@@ -50,6 +51,7 @@ describe("createApp", () => {
         model: "llamacpp",
         multimodal_data: ["base64-image"],
         missingLogprobPolicy: "error",
+        fallbackPromptTemplate: "fallback {{codes}}",
       }),
     );
   });

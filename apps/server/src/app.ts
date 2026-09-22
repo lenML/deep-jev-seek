@@ -87,6 +87,16 @@ async function handleSystemOne(
       throw new HttpError(400, "invalid_prompt_template", "promptTemplate must be a string.");
     }
     if (
+      parsed.fallbackPromptTemplate !== undefined &&
+      typeof parsed.fallbackPromptTemplate !== "string"
+    ) {
+      throw new HttpError(
+        400,
+        "invalid_fallback_prompt_template",
+        "fallbackPromptTemplate must be a string.",
+      );
+    }
+    if (
       parsed.missingLogprobPolicy !== undefined &&
       parsed.missingLogprobPolicy !== "error" &&
       parsed.missingLogprobPolicy !== "zero"
@@ -106,6 +116,9 @@ async function handleSystemOne(
       ...(typeof parsed.debug === "boolean" ? { debug: parsed.debug } : {}),
       ...(typeof parsed.promptTemplate === "string"
         ? { promptTemplate: parsed.promptTemplate }
+        : {}),
+      ...(typeof parsed.fallbackPromptTemplate === "string"
+        ? { fallbackPromptTemplate: parsed.fallbackPromptTemplate }
         : {}),
       ...(parsed.missingLogprobPolicy === "error" || parsed.missingLogprobPolicy === "zero"
         ? { missingLogprobPolicy: parsed.missingLogprobPolicy }
@@ -141,7 +154,7 @@ export function createApp(options: AppOptions = {}) {
 
         return jsonResponse({
           name: "@lenml/jevseek-server",
-          version: "0.1.0",
+          version: "0.1.1",
           provider,
           endpoints: ["/healthz", "/v1/models", "/v1/systemone"],
         });
