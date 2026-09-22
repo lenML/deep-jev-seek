@@ -25,6 +25,8 @@
 
 这里的概率来自语言模型 token logprob，与 Jev 权重下的官方校准结果不同。JevSeek 只保证协议兼容和概率归一化。
 
+DeepSeek 的默认模板使用函数补全结构，让首 token 落在候选码位置。llama.cpp 保留可读分类模板。两者都可用 `promptTemplate` 覆盖。
+
 ## npm 包
 
 ```bash
@@ -108,9 +110,14 @@ prompt 必须包含与每个数组项对应的服务器媒体标记。模型需�
 
 ### Prompt 模板
 
-默认模板每行放一个选项，末尾为 `Answer: \boxed{`。开发者可在创建客户端或调用 `systemOne` 时覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
+默认模板按 provider 选择：
 
-没有候选 logprob 时，客户端先用严格候选码模板 `DEFAULT_FALLBACK_PROMPT_TEMPLATE` 重试。仍失败时，默认 `missingLogprobPolicy: "zero"` 返回全 0 概率和 `confidence: 0`；设为 `"error"` 则抛出解析错误。该设置可在创建客户端或调用 `systemOne` 时覆盖。
+- DeepSeek：`DEFAULT_DEEPSEEK_PROMPT_TEMPLATE` 使用 `function selectOption()` 补全结构。
+- llama.cpp：`DEFAULT_LLAMACPP_PROMPT_TEMPLATE` 使用可读选项和 `Answer: \boxed{`。
+
+`DEFAULT_PROMPT_TEMPLATE` 继续指向 llama.cpp 模板，保持旧代码兼容。开发者可在创建客户端或调用 `systemOne` 时覆盖 `promptTemplate`。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。
+
+没有候选 logprob 时，客户端使用 provider 对应的 fallback 模板重试。DeepSeek 默认使用 `DEFAULT_DEEPSEEK_FALLBACK_PROMPT_TEMPLATE`，llama.cpp 使用 `DEFAULT_LLAMACPP_FALLBACK_PROMPT_TEMPLATE`。两者都可用 `fallbackPromptTemplate` 覆盖。仍失败时，默认 `missingLogprobPolicy: "zero"` 返回全 0 概率和 `confidence: 0`；设为 `"error"` 则抛出解析错误。
 
 请求级覆盖：
 
@@ -136,6 +143,15 @@ Answer code:`,
 ```bash
 pnpm prompt:benchmark
 ```
+
+DeepSeek 实测使用 MMLU-Pro validation 全部 70 题，单候选码、无 fallback：
+
+| 模型              | 默认模板准确率 |
+| ----------------- | -------------- |
+| `deepseek-flash`  | 74-76%         |
+| `deepseek-v4-pro` | 78.57%         |
+
+实测日期为 2026-09-23。结果受模板版本、模型更新和采样设置影响。
 
 类型和 HTTP 契约见 [docs/api.md](docs/api.md)。
 
@@ -268,7 +284,7 @@ Linux 下按 Docker 网络配置替换 `LLAMACPP_BASE_URL`。常用环境变量�
 | `LLAMACPP_BASE_URL` | `http://127.0.0.1:8080/v1`      | llama.cpp 服务地址                    |
 | `MAX_BODY_BYTES`    | `1048576`                       | JSON 请求体上限                       |
 
-HTTP 请求可覆盖 `model`、`promptTemplate`、`missingLogprobPolicy` 与 llama.cpp 的 `multimodal_data`。请求体格式、错误码和响应结构见 [docs/api.md](docs/api.md)。
+HTTP 请求可覆盖 `model`、`promptTemplate`、`fallbackPromptTemplate`、`missingLogprobPolicy` 与 llama.cpp 的 `multimodal_data`。请求体格式、错误码和响应结构见 [docs/api.md](docs/api.md)。
 
 ## 开发命令
 
@@ -299,6 +315,7 @@ docs/               协议、设计与发布文档
 ## 限制
 
 - DeepSeek FIM 单次最多返回 20 个 top logprobs，因此单个 choice 问题最多 20 个候选。
+- DeepSeek FIM 实测只有 sampled token 的 logprob 有效，其他 `top_logprobs` 常为 `-9999`。当前返回通常是 one-hot 选择，不是校准概率分布。
 - 每个问题独立请求一次，问题越多，延迟和成本越高。
 - 浏览器直连依赖上游 CORS 与用户本地网络。
 - llama.cpp 模型必须输出候选码 token，并提供 `n_probs`。不同模型的 prompt 敏感性不同。

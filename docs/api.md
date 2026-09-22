@@ -136,7 +136,7 @@ DeepSeek provider 收到 `multimodal_data` 会在发请求前抛出校验错误�
 
 ## Prompt 模板
 
-`createJevSeek()` 和 `systemOne()` 都接受 `promptTemplate`。请求级设置优先于客户端级设置。
+`createJevSeek()` 和 `systemOne()` 都接受 `promptTemplate` 和 `fallbackPromptTemplate`。请求级设置优先于客户端级设置。未设置时按 provider 选择默认模板：DeepSeek 使用函数补全结构，llama.cpp 使用可读选项结构。
 
 字符串模板支持以下占位符：
 
@@ -173,9 +173,9 @@ Answer code:`,
 });
 ```
 
-函数模板收到 `state`、`question`、`instructions`、`options`、`questionType`、`codes` 和 `codeList`，并返回完整 prompt 字符串。默认模板通过 `DEFAULT_PROMPT_TEMPLATE` 导出。
+函数模板收到 `state`、`question`、`instructions`、`options`、`questionType`、`codes` 和 `codeList`，并返回完整 prompt 字符串。默认模板通过 `DEFAULT_DEEPSEEK_PROMPT_TEMPLATE`、`DEFAULT_LLAMACPP_PROMPT_TEMPLATE` 和兼容别名 `DEFAULT_PROMPT_TEMPLATE` 导出。
 
-响应没有候选 logprob 时，客户端会使用 `DEFAULT_FALLBACK_PROMPT_TEMPLATE` 再请求一次。严格重试仍没有候选时，`missingLogprobPolicy` 决定结果：
+响应没有候选 logprob 时，客户端会使用 `fallbackPromptTemplate` 再请求一次。DeepSeek 与 llama.cpp 有各自默认值。严格重试仍没有候选时，`missingLogprobPolicy` 决定结果：
 
 - `"zero"`：默认。返回全 0 概率和 `confidence: 0`，避免 benchmark 与批量任务中断。
 - `"error"`：抛出 `PARSE_ERROR`。

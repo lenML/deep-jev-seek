@@ -59,6 +59,8 @@ Features:
 
 The default DeepSeek base URL is `https://api.deepseek.com/beta`. Runs on Node.js 18+, Bun, workers, and browsers.
 
+Provider-specific defaults are used when `promptTemplate` is not set. DeepSeek uses a function-completion template that lands the first token on a candidate code. llama.cpp keeps the readable `Answer: \boxed{` template.
+
 ## Cost estimates
 
 For a 200-token state and three 100-token questions, JevSeek sends three DeepSeek FIM requests and repeats the state: about 900 input tokens and 3 output tokens. Jev processes the same state and questions in one input-only request: about 500 tokens. Prices below use the 2026-09-22 published rates and no cache, retry, or concurrency discount.
@@ -100,6 +102,10 @@ The default llama.cpp base URL is `http://127.0.0.1:8080/v1`.
 
 Override `promptTemplate` in `createJevSeek()` for the client, or in `systemOne()` for one request. String templates support `{{state}}`, `{{question}}`, `{{instructions}}`, `{{options}}`, `{{questionType}}`, and `{{codes}}`; function templates receive the structured rendering context.
 
-The default template uses readable option lines and ends with `Answer: \boxed{`. If the response contains no candidate logprob, the client retries with `DEFAULT_FALLBACK_PROMPT_TEMPLATE`. If that still fails, the default `missingLogprobPolicy: "zero"` returns zero probabilities with confidence `0`; set it to `"error"` to retain the parse error. Run `pnpm prompt:benchmark` to reproduce the JevBench Easy prompt score.
+If the response contains no candidate logprob, the client retries with the provider-specific fallback template. Use `fallbackPromptTemplate` to override it at client or request level. If that still fails, the default `missingLogprobPolicy: "zero"` returns zero probabilities with confidence `0`; set it to `"error"` to retain the parse error.
+
+The DeepSeek defaults were measured on all 70 MMLU-Pro validation rows on 2026-09-23. `deepseek-flash` scored 74-76% across repeat runs and `deepseek-v4-pro` scored 78.57%, with no zero-probability fallback. DeepSeek FIM currently returns a usable logprob only for the sampled token; other `top_logprobs` are commonly `-9999`, so results are one-hot selections rather than calibrated distributions.
+
+Run `pnpm prompt:benchmark` to reproduce the llama.cpp JevBench Easy prompt score.
 
 See the repository documentation for the full HTTP and browser API.

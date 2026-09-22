@@ -67,7 +67,7 @@ Options:
 Answer: \boxed{
 ```
 
-默认模板按 completion 语义编写，不使用聊天式角色口吻。选项使用 `候选码 = 描述`，结尾让下一个 token 直接落在候选码位置。内置 `{{instructions}}` 和 `{{options}}` 便于自定义模板直接使用可读字段；`{{question}}` 继续提供 code-mapped JSON。
+默认模板按 provider 分离。DeepSeek 使用 `function selectOption()` 补全结构，避免模型直接输出选项内容；llama.cpp 使用 `候选码 = 描述` 和 `Answer: \boxed{`。两者都按 completion 语义编写，不使用聊天式角色口吻。内置 `{{instructions}}` 和 `{{options}}` 便于自定义模板直接使用可读字段；`{{question}}` 继续提供 code-mapped JSON。
 
 JevBench Easy 公开集在本地 llama.cpp completion 端点复测：原序 48/48；choice 原序、逆序、轮转各三轮共 360/360，每题三种顺序全部稳定。该结果用于模板回归，不代表其他模型的绝对准确率。
 
@@ -75,7 +75,7 @@ JevBench Easy 公开集在本地 llama.cpp completion 端点复测：原序 48/4
 
 状态序列化保持稳定：对象 key 排序，避免等价状态因 JS 属性顺序变化导致缓存与结果不稳定。
 
-模板可通过 `createJevSeek({ promptTemplate })` 或 `systemOne({ promptTemplate })` 覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。请求级设置优先于客户端级设置。
+模板可通过 `createJevSeek({ promptTemplate, fallbackPromptTemplate })` 或 `systemOne({ promptTemplate, fallbackPromptTemplate })` 覆盖。字符串模板支持 `{{state}}`、`{{question}}`、`{{instructions}}`、`{{options}}`、`{{questionType}}`、`{{codes}}`；函数模板可读取结构化上下文并返回完整 prompt。请求级设置优先于客户端级设置。
 
 `instructions` 支持 `string | object | array`。对象和数组原样 JSON 序列化。`criteria` 同样进入 question JSON。
 
