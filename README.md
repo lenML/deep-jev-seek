@@ -8,20 +8,20 @@
 
 ![JevSeek WebUI](docs/assets/readme-banner.webp)
 
-把 DeepSeek FIM 或 llama.cpp Completion API 封装为 Jev / TypeSafe SystemOne 风格的离散决策接口。
+把 [DeepSeek FIM](https://api-docs.deepseek.com/zh-cn/guides/fim_completion/) 或 [llama.cpp Completion API](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) 封装为 [Jev / TypeSafe SystemOne](https://learnjev.com/reference) 风格的离散决策接口。
 
-项目包含三个部分：
-
-- `@lenml/jevseek`：TypeScript npm 核心包。
-- React WebUI：纯浏览器工作台，可连接 DeepSeek 或 llama.cpp。
-- Bun Docker 镜像：接收 Jev 风格 HTTP 请求，返回 Jev 风格结果。
+| 部分             | 用途                                                          | 入口                                                                                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@lenml/jevseek` | TypeScript 核心包，提供 client、transport 和 prompt 模板      | [![npm version](https://img.shields.io/npm/v/@lenml/jevseek.svg)](https://www.npmjs.com/package/@lenml/jevseek) · [npm](https://www.npmjs.com/package/@lenml/jevseek) · [源码](packages/jevseek) · [API](docs/api.md) |
+| WebUI            | 纯浏览器工作台，可连接 DeepSeek 或 llama.cpp                  | [在线使用](https://lenml.github.io/deep-jev-seek/) · [源码](apps/web)                                                                                                                                                 |
+| Docker           | 面向 DeepSeek 的轻量 HTTP 转发器，也可指向现有 llama.cpp 服务 | [发布工作流](.github/workflows/docker.yml) · [源码](apps/server)                                                                                                                                                      |
 
 ## 请求流程
 
 每条 choice、score、noul 问题各发一次 completion 请求。模型只输出候选码，JevSeek 再从 token 概率归一化出答案。
 
-- DeepSeek 模式：请求 `/beta/completions`，读取 `top_logprobs`。
-- llama.cpp 模式：请求原生 `/completion`，读取 `n_probs`。
+- DeepSeek 模式：请求 [FIM API](https://api-docs.deepseek.com/zh-cn/api/create-completion/) 的 `/beta/completions`，读取 `top_logprobs`。
+- llama.cpp 模式：请求 [llama.cpp server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) 的原生 `/completion`，读取 `n_probs`。
 
 这里的概率来自语言模型 token logprob，与 Jev 权重下的官方校准结果不同。JevSeek 只保证协议兼容和概率归一化。
 
@@ -144,16 +144,18 @@ Answer code:`,
 pnpm prompt:benchmark
 ```
 
-DeepSeek 实测使用 MMLU-Pro validation 全部 70 题，单候选码、无 fallback：
-
-| 模型              | 默认模板准确率 |
-| ----------------- | -------------- |
-| `deepseek-flash`  | 74-76%         |
-| `deepseek-v4-pro` | 78.57%         |
-
-实测日期为 2026-09-23。结果受模板版本、模型更新和采样设置影响。
-
 类型和 HTTP 契约见 [docs/api.md](docs/api.md)。
+
+## DeepSeek 实测
+
+2026-09-23 使用 MMLU-Pro validation 全部 70 题：
+
+| 模型              |              准确率 | 平均延迟 |
+| ----------------- | ------------------: | -------: |
+| `deepseek-flash`  | 74.29%，复测 75.71% |   0.40 s |
+| `deepseek-v4-pro` |              78.57% |   0.72 s |
+
+测试记录和限制见 [docs/deepseek-evaluation.md](docs/deepseek-evaluation.md)。
 
 ## 成本估算
 
@@ -199,11 +201,7 @@ DeepSeek 价格单位是人民币 / 百万 token。空闲时段为北京时间�
 
 ## WebUI
 
-线上地址：
-
-```text
-https://lenml.github.io/deep-jev-seek/
-```
+线上地址：[https://lenml.github.io/deep-jev-seek/](https://lenml.github.io/deep-jev-seek/)
 
 浏览器可连接 DeepSeek 或 llama.cpp。DeepSeek API Key 默认保存在当前标签页的 `sessionStorage`；选择「当前浏览器」后改用 `localStorage`。请求直接发往配置的 provider，项目不代理，也不保存 Key。
 
@@ -222,9 +220,13 @@ pnpm --filter @lenml/jevseek build
 pnpm --filter @lenml/jevseek-web dev
 ```
 
-## Docker
+## Docker 转发器
 
-镜像由 GitHub Actions 发布到 GHCR。服务提供以下端点：
+该镜像默认用于把 Jev 风格 HTTP 请求转发到 DeepSeek FIM，属于超轻量包装层。镜像不内置 llama.cpp、模型权重或本地推理运行时。
+
+llama.cpp 是可选 provider。启用后，镜像只把请求转发到已有的 llama.cpp server，模型仍由外部服务加载。
+
+镜像由 [GitHub Actions](.github/workflows/docker.yml) 发布到 GHCR。服务提供以下端点：
 
 | 端点                 | 说明                                                            |
 | -------------------- | --------------------------------------------------------------- |
