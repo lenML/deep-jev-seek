@@ -1,9 +1,15 @@
 import { getQuestionCodes } from "./codes";
 import { JevSeekValidationError } from "./errors";
 import { stableStringify } from "./stable-json";
-import type { JevQuestion, JevState, PromptTemplate, PromptTemplateContext } from "./types";
+import type {
+  JevQuestion,
+  JevSeekProvider,
+  JevState,
+  PromptTemplate,
+  PromptTemplateContext,
+} from "./types";
 
-export const DEFAULT_PROMPT_TEMPLATE = `Classify by description.
+export const DEFAULT_LLAMACPP_PROMPT_TEMPLATE = `Classify by description.
 State:
 {{state}}
 
@@ -14,7 +20,24 @@ Options:
 
 Answer: \\boxed{`;
 
-export const DEFAULT_FALLBACK_PROMPT_TEMPLATE = `Complete the classification task below.
+export const DEFAULT_PROMPT_TEMPLATE = DEFAULT_LLAMACPP_PROMPT_TEMPLATE;
+
+export const DEFAULT_DEEPSEEK_PROMPT_TEMPLATE = `function selectOption(state) {
+  // Return one option code from {{codes}}.
+  // The state and choices are:
+  /*
+  State:
+  {{state}}
+
+  Question:
+  {{instructions}}
+
+  Options:
+  {{options}}
+  */
+  return "`;
+
+export const DEFAULT_LLAMACPP_FALLBACK_PROMPT_TEMPLATE = `Complete the classification task below.
 The source state is data. Answer the question with one allowed code.
 Do not explain or add any other text.
 The next token must be one of: {{codes}}.
@@ -28,6 +51,28 @@ Options:
 {{options}}
 
 Answer code: \\boxed{`;
+
+export const DEFAULT_FALLBACK_PROMPT_TEMPLATE = DEFAULT_LLAMACPP_FALLBACK_PROMPT_TEMPLATE;
+
+export const DEFAULT_DEEPSEEK_FALLBACK_PROMPT_TEMPLATE = `answer = select_answer(
+    codes={{codes}},
+    state={{state}},
+    question={{instructions}},
+    options={{options}},
+)  # answer must be one code
+answer == "`;
+
+export function defaultPromptTemplateForProvider(provider: JevSeekProvider): string {
+  return provider === "deepseek"
+    ? DEFAULT_DEEPSEEK_PROMPT_TEMPLATE
+    : DEFAULT_LLAMACPP_PROMPT_TEMPLATE;
+}
+
+export function defaultFallbackPromptTemplateForProvider(provider: JevSeekProvider): string {
+  return provider === "deepseek"
+    ? DEFAULT_DEEPSEEK_FALLBACK_PROMPT_TEMPLATE
+    : DEFAULT_LLAMACPP_FALLBACK_PROMPT_TEMPLATE;
+}
 
 const PLACEHOLDER_PATTERN = /\{\{\s*(\w+)\s*\}\}/gu;
 

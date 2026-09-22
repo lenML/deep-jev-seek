@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPrompt,
+  defaultPromptTemplateForProvider,
+  DEFAULT_DEEPSEEK_PROMPT_TEMPLATE,
+  DEFAULT_LLAMACPP_PROMPT_TEMPLATE,
   getQuestionCodes,
   JevSeekValidationError,
   renderPromptTemplate,
@@ -22,6 +25,13 @@ describe("stableStringify", () => {
 });
 
 describe("buildPrompt", () => {
+  it("selects provider-specific default templates", () => {
+    expect(defaultPromptTemplateForProvider("deepseek")).toBe(DEFAULT_DEEPSEEK_PROMPT_TEMPLATE);
+    expect(defaultPromptTemplateForProvider("llamacpp")).toBe(DEFAULT_LLAMACPP_PROMPT_TEMPLATE);
+    expect(DEFAULT_DEEPSEEK_PROMPT_TEMPLATE).toContain('return "');
+    expect(DEFAULT_LLAMACPP_PROMPT_TEMPLATE).toContain("Answer: \\boxed{");
+  });
+
   it("uses a concise default with readable options and a boxed answer", () => {
     const prompt = buildPrompt("state", {
       type: "noul",

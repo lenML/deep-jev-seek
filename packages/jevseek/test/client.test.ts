@@ -97,6 +97,32 @@ describe("JevSeekClient", () => {
     expect(prompts[0]).toContain('"first"');
     expect(prompts[1]).toBe('request "second" 0, 1');
   });
+
+  it("uses completion-safe defaults for DeepSeek and readable defaults for llama.cpp", async () => {
+    const prompts: string[] = [];
+    const transport = makeTransport(async (request) => {
+      prompts.push(request.prompt);
+      return completion("1", { "0": -2, "1": -0.1 });
+    });
+    const questions = {
+      q: {
+        type: "noul" as const,
+        instructions: "Is it urgent?",
+      },
+    };
+
+    await createJevSeek({ transport }).systemOne({ state: "deepseek", questions });
+    await createJevSeek({ transport, provider: "llamacpp" }).systemOne({
+      state: "llamacpp",
+      questions,
+    });
+
+    expect(prompts[0]).toContain("function selectOption");
+    expect(prompts[0]).toContain('return "');
+    expect(prompts[1]).toContain("Classify by description.");
+    expect(prompts[1]).toContain("Answer: \\boxed{");
+  });
+
   it("limits concurrent question requests", async () => {
     let active = 0;
     let maximum = 0;

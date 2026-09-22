@@ -21,11 +21,11 @@ function completion(
 }
 
 describe("missing candidate logprobs", () => {
-  it("retries with a strict code prompt when candidates are missing", async () => {
+  it("retries with the provider fallback prompt when candidates are missing", async () => {
     const prompts: string[] = [];
     const transport = makeTransport(async (request) => {
       prompts.push(request.prompt);
-      if (request.prompt.includes("Answer code: \\boxed{")) {
+      if (request.prompt.includes('answer == "')) {
         return completion("A", { A: -0.1, B: -2 });
       }
       return completion("10", { "10": -0.1 });
@@ -48,9 +48,39 @@ describe("missing candidate logprobs", () => {
     });
 
     expect(prompts).toHaveLength(2);
-    expect(prompts[1]).toContain("Answer code: \\boxed{");
+    expect(prompts[1]).toContain('answer == "');
     expect(result.answers.q).toMatchObject({ type: "choice", choice: "a" });
     expect(result.usage).toEqual({ input_tokens: 24, output_tokens: 2 });
+  });
+
+  it("supports request-level fallback template overrides", async () => {
+    const prompts: string[] = [];
+    const transport = makeTransport(async (request) => {
+      prompts.push(request.prompt);
+      return request.prompt.startsWith("fallback")
+        ? completion("A", { A: -0.1, B: -2 })
+        : completion("10", { "10": -0.1 });
+    });
+    const client = createJevSeek({
+      transport,
+      retry: { maxAttempts: 2, baseDelayMs: 0, maxDelayMs: 0, jitter: false },
+    });
+
+    const result = await client.systemOne({
+      state: "state",
+      questions: {
+        q: {
+          type: "choice",
+          instructions: "Pick",
+          criteria: { a: "0", b: "10" },
+        },
+      },
+      fallbackPromptTemplate: "fallback {{codes}}",
+    });
+
+    expect(prompts).toHaveLength(2);
+    expect(prompts[1]).toBe("fallback A, B");
+    expect(result.answers.q).toMatchObject({ type: "choice", choice: "a" });
   });
 
   it("returns zero probabilities after strict fallback still has no candidates", async () => {

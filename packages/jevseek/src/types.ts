@@ -73,6 +73,7 @@ export interface SystemOneRequest {
   debug?: boolean;
   signal?: AbortSignal;
   promptTemplate?: PromptTemplate;
+  fallbackPromptTemplate?: PromptTemplate;
   missingLogprobPolicy?: MissingLogprobPolicy;
   multimodal_data?: string[];
 }
@@ -195,6 +196,7 @@ export interface JevSeekOptions {
   retry?: Partial<RetryOptions>;
   providerOptions?: JevSeekProviderOptions;
   promptTemplate?: PromptTemplate;
+  fallbackPromptTemplate?: PromptTemplate;
   missingLogprobPolicy?: MissingLogprobPolicy;
 }
 

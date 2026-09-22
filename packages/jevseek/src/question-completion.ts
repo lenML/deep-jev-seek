@@ -2,7 +2,7 @@ import { encodeAnswer } from "./answers";
 import { getQuestionCodes } from "./codes";
 import { JevSeekAbortError, JevSeekParseError, JevSeekTimeoutError } from "./errors";
 import { normalizeCandidateLogprobs } from "./logprobs";
-import { buildPrompt, DEFAULT_FALLBACK_PROMPT_TEMPLATE } from "./prompt";
+import { buildPrompt } from "./prompt";
 import { withRetry } from "./retry";
 import type {
   CompletionTransportRequest,
@@ -33,6 +33,7 @@ export interface CompleteQuestionOptions {
   question: JevQuestion;
   model: string;
   promptTemplate: PromptTemplate;
+  fallbackPromptTemplate: PromptTemplate;
   missingLogprobPolicy: MissingLogprobPolicy;
   retry: RetryOptions;
   timeoutMs: number;
@@ -150,7 +151,7 @@ export async function completeQuestion(input: CompleteQuestionOptions): Promise<
     input.state,
     input.question,
     codes,
-    DEFAULT_FALLBACK_PROMPT_TEMPLATE,
+    input.fallbackPromptTemplate,
   );
   const request: CompletionTransportRequest = {
     maxTokens: 1,

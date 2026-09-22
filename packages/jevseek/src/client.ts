@@ -12,7 +12,10 @@ import {
   validateProvider,
   validateTimeout,
 } from "./client-validation";
-import { DEFAULT_PROMPT_TEMPLATE } from "./prompt";
+import {
+  defaultFallbackPromptTemplateForProvider,
+  defaultPromptTemplateForProvider,
+} from "./prompt";
 import { completeQuestion } from "./question-completion";
 import { resolveRetryOptions } from "./retry";
 import type {
@@ -38,6 +41,7 @@ export class JevSeekClient {
   readonly retry: RetryOptions;
   readonly diagnosticsEnabledByDefault: boolean;
   readonly promptTemplate: PromptTemplate;
+  readonly fallbackPromptTemplate: PromptTemplate;
   readonly missingLogprobPolicy: MissingLogprobPolicy;
 
   private readonly transport: FimTransport;
@@ -64,7 +68,9 @@ export class JevSeekClient {
     this.retry = resolveRetryOptions(options.retry);
     this.diagnosticsEnabledByDefault = false;
     this.providerOptions = options.providerOptions as Record<string, unknown> | undefined;
-    this.promptTemplate = options.promptTemplate ?? DEFAULT_PROMPT_TEMPLATE;
+    this.promptTemplate = options.promptTemplate ?? defaultPromptTemplateForProvider(provider);
+    this.fallbackPromptTemplate =
+      options.fallbackPromptTemplate ?? defaultFallbackPromptTemplateForProvider(provider);
     this.missingLogprobPolicy = validateMissingLogprobPolicy(options.missingLogprobPolicy);
 
     this.transport = createTransport(options, provider);
@@ -81,6 +87,7 @@ export class JevSeekClient {
     const entries = Object.entries(input.questions);
     const requestedModel = input.model ?? this.model;
     const promptTemplate = input.promptTemplate ?? this.promptTemplate;
+    const fallbackPromptTemplate = input.fallbackPromptTemplate ?? this.fallbackPromptTemplate;
     const missingLogprobPolicy = input.missingLogprobPolicy ?? this.missingLogprobPolicy;
 
     const completed = await mapWithConcurrency(
@@ -94,6 +101,7 @@ export class JevSeekClient {
           question,
           model: requestedModel,
           promptTemplate,
+          fallbackPromptTemplate,
           missingLogprobPolicy,
           retry: this.retry,
           timeoutMs: this.timeoutMs,
