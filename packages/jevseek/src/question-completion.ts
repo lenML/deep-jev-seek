@@ -23,7 +23,7 @@ export interface CompletedQuestion {
   answer: JevAnswer;
   usage: DeepSeekUsage;
   model?: string;
-  diagnostic: JevSeekQuestionDiagnostic;
+  diagnostic?: JevSeekQuestionDiagnostic;
 }
 
 export interface CompleteQuestionOptions {
@@ -65,6 +65,17 @@ function addUsage(current: DeepSeekUsage, next: DeepSeekUsage): DeepSeekUsage {
 
 function zeroProbabilities(codes: readonly string[]): Record<string, number> {
   return Object.fromEntries(codes.map((code) => [code, 0]));
+}
+
+function encodeSingleCandidateAnswer(
+  question: JevQuestion,
+  codes: readonly string[],
+): JevAnswer | undefined {
+  const code = codes[0];
+  if (codes.length !== 1 || code === undefined) {
+    return undefined;
+  }
+  return encodeAnswer(question, { [code]: 1 }, codes);
 }
 
 async function withTimeout<T>(
@@ -146,6 +157,15 @@ function diagnosticFor(input: {
 
 export async function completeQuestion(input: CompleteQuestionOptions): Promise<CompletedQuestion> {
   const codes = getQuestionCodes(input.question);
+  const singleCandidateAnswer = encodeSingleCandidateAnswer(input.question, codes);
+  if (singleCandidateAnswer !== undefined) {
+    return {
+      questionId: input.questionId,
+      answer: singleCandidateAnswer,
+      usage: emptyUsage(),
+    };
+  }
+
   const prompt = buildPrompt(input.state, input.question, codes, input.promptTemplate);
   const fallbackPrompt = buildPrompt(
     input.state,

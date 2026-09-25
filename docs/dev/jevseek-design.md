@@ -85,6 +85,10 @@ JevBench Easy 公开集在本地 llama.cpp completion 端点复测：原序 48/4
 - `score`：按 criteria 层级顺序生成 `0`、`1`、`2` 等代码。
 - `noul`：`0` 表示 false，`1` 表示 true。
 
+`questions` 至少包含一个问题。`choice` 支持 1–20 项，key 和描述必须非空；描述为 `null` 时使用 key。`score` 支持 1–10 项，每项必须为非空字符串。`noul` 的 false/true 描述可选，提供时必须非空。
+
+只有 1 个候选的 `choice`、`score` 不需要模型判断。客户端直接返回 one-hot 概率、置信度 `1` 和 usage `0`，不调用 transport。零选项、空标签和空 `questions` 在请求前抛出校验错误。
+
 当前每个问题单次最多使用 20 个可见候选。Jev 的 choice 文档允许 255 个候选，但 DeepSeek 单次最多返回 20 个 logprob 候选，超过该数量无法得到可靠的统一概率分布。
 
 若要完整支持 255 个 choice，需要增加分组分类和校准方案；超过 20 个候选不能静默截断。

@@ -89,6 +89,31 @@ console.log(result.usage);
 }
 ```
 
+## 选项边界与本地解析
+
+`questions` 至少包含一个问题，选项标签不能为空。
+
+| 类型     | 选项限制                                     |
+| -------- | -------------------------------------------- |
+| `choice` | 1–20 项；key 非空；描述为非空字符串或 `null` |
+| `score`  | 1–10 项；每项为非空字符串                    |
+| `noul`   | 固定 `0/1`；`false`、`true` 描述可省略       |
+
+`choice` 的描述为 `null` 时，prompt 使用 criteria key 作为标签。
+
+只有 1 个候选的 `choice`、`score` 会在本地生成 one-hot 结果：
+
+```json
+{
+  "type": "choice",
+  "choice": "only",
+  "probabilities": { "only": 1 },
+  "confidence": 1
+}
+```
+
+此时不调用 provider，usage 为 `0`，也不会生成上游 diagnostic。零选项、空标签或空 `questions` 会在发请求前返回 `VALIDATION_ERROR`，HTTP 服务对应 `400`。
+
 ## Provider 模式
 
 默认 provider 是 `deepseek`，请求 `POST /beta/completions`。`provider` 改为 `"llamacpp"` 后，客户端请求 llama.cpp 原生 `POST /completion`，并用 `n_probs` 获取候选概率。

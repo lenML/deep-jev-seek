@@ -45,11 +45,13 @@ $$p_i = exp(logprob_i) / Σ exp(logprob_j)$$
 | `score`  | 分数为期望值 $Σ(index × probability[index])$，置信度同上 |
 | `noul`   | `0` 为假，`1` 为真；返回 `p(true)`，不计算置信度         |
 
-`n` 是候选数。概率越接近均匀分布，置信度越接近 `0`；最高概率越接近 `1`，置信度越接近 `1`。单个候选时置信度为 `1`。
+`n` 是候选数。概率越接近均匀分布，置信度越接近 `0`；最高概率越接近 `1`，置信度越接近 `1`。`choice` 与 `score` 允许单个候选，此时置信度为 `1`，本地返回，不请求模型。
+
+选项标签必须非空。`choice` 支持 1–20 项，`score` 支持 1–10 项，`noul` 固定使用 `0/1`。空标签、零选项、空 `questions` 会在发请求前拒绝。
 
 ## 请求流程
 
-每条 choice、score、noul 问题各发一次 completion 请求。模型只输出候选码，JevSeek 再从 token 概率归一化出答案。
+每条需要模型判断的 choice、score、noul 问题各发一次 completion 请求。模型只输出候选码，JevSeek 再从 token 概率归一化出答案。单选项 choice、score 不请求模型。
 
 - DeepSeek 模式：请求 [FIM API](https://api-docs.deepseek.com/zh-cn/api/create-completion/) 的 `/beta/completions`，读取 `top_logprobs`。
 - llama.cpp 模式：请求 [llama.cpp server](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) 的原生 `/completion`，读取 `n_probs`。

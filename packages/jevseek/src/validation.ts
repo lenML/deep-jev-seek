@@ -21,6 +21,12 @@ function assertInstruction(value: unknown, label: string): void {
   }
 }
 
+function assertNonEmptyLabel(value: string, label: string): void {
+  if (value.trim() === "") {
+    throw new JevSeekValidationError(`${label} must not be empty`);
+  }
+}
+
 export function validateState(state: unknown): asserts state is JevState {
   if (typeof state !== "string" && !Array.isArray(state) && !isRecord(state)) {
     throw new JevSeekValidationError("state must be a string, object, or array");
@@ -53,13 +59,17 @@ export function validateQuestion(
       }
 
       const entries = Object.entries(question.criteria);
-      if (entries.length < 2 || entries.length > 20) {
-        throw new JevSeekValidationError(`${label}.criteria must contain between 2 and 20 options`);
+      if (entries.length < 1 || entries.length > 20) {
+        throw new JevSeekValidationError(`${label}.criteria must contain between 1 and 20 options`);
       }
 
       for (const [key, description] of entries) {
+        assertNonEmptyLabel(key, `${label}.criteria key`);
         if (typeof description !== "string" && description !== null) {
           throw new JevSeekValidationError(`${label}.criteria.${key} must be a string or null`);
+        }
+        if (description !== null) {
+          assertNonEmptyLabel(description, `${label}.criteria.${key}`);
         }
       }
       break;
@@ -67,16 +77,17 @@ export function validateQuestion(
     case "score": {
       if (
         !Array.isArray(question.criteria) ||
-        question.criteria.length < 2 ||
+        question.criteria.length < 1 ||
         question.criteria.length > 10
       ) {
-        throw new JevSeekValidationError(`${label}.criteria must contain between 2 and 10 levels`);
+        throw new JevSeekValidationError(`${label}.criteria must contain between 1 and 10 levels`);
       }
 
       question.criteria.forEach((description, index) => {
         if (typeof description !== "string") {
           throw new JevSeekValidationError(`${label}.criteria.${index} must be a string`);
         }
+        assertNonEmptyLabel(description, `${label}.criteria.${index}`);
       });
       break;
     }
@@ -89,6 +100,9 @@ export function validateQuestion(
           const description = question.criteria[key];
           if (description !== undefined && typeof description !== "string") {
             throw new JevSeekValidationError(`${label}.criteria.${key} must be a string`);
+          }
+          if (description !== undefined) {
+            assertNonEmptyLabel(description, `${label}.criteria.${key}`);
           }
         }
       }
@@ -104,7 +118,12 @@ export function validateQuestions(questions: unknown): asserts questions is Ques
     throw new JevSeekValidationError("questions must be an object");
   }
 
-  for (const [questionId, question] of Object.entries(questions)) {
+  const entries = Object.entries(questions);
+  if (entries.length === 0) {
+    throw new JevSeekValidationError("questions must contain at least one question");
+  }
+
+  for (const [questionId, question] of entries) {
     validateQuestion(question, `questions.${questionId}`);
   }
 }

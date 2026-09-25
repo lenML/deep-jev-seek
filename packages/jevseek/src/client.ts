@@ -120,7 +120,9 @@ export class JevSeekClient {
       answers[item.questionId] = item.answer;
       usage.input_tokens += item.usage.prompt_tokens;
       usage.output_tokens += item.usage.completion_tokens;
-      diagnosticQuestions[item.questionId] = item.diagnostic;
+      if (item.diagnostic !== undefined) {
+        diagnosticQuestions[item.questionId] = item.diagnostic;
+      }
     }
 
     const response: JevSeekResponse = {
