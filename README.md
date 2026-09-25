@@ -16,6 +16,39 @@
 | WebUI            | 纯浏览器工作台，可连接 DeepSeek 或 llama.cpp                  | [在线使用](https://lenml.github.io/deep-jev-seek/) · [源码](apps/web)                                                                                                                                                 |
 | Docker           | 面向 DeepSeek 的轻量 HTTP 转发器，也可指向现有 llama.cpp 服务 | [发布工作流](.github/workflows/docker.yml) · [源码](apps/server)                                                                                                                                                      |
 
+## 原理
+
+把所有请求统一成选择题，并限制模型只输出字母选项 `A/B/C/D`。模型续写一个 token，该 token 对各选项的概率就是选项概率。
+
+示例：
+
+```text
+请选择正确答案，必须选择选项。
+
+Q: 洗车我应该开车去还是走路去？
+A. 开车
+B. 走路
+C. 无解
+
+Answer: \boxed{
+```
+
+把这段 prompt 发给模型，让它续写下一个 token。
+
+候选概率来自 token logprob：
+
+```text
+p_i = exp(logprob_i) / Σ exp(logprob_j)
+```
+
+| 类型     | 输出与计算                                               |
+| -------- | -------------------------------------------------------- |
+| `choice` | 答案取最高概率候选；置信度 `(p_max - 1/n) / (1 - 1/n)`   |
+| `score`  | 分数为期望值 `Σ(index × probability[index])`，置信度同上 |
+| `noul`   | `0` 为假，`1` 为真；返回 `p(true)`，不计算置信度         |
+
+`n` 是候选数。概率越接近均匀分布，置信度越接近 `0`；最高概率越接近 `1`，置信度越接近 `1`。单个候选时置信度为 `1`。
+
 ## 请求流程
 
 每条 choice、score、noul 问题各发一次 completion 请求。模型只输出候选码，JevSeek 再从 token 概率归一化出答案。
