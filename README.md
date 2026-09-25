@@ -37,14 +37,12 @@ Answer: \boxed{
 
 候选概率来自 token logprob：
 
-```text
-p_i = exp(logprob_i) / Σ exp(logprob_j)
-```
+$$p_i = exp(logprob_i) / Σ exp(logprob_j)$$
 
 | 类型     | 输出与计算                                               |
 | -------- | -------------------------------------------------------- |
-| `choice` | 答案取最高概率候选；置信度 `(p_max - 1/n) / (1 - 1/n)`   |
-| `score`  | 分数为期望值 `Σ(index × probability[index])`，置信度同上 |
+| `choice` | 答案取最高概率候选；置信度 $(p_max - 1/n) / (1 - 1/n)$   |
+| `score`  | 分数为期望值 $Σ(index × probability[index])$，置信度同上 |
 | `noul`   | `0` 为假，`1` 为真；返回 `p(true)`，不计算置信度         |
 
 `n` 是候选数。概率越接近均匀分布，置信度越接近 `0`；最高概率越接近 `1`，置信度越接近 `1`。单个候选时置信度为 `1`。
